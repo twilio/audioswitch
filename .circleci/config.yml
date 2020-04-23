@@ -1,0 +1,132 @@
+version: 2.1
+
+aliases:
+  - &workspace
+      ~/audioswitch
+
+  - &gradle-cache-key
+    key: jars-{{ checksum "build.gradle" }}-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
+  - &restore_cache-gradle
+    <<: *gradle-cache-key
+    name: Restore Gradle Cache
+  - &save_cache-gradle
+    <<: *gradle-cache-key
+    name: Save Gradle Cache
+    paths:
+      - ~/.gradle/caches
+      - ~/.gradle/wrapper
+
+  - &configure-git-user
+    name: Configure git user
+    command: |
+      git config --global user.email $GIT_USER_EMAIL
+      git config --global user.name $GIT_USER_NAME
+
+  - &build-defaults
+    working_directory: *workspace
+    docker:
+      - image: circleci/android:api-28-node
+    environment:
+      - _JAVA_OPTIONS: "-XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap"
+
+  - &integration-test-defaults
+    working_directory: *workspace
+    docker:
+      - image: google/cloud-sdk:latest
+    environment:
+    resource_class: medium+
+
+  - &gcloud-auth
+    name: Google Cloud Auth
+    command: >
+      echo $GCP_KEY | base64 -d | gcloud auth activate-service-account --key-file=-
+
+jobs:
+  lint:
+    <<: *build-defaults
+    resource_class: large
+    steps:
+      - checkout
+      - restore_cache: *restore_cache-gradle
+      - run:
+          name: Lint
+          command: ./gradlew -q lint
+      - store_artifacts:
+          path: audioswitch/build/reports/lint-results.html
+          prefix: audioswitch
+      - save_cache: *save_cache-gradle
+
+  check-format:
+    <<: *build-defaults
+    resource_class: medium+
+    steps:
+      - checkout
+      - restore_cache: *restore_cache-gradle
+      - run:
+          name: Spotless Check
+          command: ./gradlew -q spotlessCheck
+      - save_cache: *save_cache-gradle
+
+  build-audioswitch:
+    <<: *build-defaults
+    resource_class: large
+    steps:
+      - checkout
+      - attach_workspace:
+          at: *workspace
+      - restore_cache: *restore_cache-gradle
+      - run:
+          name: Build AudioSwitch and Tests
+          command: ./gradlew -q audioswitch:assemble audioswitch:assembleAndroidTest
+      - persist_to_workspace:
+          root: .
+          paths:
+            - audioswitch/build
+      - save_cache: *save_cache-gradle
+
+  unit-tests:
+    <<: *build-defaults
+    resource_class: large
+    steps:
+      - checkout
+      - attach_workspace:
+          at: *workspace
+      - restore_cache: *restore_cache-gradle
+      - run:
+          name: Unit Tests
+          command: ./gradlew audioswitch:testDebugUnitTest
+      - save_cache: *save_cache-gradle
+
+  integration-tests:
+    <<: *integration-test-defaults
+    steps:
+      - checkout
+      - attach_workspace:
+          at: *workspace
+      - run: *gcloud-auth
+      - run:
+          name: Integration Tests
+          #          command: >
+          #            # TODO
+          #            gcloud firebase test android run --no-record-video --project video-app-79418
+          #            ui-test-args.yaml:ui-tests
+          command: >
+            # TODO
+            echo "TODO"
+
+workflows:
+  build-test:
+    jobs:
+      - lint
+      - check-format
+      - build-audioswitch
+      - unit-tests:
+          requires:
+            - build-audioswitch
+            - lint
+            - check-format
+      - integration-tests:
+          requires:
+            - build-audioswitch
+            - lint
+            - check-format
