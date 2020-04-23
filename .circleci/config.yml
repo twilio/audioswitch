@@ -112,7 +112,7 @@ jobs:
           #            ui-test-args.yaml:ui-tests
           command: >
             # TODO
-            echo "TODO"
+            gcloud firebase test android models list
 
 workflows:
   build-test:
