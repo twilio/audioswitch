@@ -54,13 +54,9 @@ buildscript {
     }
 
     ext.getShortCommitSha = {
-        def stdOut = new ByteArrayOutputStream()
-        exec {
-            commandLine "bash", "-c", "git rev-parse --short HEAD"
-            standardOutput stdOut
-        }
+        def gitSha = System.getenv("CIRCLE_SHA1")
 
-        return stdOut
+        return gitSha.substring(0, 7)
     }
 
     ext.getVersionName = {
