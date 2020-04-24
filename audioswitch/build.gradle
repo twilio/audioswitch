@@ -49,20 +49,3 @@ uploadArchives {
         }
     }
 }
-
-task androidJavadocsJar(type: Jar, dependsOn: createJavadocs) {
-    archiveClassifier.convention('javadoc')
-    archiveClassifier.set('javadoc')
-    from createJavadocs.destinationDir
-}
-
-task androidSourcesJar(type: Jar) {
-    archiveClassifier.convention('sources')
-    archiveClassifier.set('sources')
-    from android.sourceSets.main.java.source
-}
-
-artifacts {
-    archives androidSourcesJar
-    archives androidJavadocsJar
-}
