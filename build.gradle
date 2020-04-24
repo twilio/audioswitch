@@ -106,6 +106,98 @@ allprojects {
     }
 }
 
+/*
+ * Checks if release tag matches version and current commit
+ */
+def matchesVersion(versionTag) {
+    def properties = new Properties()
+    file("${rootDir}/gradle.properties").withInputStream { properties.load(it) }
+    def releaseTag = "${properties.getProperty("versionMajor")}." +
+            "${properties.getProperty("versionMinor")}." +
+            "${properties.getProperty("versionPatch")}"
+
+    return releaseTag == versionTag
+}
+
+task validateReleaseTag {
+    description = 'Validate the release tag matches the release version ' +
+            'present on commit'
+    group = 'Git'
+
+    doLast {
+        def circleTag = System.getenv("CIRCLE_TAG")
+        def tagsMatch = (matchesVersion(circleTag)) ? ("true") : ("false")
+
+        exec {
+            workingDir "${rootDir}"
+            commandLine tagsMatch
+        }
+    }
+}
+
+task incrementVersion(type: GradleBuild) {
+    description = 'Increment the SDK version after a release'
+    group = 'Git'
+
+    doLast {
+        def stdOut = new ByteArrayOutputStream()
+
+        exec {
+            commandLine "bash", "-c", "git remote show origin | grep HEAD | cut -d: -f2-"
+            standardOutput stdOut
+        }
+
+        def gitBranch = stdOut.toString().replaceAll("\\s","")
+        def circleTag = System.getenv("CIRCLE_TAG")
+        def nextVersionPatch = versionPatch + 1
+
+        if (!buildDir.exists()) {
+            buildDir.mkdir()
+        }
+
+        exec {
+            workingDir "${rootDir}"
+            commandLine "git", "checkout", "${gitBranch}"
+        }
+
+        /*
+         * Only update the version on upstream branch if the version matches tag. It is possible
+         * these values do not match if a job is performed on an earlier commit and a PR
+         * with a version update occurs later in history.
+         */
+        if (matchesVersion(circleTag)) {
+            exec {
+                workingDir "${rootDir}"
+                commandLine "echo", "Incrementing from versionPatch ${versionPatch} to " +
+                        "${nextVersionPatch}"
+            }
+
+            exec {
+                workingDir "${rootDir}"
+                commandLine "sed",
+                        "s@versionPatch=.*@versionPatch=${nextVersionPatch}@",
+                        "gradle.properties"
+                standardOutput new FileOutputStream("${buildDir}/gradle.properties")
+            }
+
+            exec {
+                workingDir "${rootDir}"
+                commandLine "mv", "${buildDir}/gradle.properties", "gradle.properties"
+            }
+
+            exec {
+                workingDir "${rootDir}"
+                commandLine "git", "commit", "gradle.properties", "-m", "\"Bump patch version [skip ci]\""
+            }
+
+            exec {
+                workingDir "${rootDir}"
+                commandLine "git", "push", "origin", "${gitBranch}"
+            }
+        }
+    }
+}
+
 task bintrayAudioSwitchPreReleaseUpload(type: GradleBuild) {
     description = 'Publish an AudioSwitch pre release'
     group = 'Publishing'
@@ -114,6 +206,19 @@ task bintrayAudioSwitchPreReleaseUpload(type: GradleBuild) {
     startParameter.projectProperties += gradle.startParameter.projectProperties + [
             'preRelease': true,
             'maven.repo': 'https://api.bintray.com/maven/twilio/internal-releases/audioswitch/;publish=1',
+            'maven.username': "${getAudioSwitchBintrayUsername()}",
+            'maven.password': "${getAudioSwitchBintrayPassword()}"
+    ]
+}
+
+task bintrayAudioSwitchReleaseUpload(type: GradleBuild) {
+    description = 'Publish an AudioSwitch release'
+    group = 'Publishing'
+    dependsOn validateReleaseTag
+    buildFile = file('audioswitch/build.gradle')
+    tasks = ['assembleRelease', 'uploadArchives']
+    startParameter.projectProperties += gradle.startParameter.projectProperties + [
+            'maven.repo': 'https://api.bintray.com/maven/twilio/releases/audioswitch/;publish=1',
             'maven.username': "${getAudioSwitchBintrayUsername()}",
             'maven.password': "${getAudioSwitchBintrayPassword()}"
     ]

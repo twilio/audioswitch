@@ -127,6 +127,33 @@ jobs:
           command: ./gradlew -q bintrayAudioSwitchPreReleaseUpload
       - save_cache: *save_cache-gradle
 
+  publish-release:
+    <<: *build-defaults
+    resource_class: large
+    steps:
+      - checkout
+      - attach_workspace:
+          at: *workspace
+      - restore_cache: *restore_cache-gradle
+      - run:
+          name: Publish AudioSwitch release
+          command: ./gradlew -q bintrayAudioSwitchReleaseUpload
+      - save_cache: *save_cache-gradle
+
+  bump-version:
+    <<: *build-defaults
+    resource_class: large
+    steps:
+      - checkout
+      - attach_workspace:
+          at: *workspace
+      - restore_cache: *restore_cache-gradle
+      - run: *configure-git-user
+      - run:
+          name: Bump Version
+          command: ./gradlew incrementVersion
+      - save_cache: *save_cache-gradle
+
 workflows:
   build-test-publish:
     jobs:
@@ -151,3 +178,16 @@ workflows:
           requires:
             - unit-tests
             - integration-tests
+
+  release:
+    jobs:
+      - publish-release:
+          filters:
+            tags:
+              only:
+                - /^\d+\.\d+\.\d+$/
+            branches:
+              ignore: /.*/
+      - bump-version:
+          requires:
+            - publish-release
