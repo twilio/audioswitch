@@ -114,8 +114,21 @@ jobs:
             # TODO
             gcloud firebase test android models list
 
+  publish-internal-release:
+    <<: *build-defaults
+    resource_class: large
+    steps:
+      - checkout
+      - attach_workspace:
+          at: *workspace
+      - restore_cache: *restore_cache-gradle
+      - run:
+          name: Publish AudioSwitch InternalRelease
+          command: ./gradlew -q bintrayAudioSwitchPreReleaseUpload
+      - save_cache: *save_cache-gradle
+
 workflows:
-  build-test:
+  build-test-publish:
     jobs:
       - lint
       - check-format
@@ -130,3 +143,11 @@ workflows:
             - build-audioswitch
             - lint
             - check-format
+      - publish-internal-release:
+          filters:
+            branches:
+              only:
+                - "master"
+          requires:
+            - unit-tests
+            - integration-tests

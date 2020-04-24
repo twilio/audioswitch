@@ -1,4 +1,5 @@
 apply plugin: 'com.android.library'
+apply plugin: 'maven'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 
@@ -9,8 +10,7 @@ android {
     defaultConfig {
         minSdkVersion 16
         targetSdkVersion 29
-        versionCode 1
-        versionName "0.1.0"
+        versionName getVersionName()
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles 'consumer-rules.pro'
@@ -31,4 +31,38 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            repository(url: "${mavenRepo}") {
+                authentication(
+                        userName: mavenUsername,
+                        password: mavenPassword
+                )
+            }
+            pom.version = getVersionName()
+            pom.groupId = 'com.twilio'
+            pom.artifactId = 'audioswitch'
+            pom.packaging = 'aar'
+        }
+    }
+}
+
+task androidJavadocsJar(type: Jar, dependsOn: createJavadocs) {
+    archiveClassifier.convention('javadoc')
+    archiveClassifier.set('javadoc')
+    from createJavadocs.destinationDir
+}
+
+task androidSourcesJar(type: Jar) {
+    archiveClassifier.convention('sources')
+    archiveClassifier.set('sources')
+    from android.sourceSets.main.java.source
+}
+
+artifacts {
+    archives androidSourcesJar
+    archives androidJavadocsJar
 }
