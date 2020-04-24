@@ -113,7 +113,7 @@ task bintrayAudioSwitchPreReleaseUpload(type: GradleBuild) {
     tasks = ['assembleRelease', 'uploadArchives']
     startParameter.projectProperties += gradle.startParameter.projectProperties + [
             'preRelease': true,
-            'maven.repo': 'https://api.bintray.com/maven/twilio/internal-release/audioswitch/;publish=1',
+            'maven.repo': 'https://api.bintray.com/maven/twilio/internal-releases/audioswitch/;publish=1',
             'maven.username': "${getAudioSwitchBintrayUsername()}",
             'maven.password': "${getAudioSwitchBintrayPassword()}"
     ]
