@@ -123,7 +123,7 @@ jobs:
           at: *workspace
       - restore_cache: *restore_cache-gradle
       - run:
-          name: Publish AudioSwitch InternalRelease
+          name: Publish AudioSwitch pre release
           command: ./gradlew -q bintrayAudioSwitchPreReleaseUpload
       - save_cache: *save_cache-gradle
 
