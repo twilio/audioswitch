@@ -114,7 +114,7 @@ jobs:
             # TODO
             gcloud firebase test android models list
 
-  publish-internal-release:
+  publish-pre-release:
     <<: *build-defaults
     resource_class: large
     steps:
@@ -143,7 +143,7 @@ workflows:
             - build-audioswitch
             - lint
             - check-format
-      - publish-internal-release:
+      - publish-pre-release:
           filters:
             branches:
               only:
