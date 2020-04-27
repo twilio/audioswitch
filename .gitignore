@@ -1,5 +1,4 @@
 # Built application files
-*.apk
 *.aar
 *.ap_
 *.aab
@@ -39,6 +38,7 @@ captures/
 # IntelliJ
 *.iml
 .idea/
+.DS_Store
 
 # Keystore files
 # Uncomment the following lines if you do not want to check your keystore files in.
