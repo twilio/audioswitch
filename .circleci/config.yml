@@ -106,13 +106,9 @@ jobs:
       - run: *gcloud-auth
       - run:
           name: Integration Tests
-          #          command: >
-          #            # TODO
-          #            gcloud firebase test android run --no-record-video --project video-app-79418
-          #            ui-test-args.yaml:ui-tests
           command: >
-            # TODO
-            gcloud firebase test android models list
+            gcloud firebase test android run --no-record-video --project video-app-79418
+            ui-test-args.yaml:integration-tests
 
   publish-pre-release:
     <<: *build-defaults
