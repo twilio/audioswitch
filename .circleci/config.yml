@@ -41,6 +41,14 @@ aliases:
     command: >
       echo $GCP_KEY | base64 -d | gcloud auth activate-service-account --key-file=-
 
+  - &release-filter
+    filters:
+      tags:
+        only:
+          - /^\d+\.\d+\.\d+$/
+      branches:
+        ignore: /.*/
+
 jobs:
   lint:
     <<: *build-defaults
@@ -178,12 +186,8 @@ workflows:
   release:
     jobs:
       - publish-release:
-          filters:
-            tags:
-              only:
-                - /^\d+\.\d+\.\d+$/
-            branches:
-              ignore: /.*/
+          <<: *release-filter
       - bump-version:
+          <<: *release-filter
           requires:
             - publish-release
