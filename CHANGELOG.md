@@ -1,24 +1,16 @@
-# AudioSwitch
+# Change Log
 
-[![CircleCI](https://circleci.com/gh/twilio/audioswitch.svg?style=svg)](https://circleci.com/gh/twilio/audioswitch)
+### 0.1.0
 
-An Android audio management library for real-time communication apps.
+This release marks the first iteration of the AudioSwitch library: an Android audio management library for real-time communication apps.
 
-![video-app-screenshots](images/audioswitch-logo.png)
+This initial release comes with the following features:
 
-## Features
-
-- [x] Manage [audio focus](https://developer.android.com/guide/topics/media-apps/audio-focus) for typical VoIP and Video conferencing use cases.
-- [x] Manage audio input and output devices.
-    - [x] Detect changes in available audio devices
-    - [x] Enumerate audio devices
-    - [x] Select an audio device
-
-## Requirements
-
-Android Studio Version | Android API Version Min
------------- | -------------
-3.6+ | 16
+-  Manage [audio focus](https://developer.android.com/guide/topics/media-apps/audio-focus) for typical VoIP and Video conferencing use cases.
+-  Manage audio input and output devices.
+    -  Detect changes in available audio devices
+    -  Enumerate audio devices
+    -  Select an audio device
 
 ## Getting Started
 
@@ -66,7 +58,3 @@ Make sure to revert back to the prior audio state when it makes sense to do so i
 audioDeviceSelector.deactivate()
 ```
 **Note:** The `stop()` function will call `deactivate()` before closing AudioDeviceSelector resources.
-
-## License
-
-Apache 2.0 license. See [LICENSE.txt](LICENSE.txt) for details.
