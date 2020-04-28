@@ -2,29 +2,21 @@ package com.twilio.audioswitch.selection
 
 /**
  * This class represents a single audio device that has been retrieved by the [AudioDeviceSelector].
- * @property name the friendly name of the device
  */
 sealed class AudioDevice {
 
+    /** The friendly name of the device.*/
     abstract val name: String
 
-    /**
-     * An [AudioDevice] representing a Bluetooth Headset.
-     */
+    /** An [AudioDevice] representing a Bluetooth Headset.*/
     data class BluetoothHeadset internal constructor(override val name: String) : AudioDevice()
 
-    /**
-     * An [AudioDevice] representing a Wired Headset.
-     */
-    object WiredHeadset : AudioDevice() { override val name: String = "Wired Headset" }
+    /** An [AudioDevice] representing a Wired Headset.*/
+    data class WiredHeadset internal constructor(override val name: String = "Wired Headset") : AudioDevice()
 
-    /**
-     * An [AudioDevice] representing the Earpiece.
-     */
-    object Earpiece : AudioDevice() { override val name: String = "Earpiece" }
+    /** An [AudioDevice] representing the Earpiece.*/
+    data class Earpiece internal constructor(override val name: String = "Earpiece") : AudioDevice()
 
-    /**
-     * An [AudioDevice] representing the Speakerphone.
-     */
-    object Speakerphone : AudioDevice() { override val name: String = "Speakerphone" }
+    /** An [AudioDevice] representing the Speakerphone.*/
+    data class Speakerphone internal constructor(override val name: String = "Speakerphone") : AudioDevice()
 }
