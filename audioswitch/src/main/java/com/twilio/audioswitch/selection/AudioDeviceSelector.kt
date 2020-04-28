@@ -109,7 +109,7 @@ class AudioDeviceSelector {
             wiredHeadsetAvailable = true
             logger.d(TAG, "Wired Headset available")
             if (this@AudioDeviceSelector.state == ACTIVATED) {
-                userSelectedDevice = WiredHeadset
+                userSelectedDevice = WiredHeadset()
             }
             enumerateDevices()
         }
@@ -190,11 +190,11 @@ class AudioDeviceSelector {
                 audioDeviceManager.enableSpeakerphone(false)
                 bluetoothController?.activate()
             }
-            Earpiece, WiredHeadset -> {
+            is Earpiece, is WiredHeadset -> {
                 audioDeviceManager.enableSpeakerphone(false)
                 bluetoothController?.deactivate()
             }
-            Speakerphone -> {
+            is Speakerphone -> {
                 audioDeviceManager.enableSpeakerphone(true)
                 bluetoothController?.deactivate()
             }
@@ -249,13 +249,13 @@ class AudioDeviceSelector {
         mutableAudioDevices.clear()
         bluetoothAudioDevice?.let { mutableAudioDevices.add(it) }
         if (wiredHeadsetAvailable) {
-            mutableAudioDevices.add(WiredHeadset)
+            mutableAudioDevices.add(WiredHeadset())
         }
         if (audioDeviceManager.hasEarpiece() && !wiredHeadsetAvailable) {
-            mutableAudioDevices.add(Earpiece)
+            mutableAudioDevices.add(Earpiece())
         }
         if (audioDeviceManager.hasSpeakerphone()) {
-            mutableAudioDevices.add(Speakerphone)
+            mutableAudioDevices.add(Speakerphone())
         }
 
         // Check whether the user selected device is still present

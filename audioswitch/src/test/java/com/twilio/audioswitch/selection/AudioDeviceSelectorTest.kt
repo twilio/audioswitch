@@ -115,8 +115,8 @@ class AudioDeviceSelectorTest {
         audioDeviceSelector.start(audioDeviceChangeListener)
 
         verify(audioDeviceChangeListener).invoke(
-                listOf(Earpiece, Speakerphone),
-                Earpiece)
+                listOf(Earpiece(), Speakerphone()),
+                Earpiece())
     }
 
     @Test
@@ -310,7 +310,7 @@ class AudioDeviceSelectorTest {
     @Test
     fun `activate should enable audio routing to the speakerphone device`() {
         audioDeviceSelector.start(audioDeviceChangeListener)
-        audioDeviceSelector.selectDevice(Speakerphone)
+        audioDeviceSelector.selectDevice(Speakerphone())
         audioDeviceSelector.activate()
 
         verify(audioManager).isSpeakerphoneOn = true
