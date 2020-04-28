@@ -8,17 +8,17 @@ An Android audio management library for real-time communication apps.
 
 ## Features
 
-- [x] Manage [audio focus](https://developer.android.com/guide/topics/media-apps/audio-focus) for typical VoIP and Video conferencing use cases
+- [x] Manage [audio focus](https://developer.android.com/guide/topics/media-apps/audio-focus) for typical VoIP and Video conferencing use cases.
 - [x] Manage audio input and output devices.
-    - [x] Enumerate audio devices
     - [x] Detect changes in available audio devices
+    - [x] Enumerate audio devices
     - [x] Select an audio device
 
 ## Requirements
 
 Android Studio Version | Android API Version Min
 ------------ | -------------
-3.5+ | 16
+3.6+ | 16
 
 ## Getting Started
 
