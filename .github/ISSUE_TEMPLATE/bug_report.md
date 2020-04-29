@@ -36,8 +36,8 @@ If applicable, add screenshots to help explain your problem.
  - Device: (e.g. Pixel 4)
  - API Version: (e.g. API 29)
 
-**Video Android SDK (please complete the following information):**
-- Version: (e.g. 5.1.0)
+**Version**
+- Version: (e.g. 0.1.0)
 
 **Additional context**
 Add any other context about the problem here.
