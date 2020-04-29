@@ -29,7 +29,7 @@ To get started using this library, follow the steps below.
 [![Download](https://api.bintray.com/packages/twilio/releases/audioswitch/images/download.svg) ](https://bintray.com/twilio/releases/audioswitch/_latestVersion)
 
 Add this line as a new Gradle dependency:
-```
+```groovy
 implementation 'com.twilio:audioswitch:$version'
 ```
 
