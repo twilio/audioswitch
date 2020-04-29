@@ -18,13 +18,6 @@ To get started using this library, follow the steps below.
 
 ### Gradle Setup
 
-Ensure the jcenter repository is configured:
-```
-repositories {
-    jcenter()
-}
-```
-
 Add this line as a new Gradle dependency:
 ```
 implementation 'com.twilio:audioswitch:0.1.0'
