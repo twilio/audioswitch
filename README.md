@@ -26,9 +26,11 @@ To get started using this library, follow the steps below.
 
 ### Gradle Setup
 
+[![Download](https://api.bintray.com/packages/twilio/releases/audioswitch/images/download.svg) ](https://bintray.com/twilio/releases/audioswitch/_latestVersion)
+
 Add this line as a new Gradle dependency:
-```
-implementation 'com.twilio:audioswitch:0.1.0'
+```groovy
+implementation 'com.twilio:audioswitch:$version'
 ```
 
 ### AudioDeviceSelector Setup
