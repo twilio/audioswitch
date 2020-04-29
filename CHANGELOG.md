@@ -18,12 +18,10 @@ To get started using this library, follow the steps below.
 
 ### Gradle Setup
 
-Add the Twilio Bintray release repository under repositories:
+Ensure the jcenter repository is configured:
 ```
 repositories {
-    maven {
-        url  "https://twilio.bintray.com/releases"
-    }
+    jcenter()
 }
 ```
 
