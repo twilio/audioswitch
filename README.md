@@ -24,6 +24,22 @@ Android Studio Version | Android API Version Min
 
 To get started using this library, follow the steps below.
 
+### Gradle Setup
+
+Add the Twilio Bintray release repository under repositories:
+```
+repositories {
+    maven {
+        url  "https://twilio.bintray.com/releases"
+    }
+}
+```
+
+Add this line as a new Gradle dependency:
+```
+implementation 'com.twilio:audioswitch:0.1.0'
+```
+
 ### AudioDeviceSelector Setup
 Instantiate an instance of the [AudioDeviceSelector](audioswitch/src/main/java/com/twilio/audioswitch/selection/AudioDeviceSelector.kt) class, passing a reference to the application context.
 
