@@ -18,15 +18,6 @@ To get started using this library, follow the steps below.
 
 ### Gradle Setup
 
-Add the Twilio Bintray release repository under repositories:
-```
-repositories {
-    maven {
-        url  "https://twilio.bintray.com/releases"
-    }
-}
-```
-
 Add this line as a new Gradle dependency:
 ```
 implementation 'com.twilio:audioswitch:0.1.0'
