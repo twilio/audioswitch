@@ -76,9 +76,10 @@ audioDeviceSelector.deactivate()
 ```
 **Note:** The `stop()` function will call `deactivate()` before closing AudioDeviceSelector resources.
 
-## Reference Application
+## Usage Examples
 
-Check out the [Twilio Video App](https://github.com/twilio/twilio-video-app-android) as an example of an app that uses this library.
+* [Twilio Video Android App](https://github.com/twilio/twilio-video-app-android)
+* [Twilio Video Android Quickstart](https://github.com/twilio/video-quickstart-android)
 
 ## License
 
