@@ -80,6 +80,7 @@ audioDeviceSelector.deactivate()
 
 * [Twilio Video Android App](https://github.com/twilio/twilio-video-app-android)
 * [Twilio Video Android Quickstart](https://github.com/twilio/video-quickstart-android)
+* [Twilio Voice Android Quickstart](https://github.com/twilio/voice-quickstart-android)
 
 ## License
 
