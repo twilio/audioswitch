@@ -1,5 +1,9 @@
 # Changelog
 
+### 0.1.1
+
+- Fixes bug that did not correctly abandon audio request after deactivate
+
 ### 0.1.0
 
 This release marks the first iteration of the AudioSwitch library: an Android audio management library for real-time communication apps.
