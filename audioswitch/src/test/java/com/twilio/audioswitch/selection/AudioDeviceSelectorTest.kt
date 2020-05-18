@@ -299,6 +299,40 @@ class AudioDeviceSelectorTest {
     }
 
     @Test
+    fun `deactivate should set audio focus using pre Android O method if api version is 26`() {
+        whenever(buildWrapper.getVersion()).thenReturn(Build.VERSION_CODES.O)
+        val audioFocusRequest = mock<AudioFocusRequest>()
+        whenever(this.audioFocusRequest.buildRequest()).thenReturn(audioFocusRequest)
+        audioDeviceSelector.start(audioDeviceChangeListener)
+        audioDeviceSelector.activate()
+        audioDeviceSelector.stop()
+
+        verify(audioManager).abandonAudioFocusRequest(audioFocusRequest)
+    }
+
+    @Test
+    fun `deactivate should set audio focus using pre Android O method if api version is 27`() {
+        whenever(buildWrapper.getVersion()).thenReturn(Build.VERSION_CODES.O_MR1)
+        val audioFocusRequest = mock<AudioFocusRequest>()
+        whenever(this.audioFocusRequest.buildRequest()).thenReturn(audioFocusRequest)
+        audioDeviceSelector.start(audioDeviceChangeListener)
+        audioDeviceSelector.activate()
+        audioDeviceSelector.stop()
+
+        verify(audioManager).abandonAudioFocusRequest(audioFocusRequest)
+    }
+
+    @Test
+    fun `deactivate should set audio focus using pre Android O method if api version is 25`() {
+        whenever(buildWrapper.getVersion()).thenReturn(Build.VERSION_CODES.N_MR1)
+        audioDeviceSelector.start(audioDeviceChangeListener)
+        audioDeviceSelector.activate()
+        audioDeviceSelector.stop()
+
+        verify(audioManager).abandonAudioFocus(null)
+    }
+
+    @Test
     fun `activate should enable audio routing to the earpiece`() {
         audioDeviceSelector.start(audioDeviceChangeListener)
         audioDeviceSelector.activate()
