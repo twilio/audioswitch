@@ -99,7 +99,7 @@ internal class AudioDeviceManager(
         if (build.getVersion() >= Build.VERSION_CODES.O) {
             audioRequest?.let { audioManager.abandonAudioFocusRequest(it) }
         } else {
-            audioManager.abandonAudioFocus {}
+            audioManager.abandonAudioFocus { }
         }
     }
 }
