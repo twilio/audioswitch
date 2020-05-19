@@ -149,7 +149,7 @@ task incrementVersion(type: GradleBuild) {
 
         def gitBranch = stdOut.toString().replaceAll("\\s","")
         def circleTag = System.getenv("CIRCLE_TAG")
-        def nextVersionPatch = versionPatch + 1
+        def nextVersionPatch = versionPatch.toInteger() + 1
 
         if (!buildDir.exists()) {
             buildDir.mkdir()
