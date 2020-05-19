@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.PackageManager
 import android.media.AudioDeviceInfo
+import android.media.AudioFocusRequest
 import android.media.AudioManager
 import android.os.Build
 import com.twilio.audioswitch.android.BuildWrapper
@@ -22,6 +23,7 @@ internal class AudioDeviceManager(
     private var savedAudioMode = 0
     private var savedIsMicrophoneMuted = false
     private var savedSpeakerphoneEnabled = false
+    private var audioRequest: AudioFocusRequest? = null
 
     fun hasEarpiece(): Boolean {
         val hasEarpiece = context.packageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY)
@@ -54,7 +56,8 @@ internal class AudioDeviceManager(
     fun setAudioFocus() {
         // Request audio focus before making any device switch.
         if (build.getVersion() >= Build.VERSION_CODES.O) {
-            audioManager.requestAudioFocus(audioFocusRequest.buildRequest())
+            audioRequest = audioFocusRequest.buildRequest()
+            audioRequest?.let { audioManager.requestAudioFocus(it) }
         } else {
             audioManager.requestAudioFocus(
                     {},
@@ -93,6 +96,10 @@ internal class AudioDeviceManager(
         audioManager.mode = savedAudioMode
         mute(savedIsMicrophoneMuted)
         enableSpeakerphone(savedSpeakerphoneEnabled)
-        audioManager.abandonAudioFocus(null)
+        if (build.getVersion() >= Build.VERSION_CODES.O) {
+            audioRequest?.let { audioManager.abandonAudioFocusRequest(it) }
+        } else {
+            audioManager.abandonAudioFocus { }
+        }
     }
 }
