@@ -92,6 +92,7 @@ internal class AudioDeviceManager(
         savedSpeakerphoneEnabled = audioManager.isSpeakerphoneOn
     }
 
+    @SuppressLint("NewApi")
     fun restoreAudioState() {
         audioManager.mode = savedAudioMode
         mute(savedIsMicrophoneMuted)
