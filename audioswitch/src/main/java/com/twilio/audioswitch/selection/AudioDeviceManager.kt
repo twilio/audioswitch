@@ -13,11 +13,11 @@ import com.twilio.audioswitch.android.LogWrapper
 private const val TAG = "AudioDeviceManager"
 
 internal class AudioDeviceManager(
-        private val context: Context,
-        private val logger: LogWrapper,
-        private val audioManager: AudioManager,
-        private val build: BuildWrapper,
-        private val audioFocusRequest: AudioFocusRequestWrapper
+    private val context: Context,
+    private val logger: LogWrapper,
+    private val audioManager: AudioManager,
+    private val build: BuildWrapper,
+    private val audioFocusRequest: AudioFocusRequestWrapper
 ) {
 
     private var savedAudioMode = 0
