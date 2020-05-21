@@ -6,6 +6,10 @@ Enhancements
 
 - Added the library source to release artifacts. The sources will now be available when jumping to a library class definition in Android Studio.
 
+Bug Fixes
+
+- Added a fix for certain valid bluetooth device classes not being considered as headset devices as reported in [issue #16](https://github.com/twilio/audioswitch/issues/16).
+
 ### 0.1.1
 
 - Fixes bug that did not correctly abandon audio request after deactivate
