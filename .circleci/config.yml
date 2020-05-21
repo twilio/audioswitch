@@ -179,7 +179,6 @@ workflows:
             branches:
               only:
                 - "master"
-                - "task/add-sources-to-artifact"
           requires:
             - unit-tests
             - integration-tests
