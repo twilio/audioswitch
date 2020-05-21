@@ -15,12 +15,12 @@ import org.hamcrest.CoreMatchers.nullValue
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Test
 
-class PreConnectedDeviceListenerTest {
+class BluetoothHeadsetManagerTest {
 
     private val deviceListener = mock<BluetoothDeviceConnectionListener>()
     private val logger = mock<LogWrapper>()
     private val bluetoothAdapter = mock<BluetoothAdapter>()
-    private var preConnectedDeviceListener = PreConnectedDeviceListener(
+    private var preConnectedDeviceListener = BluetoothHeadsetManager(
             logger,
             bluetoothAdapter,
             deviceListener)

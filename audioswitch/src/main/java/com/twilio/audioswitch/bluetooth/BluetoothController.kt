@@ -11,20 +11,20 @@ import com.twilio.audioswitch.selection.AudioDeviceManager
 private const val TAG = "BluetoothController"
 
 internal class BluetoothController internal constructor(
-    private val context: Context,
-    private val audioDeviceManager: AudioDeviceManager,
-    private val bluetoothAdapter: BluetoothAdapter,
-    private val preConnectedDeviceListener: PreConnectedDeviceListener,
-    private val bluetoothHeadsetReceiver: BluetoothHeadsetReceiver
+        private val context: Context,
+        private val audioDeviceManager: AudioDeviceManager,
+        private val bluetoothAdapter: BluetoothAdapter,
+        private val bluetoothHeadsetManager: BluetoothHeadsetManager,
+        private val bluetoothHeadsetReceiver: BluetoothHeadsetReceiver
 ) {
 
     fun start(deviceListener: BluetoothDeviceConnectionListener) {
-        preConnectedDeviceListener.deviceListener = deviceListener
+        bluetoothHeadsetManager.deviceListener = deviceListener
         bluetoothHeadsetReceiver.deviceListener = deviceListener
 
         bluetoothAdapter.getProfileProxy(
                 context,
-                preConnectedDeviceListener,
+                bluetoothHeadsetManager,
                 BluetoothProfile.HEADSET)
 
         context.run {
@@ -39,7 +39,7 @@ internal class BluetoothController internal constructor(
     }
 
     fun stop() {
-        preConnectedDeviceListener.stop()
+        bluetoothHeadsetManager.stop()
         bluetoothHeadsetReceiver.stop()
     }
 

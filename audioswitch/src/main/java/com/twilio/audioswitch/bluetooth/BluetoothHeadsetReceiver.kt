@@ -1,8 +1,5 @@
 package com.twilio.audioswitch.bluetooth
 
-import android.bluetooth.BluetoothClass.Device.AUDIO_VIDEO_CAR_AUDIO
-import android.bluetooth.BluetoothClass.Device.AUDIO_VIDEO_HANDSFREE
-import android.bluetooth.BluetoothClass.Device.AUDIO_VIDEO_WEARABLE_HEADSET
 import android.bluetooth.BluetoothDevice.ACTION_ACL_CONNECTED
 import android.bluetooth.BluetoothDevice.ACTION_ACL_DISCONNECTED
 import android.content.BroadcastReceiver
@@ -17,17 +14,19 @@ import com.twilio.audioswitch.android.BluetoothDeviceWrapper
 import com.twilio.audioswitch.android.BluetoothIntentProcessor
 import com.twilio.audioswitch.android.LogWrapper
 
-private const val TAG = "BluetoothDeviceReceiver"
+private const val TAG = "BluetoothHeadsetReceiver"
 
 internal class BluetoothHeadsetReceiver(
-    private val context: Context,
-    private val logger: LogWrapper,
-    private val bluetoothIntentProcessor: BluetoothIntentProcessor,
-    var deviceListener: BluetoothDeviceConnectionListener? = null
+        private val context: Context,
+        private val logger: LogWrapper,
+        private val bluetoothIntentProcessor: BluetoothIntentProcessor,
+        private val headsetManager: BluetoothHeadsetManager,
+        var deviceListener: BluetoothDeviceConnectionListener? = null
 ) : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
         intent.action?.let { action ->
+            logger.d(TAG, "Bluetooth action: $action")
             when (action) {
                 ACTION_ACL_CONNECTED -> {
                     intent.getHeadsetDevice()?.let { bluetoothDevice ->
@@ -40,7 +39,7 @@ internal class BluetoothHeadsetReceiver(
                     }
                 }
                 ACTION_ACL_DISCONNECTED -> {
-                    intent.getHeadsetDevice()?.let { bluetoothDevice ->
+                    intent.getDisconnectedHeadsetDevice()?.let { bluetoothDevice ->
                         logger.d(
                                 TAG,
                                 "Bluetooth ACL device " +
@@ -76,13 +75,17 @@ internal class BluetoothHeadsetReceiver(
 
     private fun Intent.getHeadsetDevice(): BluetoothDeviceWrapper? =
             bluetoothIntentProcessor.getBluetoothDevice(this)?.let { device ->
-                if (isHeadsetDevice(device)) device else null
+                if (headsetManager.isDeviceConnected(device.name))
+                    device
+                else
+                    null
             }
 
-    private fun isHeadsetDevice(deviceWrapper: BluetoothDeviceWrapper): Boolean =
-            deviceWrapper.deviceClass?.let { deviceClass ->
-                deviceClass == AUDIO_VIDEO_HANDSFREE ||
-                deviceClass == AUDIO_VIDEO_WEARABLE_HEADSET ||
-                deviceClass == AUDIO_VIDEO_CAR_AUDIO
-            } ?: false
+    private fun Intent.getDisconnectedHeadsetDevice(): BluetoothDeviceWrapper? =
+            bluetoothIntentProcessor.getBluetoothDevice(this)?.let { device ->
+                if (headsetManager.isDeviceDisconnected(device.name))
+                    device
+                else
+                    null
+            }
 }

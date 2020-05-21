@@ -24,7 +24,7 @@ import com.twilio.audioswitch.android.LogWrapper
 import com.twilio.audioswitch.bluetooth.BluetoothController
 import com.twilio.audioswitch.bluetooth.BluetoothControllerAssertions
 import com.twilio.audioswitch.bluetooth.BluetoothHeadsetReceiver
-import com.twilio.audioswitch.bluetooth.PreConnectedDeviceListener
+import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager
 import com.twilio.audioswitch.selection.AudioDevice.Earpiece
 import com.twilio.audioswitch.selection.AudioDevice.Speakerphone
 import com.twilio.audioswitch.wired.WiredHeadsetReceiver
@@ -53,7 +53,7 @@ class AudioDeviceSelectorTest {
     }
     private val bluetoothAdapter = mock<BluetoothAdapter>()
     private val audioDeviceChangeListener = mock<AudioDeviceChangeListener>()
-    private val preConnectedDeviceListener = PreConnectedDeviceListener(logger, bluetoothAdapter)
+    private val preConnectedDeviceListener = BluetoothHeadsetManager(logger, bluetoothAdapter)
     private val bluetoothHeadsetReceiver = BluetoothHeadsetReceiver(context, logger, mock())
     private val wiredHeadsetReceiver = WiredHeadsetReceiver(context, logger)
     private val buildWrapper = mock<BuildWrapper>()
