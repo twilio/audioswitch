@@ -50,6 +50,12 @@ class BluetoothHeadsetReceiverTest {
         val audioVideoCarDevice = mock<BluetoothClass> {
             whenever(mock.deviceClass).thenReturn(BluetoothClass.Device.AUDIO_VIDEO_CAR_AUDIO)
         }
+        val headphonesDevice = mock<BluetoothClass> {
+            whenever(mock.deviceClass).thenReturn(BluetoothClass.Device.AUDIO_VIDEO_HEADPHONES)
+        }
+        val uncategorizedDevice = mock<BluetoothClass> {
+            whenever(mock.deviceClass).thenReturn(BluetoothClass.Device.Major.UNCATEGORIZED)
+        }
         val wrongDevice = mock<BluetoothClass> {
             whenever(mock.deviceClass).thenReturn(BluetoothClass.Device.AUDIO_VIDEO_VIDEO_MONITOR)
         }
@@ -57,6 +63,8 @@ class BluetoothHeadsetReceiverTest {
             arrayOf(handsFreeDevice, true),
             arrayOf(audioVideoHeadsetDevice, true),
             arrayOf(audioVideoCarDevice, true),
+            arrayOf(headphonesDevice, true),
+            arrayOf(uncategorizedDevice, true),
             arrayOf(wrongDevice, false),
             arrayOf(null, false)
         )
