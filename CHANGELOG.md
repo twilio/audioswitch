@@ -1,5 +1,11 @@
 # Changelog
 
+### 0.1.2
+
+Enhancements
+
+- Added the library source to release artifacts. The sources will now be available when jumping to a library class definition in Android Studio.
+
 ### 0.1.1
 
 - Fixes bug that did not correctly abandon audio request after deactivate
