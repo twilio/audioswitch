@@ -2,7 +2,9 @@ package com.twilio.audioswitch.bluetooth
 
 import android.bluetooth.BluetoothClass.Device.AUDIO_VIDEO_CAR_AUDIO
 import android.bluetooth.BluetoothClass.Device.AUDIO_VIDEO_HANDSFREE
+import android.bluetooth.BluetoothClass.Device.AUDIO_VIDEO_HEADPHONES
 import android.bluetooth.BluetoothClass.Device.AUDIO_VIDEO_WEARABLE_HEADSET
+import android.bluetooth.BluetoothClass.Device.Major.UNCATEGORIZED
 import android.bluetooth.BluetoothDevice.ACTION_ACL_CONNECTED
 import android.bluetooth.BluetoothDevice.ACTION_ACL_DISCONNECTED
 import android.content.BroadcastReceiver
@@ -83,6 +85,8 @@ internal class BluetoothHeadsetReceiver(
             deviceWrapper.deviceClass?.let { deviceClass ->
                 deviceClass == AUDIO_VIDEO_HANDSFREE ||
                 deviceClass == AUDIO_VIDEO_WEARABLE_HEADSET ||
-                deviceClass == AUDIO_VIDEO_CAR_AUDIO
+                deviceClass == AUDIO_VIDEO_CAR_AUDIO ||
+                deviceClass == AUDIO_VIDEO_HEADPHONES ||
+                deviceClass == UNCATEGORIZED
             } ?: false
 }
