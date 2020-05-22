@@ -61,6 +61,13 @@ artifacts {
     archives androidSourcesJar
 }
 
+def audioSwitchGroupId = 'com.twilio'
+def audioSwitchArtifactId = 'audioswitch'
+
+/*
+ * The publishing and artifactory blocks enable publishing AudioSwitch as snapshot to
+ * JFrog OSS.
+ */
 publishing {
     publications {
         audioSwitchRelease(MavenPublication) {
@@ -70,8 +77,8 @@ publishing {
                 classifier "sources"
             }
 
-            groupId = 'com.twilio'
-            artifactId = 'audioswitch'
+            groupId = audioSwitchGroupId
+            artifactId = audioSwitchArtifactId
             version = getVersionName()
 
             pom.withXml {
@@ -100,6 +107,9 @@ artifactory {
     clientConfig.info.setBuildNumber(getShortCommitSha())
 }
 
+/*
+ * The uploadArchives block is used to publish to Bintray
+ */
 uploadArchives {
     repositories {
         mavenDeployer {
@@ -110,8 +120,8 @@ uploadArchives {
                 )
             }
             pom.version = getVersionName()
-            pom.groupId = 'com.twilio'
-            pom.artifactId = 'audioswitch'
+            pom.groupId = audioSwitchGroupId
+            pom.artifactId = audioSwitchArtifactId
             pom.packaging = 'aar'
         }
     }

@@ -33,6 +33,17 @@ Add this line as a new Gradle dependency:
 implementation 'com.twilio:audioswitch:$version'
 ```
 
+Pull requests merged to master result in an artifact being published to [JFrog OSS Snapshots](https://oss.jfrog.org/artifactory/webapp/#/home). You can
+access these snapshots by adding the following to your gradle file.
+
+```groovy
+maven {
+    url 'https://oss.jfrog.org/artifactory/libs-snapshot/'
+}
+
+implementation 'com.twilio:audioswitch:$version-SNAPSHOT'
+```
+
 ### AudioDeviceSelector Setup
 Instantiate an instance of the [AudioDeviceSelector](audioswitch/src/main/java/com/twilio/audioswitch/selection/AudioDeviceSelector.kt) class, passing a reference to the application context.
 

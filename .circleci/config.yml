@@ -179,7 +179,6 @@ workflows:
             branches:
               only:
                 - "master"
-                - "task/use-ojo"
           requires:
             - unit-tests
             - integration-tests
