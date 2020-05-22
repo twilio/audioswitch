@@ -17,64 +17,24 @@ buildscript {
     ext.jfrogPassword = (project.hasProperty('jfrog.password') ?
             project.property("jfrog.password") : '')
 
-    ext.getAudioSwitchBintrayUsername = {
-        def audioSwitchBintrayUsername  = System.getenv("AUDIOSWITCH_BINTRAY_USERNAME");
+    ext.getPropertyValue =  { propertyKey ->
+        def property  = System.getenv(propertyKey)
 
-        if (audioSwitchBintrayUsername == null) {
-            logger.log(LogLevel.INFO, "Could not locate AUDIOSWITCH_BINTRAY_USERNAME environment variable. " +
+        if (property == null) {
+            logger.log(LogLevel.INFO, "Could not locate $propertyKey as environment variable. " +
                     "Trying local.properties")
             Properties properties = new Properties()
             if (project.rootProject.file('local.properties').exists()) {
                 properties.load(project.rootProject.file('local.properties').newDataInputStream())
-                audioSwitchBintrayUsername = properties.getProperty('AUDIOSWITCH_BINTRAY_USERNAME')
+                property = properties.getProperty(propertyKey)
             }
         }
 
-        if (audioSwitchBintrayUsername == null) {
-            logger.log(LogLevel.WARN, "AudioSwitch Bintray username unavailable.")
+        if (property == null) {
+            logger.log(LogLevel.WARN, "$propertyKey unavailable.")
         }
 
-        return audioSwitchBintrayUsername;
-    }
-
-    ext.getAudioSwitchBintrayPassword = {
-        def audioSwitchBintrayPassword  = System.getenv("AUDIOSWITCH_BINTRAY_PASSWORD");
-
-        if (audioSwitchBintrayPassword == null) {
-            logger.log(LogLevel.INFO, "Could not locate AUDIOSWITCH_BINTRAY_PASSWORD environment variable. " +
-                    "Trying local.properties")
-            Properties properties = new Properties()
-            if (project.rootProject.file('local.properties').exists()) {
-                properties.load(project.rootProject.file('local.properties').newDataInputStream())
-                audioSwitchBintrayPassword = properties.getProperty('AUDIOSWITCH_BINTRAY_PASSWORD')
-            }
-        }
-
-        if (audioSwitchBintrayPassword == null) {
-            logger.log(LogLevel.WARN, "AudioSwitch Bintray password unavailable.")
-        }
-
-        return audioSwitchBintrayPassword;
-    }
-
-    ext.getAudioSwitchJfrogOssUsername = {
-        def audioSwitchJfrogOssUsername  = System.getenv("AUDIOSWITCH_JFROG_OSS_USERNAME");
-
-        if (audioSwitchJfrogOssUsername == null) {
-            logger.log(LogLevel.INFO, "Could not locate AUDIOSWITCH_JFROG_OSS_USERNAME environment variable. " +
-                    "Trying local.properties")
-            Properties properties = new Properties()
-            if (project.rootProject.file('local.properties').exists()) {
-                properties.load(project.rootProject.file('local.properties').newDataInputStream())
-                audioSwitchJfrogOssUsername = properties.getProperty('AUDIOSWITCH_JFROG_OSS_USERNAME')
-            }
-        }
-
-        if (audioSwitchJfrogOssUsername == null) {
-            logger.log(LogLevel.WARN, "AudioSwitch Jfrog OSS username unavailable.")
-        }
-
-        return audioSwitchJfrogOssUsername;
+        return property
     }
 
     ext.getAudioSwitchJfrogOssPassword = {
@@ -250,8 +210,8 @@ task jfrogOssSnapshotsAudioSwitchUpload(type: GradleBuild) {
     tasks = ['assembleRelease', 'artifactoryPublish']
     startParameter.projectProperties += gradle.startParameter.projectProperties + [
             'preRelease': true,
-            'jfrog.username': "${getAudioSwitchJfrogOssUsername()}",
-            'jfrog.password': "${getAudioSwitchJfrogOssPassword()}"
+            'jfrog.username': "${getPropertyValue("AUDIOSWITCH_JFROG_OSS_USERNAME")}",
+            'jfrog.password': "${getPropertyValue("AUDIOSWITCH_JFROG_OSS_PASSWORD")}"
     ]
 }
 
@@ -263,7 +223,7 @@ task bintrayAudioSwitchReleaseUpload(type: GradleBuild) {
     tasks = ['assembleRelease', 'uploadArchives']
     startParameter.projectProperties += gradle.startParameter.projectProperties + [
             'maven.repo': 'https://api.bintray.com/maven/twilio/releases/audioswitch/;publish=1',
-            'maven.username': "${getAudioSwitchBintrayUsername()}",
-            'maven.password': "${getAudioSwitchBintrayPassword()}"
+            'maven.username': "${getPropertyValue("AUDIOSWITCH_BINTRAY_USERNAME")}",
+            'maven.password': "${getPropertyValue("AUDIOSWITCH_BINTRAY_PASSWORD")}"
     ]
 }
