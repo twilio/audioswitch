@@ -1,5 +1,7 @@
 apply plugin: 'com.android.library'
 apply plugin: 'maven'
+apply plugin: 'maven-publish'
+apply plugin: "com.jfrog.artifactory"
 apply plugin: 'kotlin-android'
 
 android {
@@ -57,6 +59,45 @@ task androidSourcesJar(type: Jar) {
 
 artifacts {
     archives androidSourcesJar
+}
+
+publishing {
+    publications {
+        audioSwitchRelease(MavenPublication) {
+            artifact("$buildDir/outputs/aar/audioswitch-release.aar")
+
+            artifact androidSourcesJar {
+                classifier "sources"
+            }
+
+            groupId = 'com.twilio'
+            artifactId = 'audioswitch'
+            version = getVersionName()
+
+            pom.withXml {
+                def root = asNode()
+                root.appendNode('name', 'Audioswitch')
+                root.appendNode('url', 'https://github.com/twilio/audioswitch')
+            }
+        }
+    }
+}
+
+artifactory {
+    contextUrl = 'http://oss.jfrog.org'
+    publish {
+        repository {
+            repoKey = 'oss-snapshot-local'
+            username = jfrogUsername
+            password = jfrogPassword
+        }
+        defaults {
+            publications('audioSwitchRelease')
+            publishArtifacts = true
+            publishPom = true
+        }
+    }
+    clientConfig.info.setBuildNumber(getShortCommitSha())
 }
 
 uploadArchives {

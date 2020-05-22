@@ -128,7 +128,7 @@ jobs:
       - restore_cache: *restore_cache-gradle
       - run:
           name: Publish AudioSwitch pre release
-          command: ./gradlew -q bintrayAudioSwitchPreReleaseUpload
+          command: ./gradlew -q jfrogOssSnapshotsAudioSwitchUpload
       - save_cache: *save_cache-gradle
 
   publish-release:

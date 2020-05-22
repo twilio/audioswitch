@@ -12,6 +12,10 @@ buildscript {
             project.property("maven.username") : '')
     ext.mavenPassword = (project.hasProperty('maven.password') ?
             project.property("maven.password") : '')
+    ext.jfrogUsername = (project.hasProperty('jfrog.username') ?
+            project.property("jfrog.username") : '')
+    ext.jfrogPassword = (project.hasProperty('jfrog.password') ?
+            project.property("jfrog.password") : '')
 
     ext.getAudioSwitchBintrayUsername = {
         def audioSwitchBintrayUsername  = System.getenv("AUDIOSWITCH_BINTRAY_USERNAME");
@@ -53,6 +57,46 @@ buildscript {
         return audioSwitchBintrayPassword;
     }
 
+    ext.getAudioSwitchJfrogOssUsername = {
+        def audioSwitchJfrogOssUsername  = System.getenv("AUDIOSWITCH_JFROG_OSS_USERNAME");
+
+        if (audioSwitchJfrogOssUsername == null) {
+            logger.log(LogLevel.INFO, "Could not locate AUDIOSWITCH_JFROG_OSS_USERNAME environment variable. " +
+                    "Trying local.properties")
+            Properties properties = new Properties()
+            if (project.rootProject.file('local.properties').exists()) {
+                properties.load(project.rootProject.file('local.properties').newDataInputStream())
+                audioSwitchJfrogOssUsername = properties.getProperty('AUDIOSWITCH_JFROG_OSS_USERNAME')
+            }
+        }
+
+        if (audioSwitchJfrogOssUsername == null) {
+            logger.log(LogLevel.WARN, "AudioSwitch Jfrog OSS username unavailable.")
+        }
+
+        return audioSwitchJfrogOssUsername;
+    }
+
+    ext.getAudioSwitchJfrogOssPassword = {
+        def audioSwitchJfrogOssPassword  = System.getenv("AUDIOSWITCH_JFROG_OSS_PASSWORD");
+
+        if (audioSwitchJfrogOssPassword == null) {
+            logger.log(LogLevel.INFO, "Could not locate AUDIOSWITCH_JFROG_OSS_PASSWORD environment variable. " +
+                    "Trying local.properties")
+            Properties properties = new Properties()
+            if (project.rootProject.file('local.properties').exists()) {
+                properties.load(project.rootProject.file('local.properties').newDataInputStream())
+                audioSwitchJfrogOssPassword = properties.getProperty('AUDIOSWITCH_JFROG_OSS_PASSWORD')
+            }
+        }
+
+        if (audioSwitchJfrogOssPassword == null) {
+            logger.log(LogLevel.WARN, "AudioSwitch Jfrog OSS password unavailable.")
+        }
+
+        return audioSwitchJfrogOssPassword;
+    }
+
     ext.getShortCommitSha = {
         def gitSha = System.getenv("CIRCLE_SHA1")
 
@@ -62,7 +106,7 @@ buildscript {
     ext.getVersionName = {
         return "${versionMajor}.${versionMinor}.${versionPatch}" +
                 ((project.hasProperty("preRelease") && project.property("preRelease").toBoolean() == true) ?
-                        "-${getShortCommitSha()}" :
+                        "-SNAPSHOT" :
                         '')
     }
 
@@ -79,6 +123,7 @@ buildscript {
 
 plugins {
     id "com.diffplug.gradle.spotless" version "3.13.0"
+    id "com.jfrog.artifactory" version "4.15.2"
 }
 apply plugin: "com.diffplug.gradle.spotless"
 spotless {
@@ -198,16 +243,15 @@ task incrementVersion(type: GradleBuild) {
     }
 }
 
-task bintrayAudioSwitchPreReleaseUpload(type: GradleBuild) {
-    description = 'Publish an AudioSwitch pre release'
+task jfrogOssSnapshotsAudioSwitchUpload(type: GradleBuild) {
+    description = 'Publish an AudioSwitch Snapshot to JFrog OSS'
     group = 'Publishing'
     buildFile = file('audioswitch/build.gradle')
-    tasks = ['assembleRelease', 'uploadArchives']
+    tasks = ['assembleRelease', 'artifactoryPublish']
     startParameter.projectProperties += gradle.startParameter.projectProperties + [
             'preRelease': true,
-            'maven.repo': 'https://api.bintray.com/maven/twilio/internal-releases/audioswitch/;publish=1',
-            'maven.username': "${getAudioSwitchBintrayUsername()}",
-            'maven.password': "${getAudioSwitchBintrayPassword()}"
+            'jfrog.username': "${getAudioSwitchJfrogOssUsername()}",
+            'jfrog.password': "${getAudioSwitchJfrogOssPassword()}"
     ]
 }
 
