@@ -1,5 +1,11 @@
 # Changelog
 
+### 0.1.3
+
+Bug Fixes
+
+- Fixed crash by adding a default bluetooth device name.
+
 ### 0.1.2
 
 Enhancements

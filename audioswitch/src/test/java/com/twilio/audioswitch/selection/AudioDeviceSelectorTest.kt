@@ -16,10 +16,12 @@ import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.verifyZeroInteractions
 import com.nhaarman.mockitokotlin2.whenever
 import com.twilio.audioswitch.android.BluetoothDeviceWrapper
+import com.twilio.audioswitch.android.BluetoothDeviceWrapperImpl
 import com.twilio.audioswitch.selection.AudioDeviceSelector.State.ACTIVATED
 import com.twilio.audioswitch.selection.AudioDeviceSelector.State.STARTED
 import com.twilio.audioswitch.selection.AudioDeviceSelector.State.STOPPED
 import com.twilio.audioswitch.android.BuildWrapper
+import com.twilio.audioswitch.android.DEFAULT_DEVICE_NAME
 import com.twilio.audioswitch.android.LogWrapper
 import com.twilio.audioswitch.bluetooth.BluetoothController
 import com.twilio.audioswitch.bluetooth.BluetoothControllerAssertions
@@ -75,6 +77,18 @@ class AudioDeviceSelectorTest {
                     bluetoothHeadsetReceiver)
     )
     private val bluetoothControllerAssertions = BluetoothControllerAssertions()
+
+    @Test
+    fun `availableAudioDevices should return a generic bluetooth device name if none was returned from the BluetoothDevice class`() {
+        audioDeviceSelector.start(audioDeviceChangeListener)
+        audioDeviceSelector.bluetoothDeviceConnectionListener.onBluetoothConnected(
+                BluetoothDeviceWrapperImpl(mock()))
+
+        val hasDefaultDeviceName = audioDeviceSelector.availableAudioDevices.any {
+            it.name == DEFAULT_DEVICE_NAME
+        }
+        assertThat(hasDefaultDeviceName, equalTo(true))
+    }
 
     @Test
     fun `start should start the bluetooth and wired headset listeners`() {
