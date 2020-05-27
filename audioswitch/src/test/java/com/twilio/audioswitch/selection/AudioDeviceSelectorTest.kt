@@ -21,7 +21,7 @@ import com.twilio.audioswitch.selection.AudioDeviceSelector.State.ACTIVATED
 import com.twilio.audioswitch.selection.AudioDeviceSelector.State.STARTED
 import com.twilio.audioswitch.selection.AudioDeviceSelector.State.STOPPED
 import com.twilio.audioswitch.android.BuildWrapper
-import com.twilio.audioswitch.android.GENERIC_DEVICE_NAME
+import com.twilio.audioswitch.android.DEFAULT_DEVICE_NAME
 import com.twilio.audioswitch.android.LogWrapper
 import com.twilio.audioswitch.bluetooth.BluetoothController
 import com.twilio.audioswitch.bluetooth.BluetoothControllerAssertions
@@ -84,10 +84,10 @@ class AudioDeviceSelectorTest {
         audioDeviceSelector.bluetoothDeviceConnectionListener.onBluetoothConnected(
                 BluetoothDeviceWrapperImpl(mock()))
 
-        val hasGenericDeviceName = audioDeviceSelector.availableAudioDevices.any {
-            it.name == GENERIC_DEVICE_NAME
+        val hasDefaultDeviceName = audioDeviceSelector.availableAudioDevices.any {
+            it.name == DEFAULT_DEVICE_NAME
         }
-        assertThat(hasGenericDeviceName, equalTo(true))
+        assertThat(hasDefaultDeviceName, equalTo(true))
     }
 
     @Test
