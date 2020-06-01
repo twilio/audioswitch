@@ -82,7 +82,7 @@ buildscript {
 }
 
 plugins {
-    id "com.diffplug.gradle.spotless" version "3.13.0"
+    id "com.diffplug.gradle.spotless" version "4.0.1"
     id "com.jfrog.artifactory" version "4.15.2"
 }
 apply plugin: "com.diffplug.gradle.spotless"
