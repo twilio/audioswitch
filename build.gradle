@@ -1,6 +1,6 @@
 buildscript {
     ext {
-        kotlin_version = '1.3.71'
+        kotlin_version = '1.3.72'
     }
 
     /**
@@ -60,7 +60,7 @@ buildscript {
     ext.getShortCommitSha = {
         def gitSha = System.getenv("CIRCLE_SHA1")
 
-        return gitSha.substring(0, 7)
+        if(gitSha != null) return gitSha.substring(0, 7) else return ""
     }
 
     ext.getVersionName = {
@@ -76,13 +76,13 @@ buildscript {
 
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.6.3'
+        classpath 'com.android.tools.build:gradle:4.0.0'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
 
 plugins {
-    id "com.diffplug.gradle.spotless" version "3.13.0"
+    id "com.diffplug.gradle.spotless" version "4.0.1"
     id "com.jfrog.artifactory" version "4.15.2"
 }
 apply plugin: "com.diffplug.gradle.spotless"

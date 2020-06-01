@@ -17,9 +17,6 @@ import com.nhaarman.mockitokotlin2.verifyZeroInteractions
 import com.nhaarman.mockitokotlin2.whenever
 import com.twilio.audioswitch.android.BluetoothDeviceWrapper
 import com.twilio.audioswitch.android.BluetoothDeviceWrapperImpl
-import com.twilio.audioswitch.selection.AudioDeviceSelector.State.ACTIVATED
-import com.twilio.audioswitch.selection.AudioDeviceSelector.State.STARTED
-import com.twilio.audioswitch.selection.AudioDeviceSelector.State.STOPPED
 import com.twilio.audioswitch.android.BuildWrapper
 import com.twilio.audioswitch.android.DEFAULT_DEVICE_NAME
 import com.twilio.audioswitch.android.LogWrapper
@@ -29,6 +26,9 @@ import com.twilio.audioswitch.bluetooth.BluetoothHeadsetReceiver
 import com.twilio.audioswitch.bluetooth.PreConnectedDeviceListener
 import com.twilio.audioswitch.selection.AudioDevice.Earpiece
 import com.twilio.audioswitch.selection.AudioDevice.Speakerphone
+import com.twilio.audioswitch.selection.AudioDeviceSelector.State.ACTIVATED
+import com.twilio.audioswitch.selection.AudioDeviceSelector.State.STARTED
+import com.twilio.audioswitch.selection.AudioDeviceSelector.State.STOPPED
 import com.twilio.audioswitch.wired.WiredHeadsetReceiver
 import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.CoreMatchers.equalTo
