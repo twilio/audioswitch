@@ -112,6 +112,21 @@ allprojects {
 }
 
 /*
+ * Utility GradleBuild task that enables defining custom tasks derived from gradle modules in a
+ * root level gradle file.
+ *
+ * TODO: Replace this approach in favor of pushing tasks down into their respective modules.
+ */
+class RootGradleBuild extends GradleBuild {
+    private static final String ROOT_PROJECT_NAME = "twilio-video-android"
+
+    RootGradleBuild() {
+        super()
+        buildName = ROOT_PROJECT_NAME
+    }
+}
+
+/*
  * Checks if release tag matches version and current commit
  */
 def matchesVersion(versionTag) {
@@ -140,7 +155,7 @@ task validateReleaseTag {
     }
 }
 
-task incrementVersion(type: GradleBuild) {
+task incrementVersion(type: RootGradleBuild) {
     description = 'Increment the SDK version after a release'
     group = 'Git'
 
@@ -203,7 +218,7 @@ task incrementVersion(type: GradleBuild) {
     }
 }
 
-task jfrogOssSnapshotsAudioSwitchUpload(type: GradleBuild) {
+task jfrogOssSnapshotsAudioSwitchUpload(type: RootGradleBuild) {
     description = 'Publish an AudioSwitch Snapshot to JFrog OSS'
     group = 'Publishing'
     buildFile = file('audioswitch/build.gradle')
@@ -215,7 +230,7 @@ task jfrogOssSnapshotsAudioSwitchUpload(type: GradleBuild) {
     ]
 }
 
-task bintrayAudioSwitchReleaseUpload(type: GradleBuild) {
+task bintrayAudioSwitchReleaseUpload(type: RootGradleBuild) {
     description = 'Publish an AudioSwitch release'
     group = 'Publishing'
     dependsOn validateReleaseTag
