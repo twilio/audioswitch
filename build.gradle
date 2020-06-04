@@ -118,7 +118,7 @@ allprojects {
  * TODO: Replace this approach in favor of pushing tasks down into their respective modules.
  */
 class RootGradleBuild extends GradleBuild {
-    private static final String ROOT_PROJECT_NAME = "twilio-video-android"
+    private static final String ROOT_PROJECT_NAME = "audioswitch-root"
 
     RootGradleBuild() {
         super()
