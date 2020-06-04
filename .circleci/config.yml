@@ -179,6 +179,7 @@ workflows:
             branches:
               only:
                 - "master"
+                - "task/fix-snapshots"
           requires:
             - unit-tests
             - integration-tests
