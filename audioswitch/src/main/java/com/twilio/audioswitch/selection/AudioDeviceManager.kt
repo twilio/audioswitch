@@ -7,8 +7,10 @@ import android.media.AudioDeviceInfo
 import android.media.AudioFocusRequest
 import android.media.AudioManager
 import android.os.Build
+import com.twilio.audioswitch.android.AsyncTaskWrapper
 import com.twilio.audioswitch.android.BuildWrapper
 import com.twilio.audioswitch.android.LogWrapper
+import com.twilio.audioswitch.android.ThreadWrapper
 
 private const val TAG = "AudioDeviceManager"
 
@@ -17,7 +19,9 @@ internal class AudioDeviceManager(
     private val logger: LogWrapper,
     private val audioManager: AudioManager,
     private val build: BuildWrapper,
-    private val audioFocusRequest: AudioFocusRequestWrapper
+    private val audioFocusRequest: AudioFocusRequestWrapper,
+    private val asyncTaskWrapper: AsyncTaskWrapper = AsyncTaskWrapper(),
+    private val threadWrapper: ThreadWrapper = ThreadWrapper()
 ) {
 
     private var savedAudioMode = 0
@@ -74,7 +78,14 @@ internal class AudioDeviceManager(
     }
 
     fun enableBluetoothSco(start: Boolean) {
-        audioManager.run { if (start) startBluetoothSco() else stopBluetoothSco() }
+        audioManager.run {
+            if (start) {
+                asyncTaskWrapper.execute {
+                    threadWrapper.sleep(1000)
+                    startBluetoothSco()
+                }
+            } else stopBluetoothSco()
+        }
     }
 
     fun enableSpeakerphone(enable: Boolean) {
