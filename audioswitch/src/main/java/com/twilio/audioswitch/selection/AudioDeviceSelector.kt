@@ -53,7 +53,8 @@ class AudioDeviceSelector {
                     audioDeviceManager,
                     bluetoothAdapter,
                     PreConnectedDeviceListener(logger, bluetoothAdapter),
-                    BluetoothHeadsetReceiver(context, logger, BluetoothIntentProcessorImpl())
+                    BluetoothHeadsetReceiver(context, logger, BluetoothIntentProcessorImpl(),
+                            audioDeviceManager)
             )
         } ?: run {
             logger.d(TAG, "Bluetooth is not supported on this device")
