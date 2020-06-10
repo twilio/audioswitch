@@ -11,8 +11,6 @@ import android.os.Handler
 import android.os.Looper
 import com.twilio.audioswitch.android.BuildWrapper
 import com.twilio.audioswitch.android.LogWrapper
-import java.util.Timer
-import java.util.TimerTask
 
 private const val TAG = "AudioDeviceManager"
 
@@ -28,8 +26,14 @@ internal class AudioDeviceManager(
     private var savedIsMicrophoneMuted = false
     private var savedSpeakerphoneEnabled = false
     private var audioRequest: AudioFocusRequest? = null
-    private var activateBluetoothTimer: Timer = Timer()
-    private var activateBluetoothTask: TimerTask? = null
+    private var activateBluetoothHandler: Handler = Handler(Looper.getMainLooper())
+    private var activateBluetoothRunnable: Runnable = object : Runnable {
+        override fun run() {
+            logger.d(TAG, "Attempting to start the bluetooth sco connection")
+            audioManager.startBluetoothSco()
+            activateBluetoothHandler.postDelayed(this, 500)
+        }
+    }
 
     fun hasEarpiece(): Boolean {
         val hasEarpiece = context.packageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY)
@@ -86,23 +90,13 @@ internal class AudioDeviceManager(
     }
 
     private fun startBluetoothSco() {
-        logger.d(TAG, "Scheduled bluetooth sco task")
-        activateBluetoothTask = object : TimerTask() {
-            override fun run() {
-                Handler(Looper.getMainLooper()).post {
-                    logger.d(TAG, "Attempting to start the bluetooth sco connection")
-                    audioManager.startBluetoothSco()
-                }
-            }
-        }
-        activateBluetoothTimer.scheduleAtFixedRate(activateBluetoothTask, 0, 500)
+        logger.d(TAG, "Scheduled bluetooth sco job")
+        activateBluetoothHandler.post(activateBluetoothRunnable)
     }
 
     fun cancelScoJob() {
-        activateBluetoothTask?.let {
-            it.cancel()
-            logger.d(TAG, "Canceled bluetooth sco task")
-        }
+        activateBluetoothHandler.removeCallbacks(activateBluetoothRunnable)
+        logger.d(TAG, "Canceled bluetooth sco job")
     }
 
     fun enableSpeakerphone(enable: Boolean) {
