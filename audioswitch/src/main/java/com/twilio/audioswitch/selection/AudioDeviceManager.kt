@@ -7,14 +7,12 @@ import android.media.AudioDeviceInfo
 import android.media.AudioFocusRequest
 import android.media.AudioManager
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import com.twilio.audioswitch.android.BuildWrapper
 import com.twilio.audioswitch.android.LogWrapper
-import com.twilio.audioswitch.android.ThreadWrapper
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import java.util.Timer
+import java.util.TimerTask
 
 private const val TAG = "AudioDeviceManager"
 
@@ -23,16 +21,15 @@ internal class AudioDeviceManager(
     private val logger: LogWrapper,
     private val audioManager: AudioManager,
     private val build: BuildWrapper,
-    private val audioFocusRequest: AudioFocusRequestWrapper,
-    private val activateBluetoothScope: CoroutineScope = CoroutineScope(Dispatchers.IO),
-    private val threadWrapper: ThreadWrapper = ThreadWrapper()
+    private val audioFocusRequest: AudioFocusRequestWrapper
 ) {
 
     private var savedAudioMode = 0
     private var savedIsMicrophoneMuted = false
     private var savedSpeakerphoneEnabled = false
     private var audioRequest: AudioFocusRequest? = null
-    private var activateBluetoothJob: Job? = null
+    private var activateBluetoothTimer: Timer = Timer()
+    private var activateBluetoothTask: TimerTask? = null
 
     fun hasEarpiece(): Boolean {
         val hasEarpiece = context.packageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY)
@@ -83,23 +80,28 @@ internal class AudioDeviceManager(
     }
 
     fun enableBluetoothSco(start: Boolean) {
-        audioManager.run {
-            if (start) {
-                activateBluetoothJob = activateBluetoothScope.launch {
-                    while (true) {
-                        logger.d(TAG, "Attempting to start the bluetooth sco connection")
-                        startBluetoothSco()
-                        delay(500)
-                    }
+        if (start) {
+            startBluetoothSco()
+        } else audioManager.stopBluetoothSco()
+    }
+
+    private fun startBluetoothSco() {
+        logger.d(TAG, "Scheduled bluetooth sco task")
+        activateBluetoothTask = object : TimerTask() {
+            override fun run() {
+                Handler(Looper.getMainLooper()).post {
+                    logger.d(TAG, "Attempting to start the bluetooth sco connection")
+                    audioManager.startBluetoothSco()
                 }
-            } else stopBluetoothSco()
+            }
         }
+        activateBluetoothTimer.scheduleAtFixedRate(activateBluetoothTask, 0, 500)
     }
 
     fun cancelScoJob() {
-        activateBluetoothJob?.let {
+        activateBluetoothTask?.let {
             it.cancel()
-            logger.d(TAG, "Canceled bluetooth sco job")
+            logger.d(TAG, "Canceled bluetooth sco task")
         }
     }
 
