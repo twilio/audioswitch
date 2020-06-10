@@ -11,4 +11,8 @@ internal class LogWrapper {
     fun e(tag: String, message: String) {
         Log.e(tag, message)
     }
+
+    fun e(tag: String, message: String, throwable: Throwable) {
+        Log.e(tag, message, throwable)
+    }
 }
