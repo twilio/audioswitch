@@ -7,10 +7,9 @@ import android.media.AudioDeviceInfo
 import android.media.AudioFocusRequest
 import android.media.AudioManager
 import android.os.Build
-import android.os.Handler
-import android.os.Looper
 import com.twilio.audioswitch.android.BuildWrapper
 import com.twilio.audioswitch.android.LogWrapper
+import com.twilio.audioswitch.bluetooth.BluetoothScoJob
 
 private const val TAG = "AudioDeviceManager"
 
@@ -19,21 +18,14 @@ internal class AudioDeviceManager(
     private val logger: LogWrapper,
     private val audioManager: AudioManager,
     private val build: BuildWrapper,
-    private val audioFocusRequest: AudioFocusRequestWrapper
+    private val audioFocusRequest: AudioFocusRequestWrapper,
+    private val bluetoothScoJob: BluetoothScoJob = BluetoothScoJob(logger)
 ) {
 
     private var savedAudioMode = 0
     private var savedIsMicrophoneMuted = false
     private var savedSpeakerphoneEnabled = false
     private var audioRequest: AudioFocusRequest? = null
-    private var activateBluetoothHandler: Handler = Handler(Looper.getMainLooper())
-    private var activateBluetoothRunnable: Runnable = object : Runnable {
-        override fun run() {
-            logger.d(TAG, "Attempting to start the bluetooth sco connection")
-            audioManager.startBluetoothSco()
-            activateBluetoothHandler.postDelayed(this, 500)
-        }
-    }
 
     fun hasEarpiece(): Boolean {
         val hasEarpiece = context.packageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY)
@@ -89,14 +81,12 @@ internal class AudioDeviceManager(
         } else audioManager.stopBluetoothSco()
     }
 
-    private fun startBluetoothSco() {
-        logger.d(TAG, "Scheduled bluetooth sco job")
-        activateBluetoothHandler.post(activateBluetoothRunnable)
+    fun cancelBluetoothScoJob() {
+        bluetoothScoJob.cancelBluetoothScoJob()
     }
 
-    fun cancelScoJob() {
-        activateBluetoothHandler.removeCallbacks(activateBluetoothRunnable)
-        logger.d(TAG, "Canceled bluetooth sco job")
+    private fun startBluetoothSco() {
+        bluetoothScoJob.executeBluetoothScoJob { audioManager.startBluetoothSco() }
     }
 
     fun enableSpeakerphone(enable: Boolean) {

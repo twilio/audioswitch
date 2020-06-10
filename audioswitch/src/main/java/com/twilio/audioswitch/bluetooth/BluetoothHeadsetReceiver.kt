@@ -58,7 +58,7 @@ internal class BluetoothHeadsetReceiver(
                         when (state) {
                             SCO_AUDIO_STATE_CONNECTED -> {
                                 logger.d(TAG, "Bluetooth SCO Audio connected")
-                                audioDeviceManager.cancelScoJob()
+                                audioDeviceManager.cancelBluetoothScoJob()
                             }
                             SCO_AUDIO_STATE_DISCONNECTED -> {
                                 logger.d(TAG, "Bluetooth SCO Audio disconnected")
