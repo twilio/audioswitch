@@ -30,6 +30,9 @@ internal class BluetoothHeadsetReceiver(
     private val enableBluetoothScoJob: BluetoothScoJob = BluetoothScoJob(logger) {
         audioDeviceManager.enableBluetoothSco(true)
     },
+    private val disableBluetoothScoJob: BluetoothScoJob = BluetoothScoJob(logger) {
+        audioDeviceManager.enableBluetoothSco(false)
+    },
     var deviceListener: BluetoothDeviceConnectionListener? = null
 ) : BroadcastReceiver() {
 
@@ -65,6 +68,7 @@ internal class BluetoothHeadsetReceiver(
                             }
                             SCO_AUDIO_STATE_DISCONNECTED -> {
                                 logger.d(TAG, "Bluetooth SCO Audio disconnected")
+                                disableBluetoothScoJob.cancelBluetoothScoJob()
                             }
                             SCO_AUDIO_STATE_ERROR -> {
                                 logger.e(TAG, "Error retrieving Bluetooth SCO Audio state")
@@ -79,8 +83,10 @@ internal class BluetoothHeadsetReceiver(
 
     fun enableBluetoothSco(enable: Boolean) {
         if (enable) {
-            startBluetoothSco()
-        } else audioDeviceManager.enableBluetoothSco(false)
+            enableBluetoothScoJob.executeBluetoothScoJob()
+        } else {
+            disableBluetoothScoJob.executeBluetoothScoJob()
+        }
     }
 
     fun stop() {
@@ -101,8 +107,4 @@ internal class BluetoothHeadsetReceiver(
                 deviceClass == AUDIO_VIDEO_HEADPHONES ||
                 deviceClass == UNCATEGORIZED
             } ?: false
-
-    private fun startBluetoothSco() {
-        enableBluetoothScoJob.executeBluetoothScoJob()
-    }
 }
