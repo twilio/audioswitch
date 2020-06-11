@@ -9,6 +9,7 @@ import android.media.AudioManager
 import android.media.AudioManager.SCO_AUDIO_STATE_CONNECTED
 import android.media.AudioManager.SCO_AUDIO_STATE_DISCONNECTED
 import android.media.AudioManager.SCO_AUDIO_STATE_ERROR
+import android.os.Handler
 import com.nhaarman.mockitokotlin2.isA
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.times
@@ -43,7 +44,14 @@ class BluetoothHeadsetReceiverTest {
             audioManager,
             buildWrapper,
             audioFocusRequest)
-    private var bluetoothHeadsetReceiver = BluetoothHeadsetReceiver(context, logger, BluetoothIntentProcessorImpl(), audioDeviceManager)
+    private val handler = mock<Handler>()
+    private var bluetoothHeadsetReceiver = BluetoothHeadsetReceiver(context,
+            logger,
+            BluetoothIntentProcessorImpl(),
+            audioDeviceManager,
+            EnableBluetoothScoJob(logger, audioDeviceManager, handler),
+            DisableBluetoothScoJob(logger, audioDeviceManager, handler),
+            deviceListener)
     private val bluetoothClass = mock<BluetoothClass> {
         whenever(mock.deviceClass).thenReturn(AUDIO_VIDEO_HANDSFREE)
     }

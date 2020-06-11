@@ -7,6 +7,7 @@ import android.content.pm.PackageManager
 import android.media.AudioFocusRequest
 import android.media.AudioManager
 import android.os.Build
+import android.os.Handler
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.eq
 import com.nhaarman.mockitokotlin2.isA
@@ -17,12 +18,15 @@ import com.nhaarman.mockitokotlin2.verifyZeroInteractions
 import com.nhaarman.mockitokotlin2.whenever
 import com.twilio.audioswitch.android.BluetoothDeviceWrapper
 import com.twilio.audioswitch.android.BluetoothDeviceWrapperImpl
+import com.twilio.audioswitch.android.BluetoothIntentProcessorImpl
 import com.twilio.audioswitch.android.BuildWrapper
 import com.twilio.audioswitch.android.DEFAULT_DEVICE_NAME
 import com.twilio.audioswitch.android.LogWrapper
 import com.twilio.audioswitch.bluetooth.BluetoothController
 import com.twilio.audioswitch.bluetooth.BluetoothControllerAssertions
 import com.twilio.audioswitch.bluetooth.BluetoothHeadsetReceiver
+import com.twilio.audioswitch.bluetooth.DisableBluetoothScoJob
+import com.twilio.audioswitch.bluetooth.EnableBluetoothScoJob
 import com.twilio.audioswitch.bluetooth.PreConnectedDeviceListener
 import com.twilio.audioswitch.selection.AudioDevice.Earpiece
 import com.twilio.audioswitch.selection.AudioDevice.Speakerphone
@@ -60,7 +64,13 @@ class AudioDeviceSelectorTest {
             audioManager,
             buildWrapper,
             audioFocusRequest)
-    private val bluetoothHeadsetReceiver = BluetoothHeadsetReceiver(context, logger, mock(), audioDeviceManager)
+    private val handler = mock<Handler>()
+    private var bluetoothHeadsetReceiver = BluetoothHeadsetReceiver(context,
+            logger,
+            BluetoothIntentProcessorImpl(),
+            audioDeviceManager,
+            EnableBluetoothScoJob(logger, audioDeviceManager, handler),
+            DisableBluetoothScoJob(logger, audioDeviceManager, handler))
     private var audioDeviceSelector = AudioDeviceSelector(
             logger,
             audioDeviceManager,
