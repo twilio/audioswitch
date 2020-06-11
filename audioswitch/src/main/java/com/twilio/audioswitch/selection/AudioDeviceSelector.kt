@@ -50,7 +50,6 @@ class AudioDeviceSelector {
         this.wiredHeadsetReceiver = WiredHeadsetReceiver(context, logger)
         this.bluetoothController = BluetoothAdapter.getDefaultAdapter()?.let { bluetoothAdapter ->
             BluetoothController(context,
-                    audioDeviceManager,
                     bluetoothAdapter,
                     PreConnectedDeviceListener(logger, bluetoothAdapter),
                     BluetoothHeadsetReceiver(context, logger, BluetoothIntentProcessorImpl(),

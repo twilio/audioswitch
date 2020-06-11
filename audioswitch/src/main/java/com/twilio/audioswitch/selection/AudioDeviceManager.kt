@@ -9,7 +9,6 @@ import android.media.AudioManager
 import android.os.Build
 import com.twilio.audioswitch.android.BuildWrapper
 import com.twilio.audioswitch.android.LogWrapper
-import com.twilio.audioswitch.bluetooth.BluetoothScoJob
 
 private const val TAG = "AudioDeviceManager"
 
@@ -18,8 +17,7 @@ internal class AudioDeviceManager(
     private val logger: LogWrapper,
     private val audioManager: AudioManager,
     private val build: BuildWrapper,
-    private val audioFocusRequest: AudioFocusRequestWrapper,
-    private val bluetoothScoJob: BluetoothScoJob = BluetoothScoJob(logger)
+    private val audioFocusRequest: AudioFocusRequestWrapper
 ) {
 
     private var savedAudioMode = 0
@@ -75,18 +73,8 @@ internal class AudioDeviceManager(
         audioManager.mode = AudioManager.MODE_IN_COMMUNICATION
     }
 
-    fun enableBluetoothSco(start: Boolean) {
-        if (start) {
-            startBluetoothSco()
-        } else audioManager.stopBluetoothSco()
-    }
-
-    fun cancelBluetoothScoJob() {
-        bluetoothScoJob.cancelBluetoothScoJob()
-    }
-
-    private fun startBluetoothSco() {
-        bluetoothScoJob.executeBluetoothScoJob { audioManager.startBluetoothSco() }
+    fun enableBluetoothSco(enable: Boolean) {
+        audioManager.run { if (enable) startBluetoothSco() else stopBluetoothSco() }
     }
 
     fun enableSpeakerphone(enable: Boolean) {
