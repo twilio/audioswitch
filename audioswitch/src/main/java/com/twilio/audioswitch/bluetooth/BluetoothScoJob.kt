@@ -9,12 +9,12 @@ import java.util.concurrent.TimeoutException
 private const val TAG = "BluetoothScoManager"
 private const val TIMEOUT = 5000L
 
-internal class BluetoothScoJob(private val logger: LogWrapper) {
+internal class BluetoothScoJob(private val logger: LogWrapper, private val scoAction: () -> Unit) {
 
     private var bluetoothScoHandler: Handler = Handler(Looper.getMainLooper())
     private var bluetoothScoRunnable: BluetoothScoRunnable? = null
 
-    fun executeBluetoothScoJob(scoAction: () -> Unit) {
+    fun executeBluetoothScoJob() {
         if (bluetoothScoRunnable == null) {
             bluetoothScoRunnable = BluetoothScoRunnable(scoAction)
             bluetoothScoHandler.post(bluetoothScoRunnable)
