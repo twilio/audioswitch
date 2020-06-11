@@ -1,25 +1,26 @@
 package com.twilio.audioswitch.bluetooth
 
 import android.os.Handler
-import android.os.SystemClock
 import com.twilio.audioswitch.android.LogWrapper
+import com.twilio.audioswitch.android.SystemClockWrapper
 import java.util.concurrent.TimeoutException
 
+internal const val TIMEOUT = 5000L
 private const val TAG = "BluetoothScoManager"
-private const val TIMEOUT = 5000L
 
 internal abstract class BluetoothScoJob(
     private val logger: LogWrapper,
-    private val bluetoothScoHandler: Handler
+    private val bluetoothScoHandler: Handler,
+    private val systemClockWrapper: SystemClockWrapper
 ) {
 
-    private var bluetoothScoRunnable: BluetoothScoRunnable? = null
+    var bluetoothScoRunnable: BluetoothScoRunnable? = null
 
     protected abstract val scoAction: () -> Unit
 
     fun executeBluetoothScoJob() {
         if (bluetoothScoRunnable == null) {
-            bluetoothScoRunnable = BluetoothScoRunnable(scoAction)
+            bluetoothScoRunnable = BluetoothScoRunnable()
             bluetoothScoHandler.post(bluetoothScoRunnable)
             logger.d(TAG, "Scheduled bluetooth sco job")
         }
@@ -33,17 +34,17 @@ internal abstract class BluetoothScoJob(
         }
     }
 
-    inner class BluetoothScoRunnable(private val scoAction: () -> Unit) : Runnable {
+    inner class BluetoothScoRunnable : Runnable {
 
-        private val startTime = SystemClock.elapsedRealtime()
+        private val startTime = systemClockWrapper.elapsedRealtime()
         private var elapsedTime = 0L
 
         override fun run() {
             if (elapsedTime < TIMEOUT) {
                 logger.d(TAG, "Invoking bluetooth sco action")
                 scoAction.invoke()
+                elapsedTime = systemClockWrapper.elapsedRealtime() - startTime
                 bluetoothScoHandler.postDelayed(this, 500)
-                elapsedTime = SystemClock.elapsedRealtime() - startTime
             } else {
                 logger.e(TAG, "Bluetooth sco job timed out", TimeoutException())
                 cancelBluetoothScoJob()
