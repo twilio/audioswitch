@@ -16,7 +16,11 @@ import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.verifyZeroInteractions
 import com.nhaarman.mockitokotlin2.whenever
 import com.twilio.audioswitch.android.BluetoothIntentProcessorImpl
+import com.twilio.audioswitch.android.BuildWrapper
 import com.twilio.audioswitch.android.LogWrapper
+import com.twilio.audioswitch.selection.AudioDeviceManager
+import com.twilio.audioswitch.selection.AudioFocusRequestWrapper
+import com.twilio.audioswitch.setupAudioManagerMock
 import junitparams.JUnitParamsRunner
 import junitparams.Parameters
 import org.hamcrest.CoreMatchers.`is`
@@ -31,7 +35,15 @@ class BluetoothHeadsetReceiverTest {
     private val context = mock<Context>()
     private val deviceListener = mock<BluetoothDeviceConnectionListener>()
     private val logger = mock<LogWrapper>()
-    private var bluetoothHeadsetReceiver = BluetoothHeadsetReceiver(context, logger, BluetoothIntentProcessorImpl(), deviceListener)
+    private val audioManager = setupAudioManagerMock()
+    private val buildWrapper = mock<BuildWrapper>()
+    private val audioFocusRequest = mock<AudioFocusRequestWrapper>()
+    private val audioDeviceManager = AudioDeviceManager(context,
+            logger,
+            audioManager,
+            buildWrapper,
+            audioFocusRequest)
+    private var bluetoothHeadsetReceiver = BluetoothHeadsetReceiver(context, logger, BluetoothIntentProcessorImpl(), audioDeviceManager)
     private val bluetoothClass = mock<BluetoothClass> {
         whenever(mock.deviceClass).thenReturn(AUDIO_VIDEO_HANDSFREE)
     }

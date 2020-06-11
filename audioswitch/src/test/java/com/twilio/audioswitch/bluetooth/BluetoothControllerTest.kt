@@ -22,7 +22,6 @@ class BluetoothControllerTest {
     private val logger = mock<LogWrapper>()
     private val bluetoothAdapter = mock<BluetoothAdapter>()
     private val preConnectedDeviceListener = PreConnectedDeviceListener(logger, bluetoothAdapter)
-    private val bluetoothHeadsetReceiver = BluetoothHeadsetReceiver(context, logger, mock())
     private val buildWrapper = mock<BuildWrapper>()
     private val audioFocusRequest = mock<AudioFocusRequestWrapper>()
     private val asyncTaskWrapper = mock<AsyncTaskWrapper> {
@@ -34,12 +33,10 @@ class BluetoothControllerTest {
             logger,
             audioManager,
             buildWrapper,
-            audioFocusRequest,
-            asyncTaskWrapper,
-            mock())
+            audioFocusRequest)
+    private val bluetoothHeadsetReceiver = BluetoothHeadsetReceiver(context, logger, mock(), audioDeviceManager)
     private var bluetoothController = BluetoothController(
             context,
-            audioDeviceManager,
             bluetoothAdapter,
             preConnectedDeviceListener,
             bluetoothHeadsetReceiver)

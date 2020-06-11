@@ -15,7 +15,6 @@ import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.verifyZeroInteractions
 import com.nhaarman.mockitokotlin2.whenever
-import com.twilio.audioswitch.android.AsyncTaskWrapper
 import com.twilio.audioswitch.android.BluetoothDeviceWrapper
 import com.twilio.audioswitch.android.BluetoothDeviceWrapperImpl
 import com.twilio.audioswitch.android.BuildWrapper
@@ -30,6 +29,7 @@ import com.twilio.audioswitch.selection.AudioDevice.Speakerphone
 import com.twilio.audioswitch.selection.AudioDeviceSelector.State.ACTIVATED
 import com.twilio.audioswitch.selection.AudioDeviceSelector.State.STARTED
 import com.twilio.audioswitch.selection.AudioDeviceSelector.State.STOPPED
+import com.twilio.audioswitch.setupAudioManagerMock
 import com.twilio.audioswitch.wired.WiredHeadsetReceiver
 import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.CoreMatchers.equalTo
@@ -48,38 +48,25 @@ class AudioDeviceSelectorTest {
         whenever(mock.packageManager).thenReturn(packageManager)
     }
     private val logger = mock<LogWrapper>()
-    private val audioManager = mock<AudioManager> {
-        whenever(mock.mode).thenReturn(AudioManager.MODE_NORMAL)
-        whenever(mock.isMicrophoneMute).thenReturn(true)
-        whenever(mock.isSpeakerphoneOn).thenReturn(true)
-        whenever(mock.getDevices(AudioManager.GET_DEVICES_OUTPUTS)).thenReturn(emptyArray())
-    }
+    private val audioManager = setupAudioManagerMock()
     private val bluetoothAdapter = mock<BluetoothAdapter>()
     private val audioDeviceChangeListener = mock<AudioDeviceChangeListener>()
     private val preConnectedDeviceListener = PreConnectedDeviceListener(logger, bluetoothAdapter)
-    private val bluetoothHeadsetReceiver = BluetoothHeadsetReceiver(context, logger, mock())
     private val wiredHeadsetReceiver = WiredHeadsetReceiver(context, logger)
     private val buildWrapper = mock<BuildWrapper>()
     private val audioFocusRequest = mock<AudioFocusRequestWrapper>()
-    private val asyncTaskWrapper = mock<AsyncTaskWrapper> {
-        whenever(mock.execute(any())).thenAnswer {
-            (it.arguments[0] as () -> Unit).invoke()
-        }
-    }
     private val audioDeviceManager = AudioDeviceManager(context,
             logger,
             audioManager,
             buildWrapper,
-            audioFocusRequest,
-            asyncTaskWrapper,
-            mock())
+            audioFocusRequest)
+    private val bluetoothHeadsetReceiver = BluetoothHeadsetReceiver(context, logger, mock(), audioDeviceManager)
     private var audioDeviceSelector = AudioDeviceSelector(
             logger,
             audioDeviceManager,
             wiredHeadsetReceiver,
             BluetoothController(
                     context,
-                    audioDeviceManager,
                     bluetoothAdapter,
                     preConnectedDeviceListener,
                     bluetoothHeadsetReceiver)
