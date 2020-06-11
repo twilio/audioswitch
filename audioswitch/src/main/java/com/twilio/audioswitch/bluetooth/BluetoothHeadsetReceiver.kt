@@ -26,13 +26,9 @@ internal class BluetoothHeadsetReceiver(
     private val context: Context,
     private val logger: LogWrapper,
     private val bluetoothIntentProcessor: BluetoothIntentProcessor,
-    private val audioDeviceManager: AudioDeviceManager,
-    private val enableBluetoothScoJob: BluetoothScoJob = BluetoothScoJob(logger) {
-        audioDeviceManager.enableBluetoothSco(true)
-    },
-    private val disableBluetoothScoJob: BluetoothScoJob = BluetoothScoJob(logger) {
-        audioDeviceManager.enableBluetoothSco(false)
-    },
+    audioDeviceManager: AudioDeviceManager,
+    private val enableBluetoothScoJob: BluetoothScoJob = EnableBluetoothScoJob(logger, audioDeviceManager),
+    private val disableBluetoothScoJob: BluetoothScoJob = DisableBluetoothScoJob(logger, audioDeviceManager),
     var deviceListener: BluetoothDeviceConnectionListener? = null
 ) : BroadcastReceiver() {
 

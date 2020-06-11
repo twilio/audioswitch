@@ -1,7 +1,6 @@
 package com.twilio.audioswitch.bluetooth
 
 import android.os.Handler
-import android.os.Looper
 import android.os.SystemClock
 import com.twilio.audioswitch.android.LogWrapper
 import java.util.concurrent.TimeoutException
@@ -9,10 +8,14 @@ import java.util.concurrent.TimeoutException
 private const val TAG = "BluetoothScoManager"
 private const val TIMEOUT = 5000L
 
-internal class BluetoothScoJob(private val logger: LogWrapper, private val scoAction: () -> Unit) {
+internal abstract class BluetoothScoJob(
+    private val logger: LogWrapper,
+    private val bluetoothScoHandler: Handler
+) {
 
-    private var bluetoothScoHandler: Handler = Handler(Looper.getMainLooper())
     private var bluetoothScoRunnable: BluetoothScoRunnable? = null
+
+    protected abstract val scoAction: () -> Unit
 
     fun executeBluetoothScoJob() {
         if (bluetoothScoRunnable == null) {
