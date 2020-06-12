@@ -31,12 +31,15 @@ class BluetoothControllerTest {
             audioFocusRequest)
     private var handler = setupScoHandlerMock()
     private var systemClockWrapper = setupSystemClockMock()
-    private var bluetoothHeadsetReceiver = BluetoothHeadsetReceiver(context,
+    private val deviceListener = mock<BluetoothDeviceConnectionListener>()
+    private var bluetoothHeadsetReceiver = BluetoothHeadsetReceiver(
+            context,
             logger,
             BluetoothIntentProcessorImpl(),
             audioDeviceManager,
             EnableBluetoothScoJob(logger, audioDeviceManager, handler, systemClockWrapper),
-            DisableBluetoothScoJob(logger, audioDeviceManager, handler, systemClockWrapper))
+            DisableBluetoothScoJob(logger, audioDeviceManager, handler, systemClockWrapper),
+            deviceListener)
     private var bluetoothController = BluetoothController(
             context,
             bluetoothAdapter,

@@ -27,6 +27,7 @@ import com.twilio.audioswitch.setupSystemClockMock
 import junitparams.JUnitParamsRunner
 import junitparams.Parameters
 import org.hamcrest.CoreMatchers.`is`
+import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.CoreMatchers.nullValue
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Test
@@ -221,9 +222,34 @@ class BluetoothHeadsetReceiverTest {
 
     @Test
     fun `stop should unassign the deviceListener`() {
+        bluetoothHeadsetReceiver = BluetoothHeadsetReceiver(
+                context,
+                logger,
+                BluetoothIntentProcessorImpl(),
+                audioDeviceManager,
+                enableBluetoothScoJob,
+                disableBluetoothScoJob)
+
+        bluetoothHeadsetReceiver.setupDeviceListener(deviceListener)
+
+        assertThat(bluetoothHeadsetReceiver.deviceListener, equalTo(deviceListener))
+
         bluetoothHeadsetReceiver.stop()
 
         assertThat(bluetoothHeadsetReceiver.deviceListener, `is`(nullValue()))
+    }
+
+    @Test
+    fun `stop should unassign the device listener for the sco jobs`() {
+        bluetoothHeadsetReceiver.setupDeviceListener(deviceListener)
+
+        assertThat(enableBluetoothScoJob.deviceListener, equalTo(deviceListener))
+        assertThat(disableBluetoothScoJob.deviceListener, equalTo(deviceListener))
+
+        bluetoothHeadsetReceiver.stop()
+
+        assertThat(enableBluetoothScoJob.deviceListener, `is`(nullValue()))
+        assertThat(disableBluetoothScoJob.deviceListener, `is`(nullValue()))
     }
 
     @Test

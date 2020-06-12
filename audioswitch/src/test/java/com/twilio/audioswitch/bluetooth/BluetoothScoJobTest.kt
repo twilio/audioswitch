@@ -1,6 +1,7 @@
 package com.twilio.audioswitch.bluetooth
 
 import android.media.AudioManager
+import android.os.Handler
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.isA
 import com.nhaarman.mockitokotlin2.mock
@@ -10,6 +11,7 @@ import com.nhaarman.mockitokotlin2.verifyZeroInteractions
 import com.nhaarman.mockitokotlin2.whenever
 import com.twilio.audioswitch.android.LogWrapper
 import com.twilio.audioswitch.assertScoJobIsCanceled
+import com.twilio.audioswitch.bluetooth.BluetoothDeviceConnectionListener.ConnectionError.SCO_CONNECTION_ERROR
 import com.twilio.audioswitch.bluetooth.BluetoothScoJob.BluetoothScoRunnable
 import com.twilio.audioswitch.selection.AudioDeviceManager
 import com.twilio.audioswitch.setupScoHandlerMock
@@ -74,17 +76,7 @@ class BluetoothScoJobTest {
         systemClockWrapper = mock {
             whenever(mock.elapsedRealtime()).thenReturn(0L, TIMEOUT)
         }
-        handler = mock {
-            whenever(mock.post(any())).thenAnswer {
-                (it.arguments[0] as BluetoothScoRunnable).run()
-                true
-            }
-
-            whenever(mock.postDelayed(isA(), isA())).thenAnswer {
-                (it.arguments[0] as BluetoothScoRunnable).run()
-                true
-            }
-        }
+        handler = setupTimeoutMock()
         scoJob = EnableBluetoothScoJob(logger, audioDeviceManager, handler, systemClockWrapper)
 
         scoJob.executeBluetoothScoJob()
@@ -94,11 +86,36 @@ class BluetoothScoJobTest {
     }
 
     @Test
+    fun `BluetoothScoRunnable should send a connection error event if a timeout occurs`() {
+        systemClockWrapper = mock {
+            whenever(mock.elapsedRealtime()).thenReturn(0L, TIMEOUT)
+        }
+        handler = setupTimeoutMock()
+        scoJob = EnableBluetoothScoJob(logger, audioDeviceManager, handler, systemClockWrapper)
+        val deviceListener = mock<BluetoothDeviceConnectionListener>()
+        scoJob.deviceListener = deviceListener
+
+        scoJob.executeBluetoothScoJob()
+
+        verify(deviceListener).onBluetoothConnectionError(SCO_CONNECTION_ERROR)
+    }
+
+    @Test
     fun `BluetoothScoRunnable should timeout if elapsedTime is greater than the time limit`() {
         systemClockWrapper = mock {
             whenever(mock.elapsedRealtime()).thenReturn(0L, TIMEOUT + 1000)
         }
-        handler = mock {
+        handler = setupTimeoutMock()
+        scoJob = EnableBluetoothScoJob(logger, audioDeviceManager, handler, systemClockWrapper)
+
+        scoJob.executeBluetoothScoJob()
+
+        verify(audioManager).startBluetoothSco()
+        assertScoJobIsCanceled(handler, scoJob)
+    }
+
+    private fun setupTimeoutMock() =
+        mock<Handler> {
             whenever(mock.post(any())).thenAnswer {
                 (it.arguments[0] as BluetoothScoRunnable).run()
                 true
@@ -109,13 +126,6 @@ class BluetoothScoJobTest {
                 true
             }
         }
-        scoJob = EnableBluetoothScoJob(logger, audioDeviceManager, handler, systemClockWrapper)
-
-        scoJob.executeBluetoothScoJob()
-
-        verify(audioManager).startBluetoothSco()
-        assertScoJobIsCanceled(handler, scoJob)
-    }
 
     @Test
     fun `cancelBluetoothScoJob should cancel sco runnable if it is running`() {
