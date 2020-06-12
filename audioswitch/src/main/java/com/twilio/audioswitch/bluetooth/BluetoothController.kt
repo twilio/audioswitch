@@ -7,8 +7,6 @@ import android.content.Context
 import android.content.IntentFilter
 import android.media.AudioManager
 
-private const val TAG = "BluetoothController"
-
 internal class BluetoothController internal constructor(
     private val context: Context,
     private val bluetoothAdapter: BluetoothAdapter,
