@@ -3,6 +3,7 @@ package com.twilio.audioswitch.selection
 import android.bluetooth.BluetoothAdapter
 import android.content.Context
 import android.media.AudioManager
+import com.twilio.audioswitch.android.AudioManagerWrapper
 import com.twilio.audioswitch.android.BluetoothDeviceWrapper
 import com.twilio.audioswitch.android.BluetoothIntentProcessorImpl
 import com.twilio.audioswitch.android.BuildWrapper
@@ -42,13 +43,13 @@ class AudioDeviceSelector {
         val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
         val logger = LogWrapper()
         val audioDeviceManager =
-                AudioDeviceManager(context,
+                AudioManagerWrapper(context,
                         logger,
                         audioManager,
                         BuildWrapper(),
                         AudioFocusRequestWrapper())
         this.logger = logger
-        this.audioDeviceManager = audioDeviceManager
+        this.audioManagerWrapper = audioDeviceManager
         this.wiredHeadsetReceiver = WiredHeadsetReceiver(context, logger)
         this.bluetoothController = BluetoothAdapter.getDefaultAdapter()?.let { bluetoothAdapter ->
             BluetoothController(context,
@@ -65,18 +66,18 @@ class AudioDeviceSelector {
 
     internal constructor(
         logger: LogWrapper,
-        audioDeviceManager: AudioDeviceManager,
+        audioManagerWrapper: AudioManagerWrapper,
         wiredHeadsetReceiver: WiredHeadsetReceiver,
         bluetoothController: BluetoothController?
     ) {
         this.logger = logger
-        this.audioDeviceManager = audioDeviceManager
+        this.audioManagerWrapper = audioManagerWrapper
         this.wiredHeadsetReceiver = wiredHeadsetReceiver
         this.bluetoothController = bluetoothController
     }
 
     private var logger: LogWrapper = LogWrapper()
-    private val audioDeviceManager: AudioDeviceManager
+    private val audioManagerWrapper: AudioManagerWrapper
     private val wiredHeadsetReceiver: WiredHeadsetReceiver
     internal val bluetoothController: BluetoothController?
     internal var audioDeviceChangeListener: AudioDeviceChangeListener? = null
@@ -182,11 +183,11 @@ class AudioDeviceSelector {
     fun activate() {
         when (state) {
             STARTED -> {
-                audioDeviceManager.cacheAudioState()
+                audioManagerWrapper.cacheAudioState()
 
                 // Always set mute to false for WebRTC
-                audioDeviceManager.mute(false)
-                audioDeviceManager.setAudioFocus()
+                audioManagerWrapper.mute(false)
+                audioManagerWrapper.setAudioFocus()
                 selectedDevice?.let { activate(it) }
                 state = ACTIVATED
             }
@@ -198,15 +199,15 @@ class AudioDeviceSelector {
     private fun activate(audioDevice: AudioDevice) {
         when (audioDevice) {
             is BluetoothHeadset -> {
-                audioDeviceManager.enableSpeakerphone(false)
+                audioManagerWrapper.enableSpeakerphone(false)
                 bluetoothController?.activate()
             }
             is Earpiece, is WiredHeadset -> {
-                audioDeviceManager.enableSpeakerphone(false)
+                audioManagerWrapper.enableSpeakerphone(false)
                 bluetoothController?.deactivate()
             }
             is Speakerphone -> {
-                audioDeviceManager.enableSpeakerphone(true)
+                audioManagerWrapper.enableSpeakerphone(true)
                 bluetoothController?.deactivate()
             }
         }
@@ -222,7 +223,7 @@ class AudioDeviceSelector {
                 bluetoothController?.deactivate()
 
                 // Restore stored audio state
-                audioDeviceManager.restoreAudioState()
+                audioManagerWrapper.restoreAudioState()
                 state = STARTED
             }
             STARTED, STOPPED -> {
@@ -262,10 +263,10 @@ class AudioDeviceSelector {
         if (wiredHeadsetAvailable) {
             mutableAudioDevices.add(WiredHeadset())
         }
-        if (audioDeviceManager.hasEarpiece() && !wiredHeadsetAvailable) {
+        if (audioManagerWrapper.hasEarpiece() && !wiredHeadsetAvailable) {
             mutableAudioDevices.add(Earpiece())
         }
-        if (audioDeviceManager.hasSpeakerphone()) {
+        if (audioManagerWrapper.hasSpeakerphone()) {
             mutableAudioDevices.add(Speakerphone())
         }
 
