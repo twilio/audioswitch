@@ -6,10 +6,10 @@ import android.content.Context
 import android.media.AudioManager
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
-import com.twilio.audioswitch.android.AudioManagerWrapper
 import com.twilio.audioswitch.android.BluetoothIntentProcessorImpl
 import com.twilio.audioswitch.android.BuildWrapper
 import com.twilio.audioswitch.android.LogWrapper
+import com.twilio.audioswitch.selection.AudioDeviceManager
 import com.twilio.audioswitch.selection.AudioFocusRequestWrapper
 import com.twilio.audioswitch.setupScoHandlerMock
 import com.twilio.audioswitch.setupSystemClockMock
@@ -24,7 +24,7 @@ class BluetoothControllerTest {
     private val preConnectedDeviceListener = PreConnectedDeviceListener(logger, bluetoothAdapter)
     private val buildWrapper = mock<BuildWrapper>()
     private val audioFocusRequest = mock<AudioFocusRequestWrapper>()
-    private val audioDeviceManager = AudioManagerWrapper(context,
+    private val audioDeviceManager = AudioDeviceManager(context,
             logger,
             audioManager,
             buildWrapper,

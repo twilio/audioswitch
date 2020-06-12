@@ -15,10 +15,10 @@ import android.media.AudioManager.EXTRA_SCO_AUDIO_STATE
 import android.media.AudioManager.SCO_AUDIO_STATE_CONNECTED
 import android.media.AudioManager.SCO_AUDIO_STATE_DISCONNECTED
 import android.media.AudioManager.SCO_AUDIO_STATE_ERROR
-import com.twilio.audioswitch.android.AudioManagerWrapper
 import com.twilio.audioswitch.android.BluetoothDeviceWrapper
 import com.twilio.audioswitch.android.BluetoothIntentProcessor
 import com.twilio.audioswitch.android.LogWrapper
+import com.twilio.audioswitch.selection.AudioDeviceManager
 
 private const val TAG = "BluetoothDeviceReceiver"
 
@@ -26,9 +26,9 @@ internal class BluetoothHeadsetReceiver(
     private val context: Context,
     private val logger: LogWrapper,
     private val bluetoothIntentProcessor: BluetoothIntentProcessor,
-    audioManagerWrapper: AudioManagerWrapper,
-    private val enableBluetoothScoJob: BluetoothScoJob = EnableBluetoothScoJob(logger, audioManagerWrapper),
-    private val disableBluetoothScoJob: BluetoothScoJob = DisableBluetoothScoJob(logger, audioManagerWrapper),
+    audioDeviceManager: AudioDeviceManager,
+    private val enableBluetoothScoJob: BluetoothScoJob = EnableBluetoothScoJob(logger, audioDeviceManager),
+    private val disableBluetoothScoJob: BluetoothScoJob = DisableBluetoothScoJob(logger, audioDeviceManager),
     var deviceListener: BluetoothDeviceConnectionListener? = null
 ) : BroadcastReceiver() {
 

@@ -9,11 +9,11 @@ import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.verifyZeroInteractions
 import com.nhaarman.mockitokotlin2.whenever
-import com.twilio.audioswitch.android.AudioManagerWrapper
 import com.twilio.audioswitch.android.LogWrapper
 import com.twilio.audioswitch.assertScoJobIsCanceled
 import com.twilio.audioswitch.bluetooth.BluetoothDeviceConnectionListener.ConnectionError.SCO_CONNECTION_ERROR
 import com.twilio.audioswitch.bluetooth.BluetoothScoJob.BluetoothScoRunnable
+import com.twilio.audioswitch.selection.AudioDeviceManager
 import com.twilio.audioswitch.setupScoHandlerMock
 import com.twilio.audioswitch.setupSystemClockMock
 import org.junit.Test
@@ -23,7 +23,7 @@ class BluetoothScoJobTest {
     private val logger = mock<LogWrapper>()
     private var handler = setupScoHandlerMock()
     val audioManager = mock<AudioManager>()
-    private val audioDeviceManager = AudioManagerWrapper(mock(),
+    private val audioDeviceManager = AudioDeviceManager(mock(),
             logger,
             audioManager,
             mock(),

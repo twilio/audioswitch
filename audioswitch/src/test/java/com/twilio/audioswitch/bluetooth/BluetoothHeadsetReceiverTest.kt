@@ -15,11 +15,11 @@ import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.verifyZeroInteractions
 import com.nhaarman.mockitokotlin2.whenever
-import com.twilio.audioswitch.android.AudioManagerWrapper
 import com.twilio.audioswitch.android.BluetoothIntentProcessorImpl
 import com.twilio.audioswitch.android.BuildWrapper
 import com.twilio.audioswitch.android.LogWrapper
 import com.twilio.audioswitch.assertScoJobIsCanceled
+import com.twilio.audioswitch.selection.AudioDeviceManager
 import com.twilio.audioswitch.selection.AudioFocusRequestWrapper
 import com.twilio.audioswitch.setupAudioManagerMock
 import com.twilio.audioswitch.setupScoHandlerMock
@@ -42,7 +42,7 @@ class BluetoothHeadsetReceiverTest {
     private val audioManager = setupAudioManagerMock()
     private val buildWrapper = mock<BuildWrapper>()
     private val audioFocusRequest = mock<AudioFocusRequestWrapper>()
-    private val audioDeviceManager = AudioManagerWrapper(context,
+    private val audioDeviceManager = AudioDeviceManager(context,
             logger,
             audioManager,
             buildWrapper,

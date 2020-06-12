@@ -1,4 +1,4 @@
-package com.twilio.audioswitch.android
+package com.twilio.audioswitch.selection
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -7,11 +7,12 @@ import android.media.AudioDeviceInfo
 import android.media.AudioFocusRequest
 import android.media.AudioManager
 import android.os.Build
-import com.twilio.audioswitch.selection.AudioFocusRequestWrapper
+import com.twilio.audioswitch.android.BuildWrapper
+import com.twilio.audioswitch.android.LogWrapper
 
 private const val TAG = "AudioDeviceManager"
 
-internal class AudioManagerWrapper(
+internal class AudioDeviceManager(
     private val context: Context,
     private val logger: LogWrapper,
     private val audioManager: AudioManager,
