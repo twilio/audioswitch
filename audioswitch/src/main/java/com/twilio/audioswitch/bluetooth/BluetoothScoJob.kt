@@ -18,7 +18,7 @@ internal abstract class BluetoothScoJob(
 ) {
 
     @VisibleForTesting(otherwise = PRIVATE)
-    lateinit var bluetoothScoRunnable: BluetoothScoRunnable
+    var bluetoothScoRunnable: BluetoothScoRunnable = BluetoothScoRunnable()
     @VisibleForTesting(otherwise = PRIVATE)
     var deviceListener: BluetoothDeviceConnectionListener? = null
 

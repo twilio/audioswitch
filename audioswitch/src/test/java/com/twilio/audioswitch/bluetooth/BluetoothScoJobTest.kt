@@ -73,7 +73,7 @@ class BluetoothScoJobTest {
     @Test
     fun `BluetoothScoRunnable should timeout if elapsedTime equals the time limit`() {
         systemClockWrapper = mock {
-            whenever(mock.elapsedRealtime()).thenReturn(0L, TIMEOUT)
+            whenever(mock.elapsedRealtime()).thenReturn(0L, 0L, TIMEOUT)
         }
         handler = setupHandlerMock()
         scoJob = EnableBluetoothScoJob(logger, audioDeviceManager, handler, systemClockWrapper)
@@ -87,7 +87,7 @@ class BluetoothScoJobTest {
     @Test
     fun `BluetoothScoRunnable should send a connection error event if a timeout occurs`() {
         systemClockWrapper = mock {
-            whenever(mock.elapsedRealtime()).thenReturn(0L, TIMEOUT)
+            whenever(mock.elapsedRealtime()).thenReturn(0L, 0L, TIMEOUT)
         }
         handler = setupHandlerMock()
         scoJob = EnableBluetoothScoJob(logger, audioDeviceManager, handler, systemClockWrapper)
@@ -102,7 +102,7 @@ class BluetoothScoJobTest {
     @Test
     fun `BluetoothScoRunnable should timeout if elapsedTime is greater than the time limit`() {
         systemClockWrapper = mock {
-            whenever(mock.elapsedRealtime()).thenReturn(0L, TIMEOUT + 1000)
+            whenever(mock.elapsedRealtime()).thenReturn(0L, 0L, TIMEOUT + 1000)
         }
         handler = setupHandlerMock()
         scoJob = EnableBluetoothScoJob(logger, audioDeviceManager, handler, systemClockWrapper)
