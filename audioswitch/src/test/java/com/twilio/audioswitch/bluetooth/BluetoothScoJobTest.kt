@@ -1,7 +1,6 @@
 package com.twilio.audioswitch.bluetooth
 
 import android.media.AudioManager
-import android.os.Handler
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.isA
 import com.nhaarman.mockitokotlin2.mock
@@ -10,30 +9,24 @@ import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.verifyZeroInteractions
 import com.nhaarman.mockitokotlin2.whenever
 import com.twilio.audioswitch.android.LogWrapper
-import com.twilio.audioswitch.android.SystemClockWrapper
 import com.twilio.audioswitch.assertScoJobIsCanceled
 import com.twilio.audioswitch.bluetooth.BluetoothScoJob.BluetoothScoRunnable
 import com.twilio.audioswitch.selection.AudioDeviceManager
+import com.twilio.audioswitch.setupScoHandlerMock
+import com.twilio.audioswitch.setupSystemClockMock
 import org.junit.Test
 
 class BluetoothScoJobTest {
 
     private val logger = mock<LogWrapper>()
-    private var handler = mock<Handler> {
-        whenever(mock.post(any())).thenAnswer {
-            (it.arguments[0] as BluetoothScoRunnable).run()
-            true
-        }
-    }
+    private var handler = setupScoHandlerMock()
     val audioManager = mock<AudioManager>()
     private val audioDeviceManager = AudioDeviceManager(mock(),
             logger,
             audioManager,
             mock(),
             mock())
-    private var systemClockWrapper = mock<SystemClockWrapper> {
-        whenever(mock.elapsedRealtime()).thenReturn(0)
-    }
+    private var systemClockWrapper = setupSystemClockMock()
     private var scoJob = EnableBluetoothScoJob(logger, audioDeviceManager, handler, systemClockWrapper)
 
     @Test

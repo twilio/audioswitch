@@ -9,8 +9,6 @@ import android.media.AudioManager
 import android.media.AudioManager.SCO_AUDIO_STATE_CONNECTED
 import android.media.AudioManager.SCO_AUDIO_STATE_DISCONNECTED
 import android.media.AudioManager.SCO_AUDIO_STATE_ERROR
-import android.os.Handler
-import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.isA
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.times
@@ -20,11 +18,12 @@ import com.nhaarman.mockitokotlin2.whenever
 import com.twilio.audioswitch.android.BluetoothIntentProcessorImpl
 import com.twilio.audioswitch.android.BuildWrapper
 import com.twilio.audioswitch.android.LogWrapper
-import com.twilio.audioswitch.android.SystemClockWrapper
 import com.twilio.audioswitch.assertScoJobIsCanceled
 import com.twilio.audioswitch.selection.AudioDeviceManager
 import com.twilio.audioswitch.selection.AudioFocusRequestWrapper
 import com.twilio.audioswitch.setupAudioManagerMock
+import com.twilio.audioswitch.setupScoHandlerMock
+import com.twilio.audioswitch.setupSystemClockMock
 import junitparams.JUnitParamsRunner
 import junitparams.Parameters
 import org.hamcrest.CoreMatchers.`is`
@@ -47,15 +46,8 @@ class BluetoothHeadsetReceiverTest {
             audioManager,
             buildWrapper,
             audioFocusRequest)
-    private var handler = mock<Handler> {
-        whenever(mock.post(any())).thenAnswer {
-            (it.arguments[0] as BluetoothScoJob.BluetoothScoRunnable).run()
-            true
-        }
-    }
-    private var systemClockWrapper = mock<SystemClockWrapper> {
-        whenever(mock.elapsedRealtime()).thenReturn(0)
-    }
+    private var handler = setupScoHandlerMock()
+    private var systemClockWrapper = setupSystemClockMock()
     private val enableBluetoothScoJob = EnableBluetoothScoJob(logger, audioDeviceManager, handler, systemClockWrapper)
     private val disableBluetoothScoJob = DisableBluetoothScoJob(logger, audioDeviceManager, handler, systemClockWrapper)
     private var bluetoothHeadsetReceiver = BluetoothHeadsetReceiver(context,
