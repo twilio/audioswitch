@@ -1,5 +1,6 @@
 package com.twilio.audioswitch.bluetooth
 
+import android.media.AudioManager
 import android.os.Handler
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.isA
@@ -26,7 +27,12 @@ class BluetoothScoJobTest {
             true
         }
     }
-    private val audioDeviceManager = mock<AudioDeviceManager>()
+    val audioManager = mock<AudioManager>()
+    private val audioDeviceManager = AudioDeviceManager(mock(),
+            logger,
+            audioManager,
+            mock(),
+            mock())
     private var systemClockWrapper = mock<SystemClockWrapper> {
         whenever(mock.elapsedRealtime()).thenReturn(0)
     }
@@ -36,7 +42,7 @@ class BluetoothScoJobTest {
     fun `EnableBluetoothScoJob should execute enableBluetoothSco with true`() {
         scoJob.executeBluetoothScoJob()
 
-        verify(audioDeviceManager).enableBluetoothSco(true)
+        verify(audioManager).startBluetoothSco()
     }
 
     @Test
@@ -45,7 +51,7 @@ class BluetoothScoJobTest {
 
         scoJob.executeBluetoothScoJob()
 
-        verify(audioDeviceManager).enableBluetoothSco(false)
+        verify(audioManager).stopBluetoothSco()
     }
 
     @Test
@@ -69,7 +75,7 @@ class BluetoothScoJobTest {
 
         scoJob.executeBluetoothScoJob()
 
-        verify(audioDeviceManager, times(2)).enableBluetoothSco(true)
+        verify(audioManager, times(2)).startBluetoothSco()
     }
 
     @Test
@@ -92,7 +98,7 @@ class BluetoothScoJobTest {
 
         scoJob.executeBluetoothScoJob()
 
-        verify(audioDeviceManager).enableBluetoothSco(true)
+        verify(audioManager).startBluetoothSco()
         assertCanceled()
     }
 
@@ -116,7 +122,7 @@ class BluetoothScoJobTest {
 
         scoJob.executeBluetoothScoJob()
 
-        verify(audioDeviceManager).enableBluetoothSco(true)
+        verify(audioManager).startBluetoothSco()
         assertCanceled()
     }
 
@@ -141,7 +147,7 @@ class BluetoothScoJobTest {
         scoJob.executeBluetoothScoJob()
 
         verify(handler).post(isA())
-        verify(audioDeviceManager).enableBluetoothSco(true)
+        verify(audioManager).startBluetoothSco()
     }
 
     private fun assertCanceled() {
