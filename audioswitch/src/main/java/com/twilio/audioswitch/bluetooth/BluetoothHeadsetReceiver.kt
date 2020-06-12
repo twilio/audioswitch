@@ -27,9 +27,9 @@ internal class BluetoothHeadsetReceiver(
     private val logger: LogWrapper,
     private val bluetoothIntentProcessor: BluetoothIntentProcessor,
     audioDeviceManager: AudioDeviceManager,
+    var deviceListener: BluetoothDeviceConnectionListener? = null,
     private val enableBluetoothScoJob: BluetoothScoJob = EnableBluetoothScoJob(logger, audioDeviceManager),
-    private val disableBluetoothScoJob: BluetoothScoJob = DisableBluetoothScoJob(logger, audioDeviceManager),
-    var deviceListener: BluetoothDeviceConnectionListener? = null
+    private val disableBluetoothScoJob: BluetoothScoJob = DisableBluetoothScoJob(logger, audioDeviceManager)
 ) : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
@@ -87,7 +87,15 @@ internal class BluetoothHeadsetReceiver(
 
     fun stop() {
         deviceListener = null
+        enableBluetoothScoJob.deviceListener = null
+        disableBluetoothScoJob.deviceListener = null
         context.unregisterReceiver(this)
+    }
+
+    fun setupDeviceListener(deviceListener: BluetoothDeviceConnectionListener) {
+        this.deviceListener = deviceListener
+        enableBluetoothScoJob.deviceListener = deviceListener
+        disableBluetoothScoJob.deviceListener = deviceListener
     }
 
     private fun Intent.getHeadsetDevice(): BluetoothDeviceWrapper? =

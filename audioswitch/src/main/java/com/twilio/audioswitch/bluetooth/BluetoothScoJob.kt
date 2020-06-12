@@ -3,6 +3,7 @@ package com.twilio.audioswitch.bluetooth
 import android.os.Handler
 import com.twilio.audioswitch.android.LogWrapper
 import com.twilio.audioswitch.android.SystemClockWrapper
+import com.twilio.audioswitch.bluetooth.BluetoothDeviceConnectionListener.ConnectionError
 import java.util.concurrent.TimeoutException
 
 internal const val TIMEOUT = 5000L
@@ -15,8 +16,10 @@ internal abstract class BluetoothScoJob(
 ) {
 
     var bluetoothScoRunnable: BluetoothScoRunnable? = null
+    var deviceListener: BluetoothDeviceConnectionListener? = null
 
     protected abstract val scoAction: () -> Unit
+    protected abstract val timeoutError: ConnectionError
 
     fun executeBluetoothScoJob() {
         if (bluetoothScoRunnable == null) {
@@ -47,6 +50,7 @@ internal abstract class BluetoothScoJob(
                 bluetoothScoHandler.postDelayed(this, 500)
             } else {
                 logger.e(TAG, "Bluetooth sco job timed out", TimeoutException())
+                deviceListener?.onBluetoothConnectionError(timeoutError)
                 cancelBluetoothScoJob()
             }
         }

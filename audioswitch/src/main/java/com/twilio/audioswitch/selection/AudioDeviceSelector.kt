@@ -9,6 +9,8 @@ import com.twilio.audioswitch.android.BuildWrapper
 import com.twilio.audioswitch.android.LogWrapper
 import com.twilio.audioswitch.bluetooth.BluetoothController
 import com.twilio.audioswitch.bluetooth.BluetoothDeviceConnectionListener
+import com.twilio.audioswitch.bluetooth.BluetoothDeviceConnectionListener.ConnectionError
+import com.twilio.audioswitch.bluetooth.BluetoothDeviceConnectionListener.ConnectionError.SCO_CONNECTION_ERROR
 import com.twilio.audioswitch.bluetooth.BluetoothHeadsetReceiver
 import com.twilio.audioswitch.bluetooth.PreConnectedDeviceListener
 import com.twilio.audioswitch.selection.AudioDevice.BluetoothHeadset
@@ -102,6 +104,15 @@ class AudioDeviceSelector {
         override fun onBluetoothDisconnected() {
             bluetoothAudioDevice = null
             enumerateDevices()
+        }
+
+        override fun onBluetoothConnectionError(error: ConnectionError) {
+            if (error is SCO_CONNECTION_ERROR) {
+                logger.d(TAG, "Removing the bluetooth audio device as the selected" +
+                        " device due to a sco connection error.")
+                bluetoothAudioDevice = null
+                enumerateDevices()
+            }
         }
     }
     internal val wiredDeviceConnectionListener = object : WiredDeviceConnectionListener {

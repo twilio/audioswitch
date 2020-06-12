@@ -18,7 +18,7 @@ internal class BluetoothController internal constructor(
 
     fun start(deviceListener: BluetoothDeviceConnectionListener) {
         preConnectedDeviceListener.deviceListener = deviceListener
-        bluetoothHeadsetReceiver.deviceListener = deviceListener
+        bluetoothHeadsetReceiver.setupDeviceListener(deviceListener)
 
         bluetoothAdapter.getProfileProxy(
                 context,
