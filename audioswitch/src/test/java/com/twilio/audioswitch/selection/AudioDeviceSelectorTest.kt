@@ -28,6 +28,7 @@ import com.twilio.audioswitch.bluetooth.BluetoothHeadsetReceiver
 import com.twilio.audioswitch.bluetooth.DisableBluetoothScoJob
 import com.twilio.audioswitch.bluetooth.EnableBluetoothScoJob
 import com.twilio.audioswitch.bluetooth.PreConnectedDeviceListener
+import com.twilio.audioswitch.selection.AudioDevice.BluetoothHeadset
 import com.twilio.audioswitch.selection.AudioDevice.Earpiece
 import com.twilio.audioswitch.selection.AudioDevice.Speakerphone
 import com.twilio.audioswitch.selection.AudioDeviceSelector.State.ACTIVATED
@@ -460,5 +461,19 @@ class AudioDeviceSelectorTest {
                 .onBluetoothConnectionError(SCO_CONNECTION_ERROR)
 
         assertThat(audioDeviceSelector.selectedAudioDevice as Earpiece, equalTo(Earpiece()))
+    }
+
+    @Test
+    fun `selectDevice should not re activate the bluetooth device if the same device has been selected`() {
+        val bluetoothDevice = mock<BluetoothDeviceWrapper> {
+            whenever(mock.name).thenReturn("Bluetooth")
+        }
+        audioDeviceSelector.start(audioDeviceChangeListener)
+        audioDeviceSelector.bluetoothDeviceConnectionListener.onBluetoothConnected(bluetoothDevice)
+        audioDeviceSelector.activate()
+        audioDeviceSelector.selectDevice(BluetoothHeadset("Bluetooth"))
+
+        verify(audioManager).isSpeakerphoneOn = false
+        verify(audioManager).startBluetoothSco()
     }
 }
