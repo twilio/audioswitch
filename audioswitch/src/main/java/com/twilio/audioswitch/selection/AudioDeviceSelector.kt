@@ -85,7 +85,7 @@ class AudioDeviceSelector {
     private var wiredHeadsetAvailable = false
     private val mutableAudioDevices = ArrayList<AudioDevice>()
 
-    private var bluetoothAudioDevice: AudioDevice? = null
+    var bluetoothAudioDevice: AudioDevice? = null
     internal var state: State = STOPPED
     internal enum class State {
         STARTED, ACTIVATED, STOPPED

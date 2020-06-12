@@ -23,6 +23,7 @@ import com.twilio.audioswitch.android.DEFAULT_DEVICE_NAME
 import com.twilio.audioswitch.android.LogWrapper
 import com.twilio.audioswitch.bluetooth.BluetoothController
 import com.twilio.audioswitch.bluetooth.BluetoothControllerAssertions
+import com.twilio.audioswitch.bluetooth.BluetoothDeviceConnectionListener.ConnectionError.SCO_CONNECTION_ERROR
 import com.twilio.audioswitch.bluetooth.BluetoothHeadsetReceiver
 import com.twilio.audioswitch.bluetooth.DisableBluetoothScoJob
 import com.twilio.audioswitch.bluetooth.EnableBluetoothScoJob
@@ -441,5 +442,23 @@ class AudioDeviceSelectorTest {
     @Test
     fun `TODO test all permutations of possible audio devices and their priorities`() {
         TODO("Not yet implemented")
+    }
+
+    @Test
+    fun `onBluetoothConnectionError should set the bluetooth device to null and revert back to the earpiece device`() {
+        val bluetoothDevice = mock<BluetoothDeviceWrapper> {
+            whenever(mock.name).thenReturn("Bluetooth")
+        }
+        audioDeviceSelector.start(audioDeviceChangeListener)
+        audioDeviceSelector.bluetoothDeviceConnectionListener.onBluetoothConnected(bluetoothDevice)
+
+        val bluetoothAudioDevice = audioDeviceSelector.bluetoothAudioDevice
+        assertThat(audioDeviceSelector.selectedAudioDevice, equalTo(bluetoothAudioDevice))
+
+        audioDeviceSelector.activate()
+        audioDeviceSelector.bluetoothDeviceConnectionListener
+                .onBluetoothConnectionError(SCO_CONNECTION_ERROR)
+
+        assertThat(audioDeviceSelector.selectedAudioDevice as Earpiece, equalTo(Earpiece()))
     }
 }
