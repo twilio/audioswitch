@@ -1,6 +1,8 @@
 package com.twilio.audioswitch.bluetooth
 
 import android.os.Handler
+import androidx.annotation.VisibleForTesting
+import androidx.annotation.VisibleForTesting.PRIVATE
 import com.twilio.audioswitch.android.LogWrapper
 import com.twilio.audioswitch.android.SystemClockWrapper
 import com.twilio.audioswitch.bluetooth.BluetoothDeviceConnectionListener.ConnectionError
