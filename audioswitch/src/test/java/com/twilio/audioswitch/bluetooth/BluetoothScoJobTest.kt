@@ -11,11 +11,9 @@ import com.nhaarman.mockitokotlin2.verifyZeroInteractions
 import com.nhaarman.mockitokotlin2.whenever
 import com.twilio.audioswitch.android.LogWrapper
 import com.twilio.audioswitch.android.SystemClockWrapper
+import com.twilio.audioswitch.assertScoJobIsCanceled
 import com.twilio.audioswitch.bluetooth.BluetoothScoJob.BluetoothScoRunnable
 import com.twilio.audioswitch.selection.AudioDeviceManager
-import org.hamcrest.CoreMatchers.`is`
-import org.hamcrest.CoreMatchers.nullValue
-import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Test
 
 class BluetoothScoJobTest {
@@ -99,7 +97,7 @@ class BluetoothScoJobTest {
         scoJob.executeBluetoothScoJob()
 
         verify(audioManager).startBluetoothSco()
-        assertCanceled()
+        assertScoJobIsCanceled(handler, scoJob)
     }
 
     @Test
@@ -123,7 +121,7 @@ class BluetoothScoJobTest {
         scoJob.executeBluetoothScoJob()
 
         verify(audioManager).startBluetoothSco()
-        assertCanceled()
+        assertScoJobIsCanceled(handler, scoJob)
     }
 
     @Test
@@ -131,7 +129,7 @@ class BluetoothScoJobTest {
         scoJob.executeBluetoothScoJob()
         scoJob.cancelBluetoothScoJob()
 
-        assertCanceled()
+        assertScoJobIsCanceled(handler, scoJob)
     }
 
     @Test
@@ -148,10 +146,5 @@ class BluetoothScoJobTest {
 
         verify(handler).post(isA())
         verify(audioManager).startBluetoothSco()
-    }
-
-    private fun assertCanceled() {
-        verify(handler).removeCallbacks(isA())
-        assertThat(scoJob.bluetoothScoRunnable, `is`(nullValue()))
     }
 }
