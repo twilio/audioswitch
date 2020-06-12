@@ -4,7 +4,6 @@ import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothProfile
 import android.content.Context
 import android.media.AudioManager
-import android.os.Handler
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
 import com.twilio.audioswitch.android.BluetoothIntentProcessorImpl
@@ -12,6 +11,8 @@ import com.twilio.audioswitch.android.BuildWrapper
 import com.twilio.audioswitch.android.LogWrapper
 import com.twilio.audioswitch.selection.AudioDeviceManager
 import com.twilio.audioswitch.selection.AudioFocusRequestWrapper
+import com.twilio.audioswitch.setupScoHandlerMock
+import com.twilio.audioswitch.setupSystemClockMock
 import org.junit.Test
 
 class BluetoothControllerTest {
@@ -28,13 +29,14 @@ class BluetoothControllerTest {
             audioManager,
             buildWrapper,
             audioFocusRequest)
-    private val handler = mock<Handler>()
+    private var handler = setupScoHandlerMock()
+    private var systemClockWrapper = setupSystemClockMock()
     private var bluetoothHeadsetReceiver = BluetoothHeadsetReceiver(context,
             logger,
             BluetoothIntentProcessorImpl(),
             audioDeviceManager,
-            EnableBluetoothScoJob(logger, audioDeviceManager, handler),
-            DisableBluetoothScoJob(logger, audioDeviceManager, handler))
+            EnableBluetoothScoJob(logger, audioDeviceManager, handler, systemClockWrapper),
+            DisableBluetoothScoJob(logger, audioDeviceManager, handler, systemClockWrapper))
     private var bluetoothController = BluetoothController(
             context,
             bluetoothAdapter,

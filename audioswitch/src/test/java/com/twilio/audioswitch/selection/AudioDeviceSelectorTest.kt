@@ -7,7 +7,6 @@ import android.content.pm.PackageManager
 import android.media.AudioFocusRequest
 import android.media.AudioManager
 import android.os.Build
-import android.os.Handler
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.eq
 import com.nhaarman.mockitokotlin2.isA
@@ -34,6 +33,8 @@ import com.twilio.audioswitch.selection.AudioDeviceSelector.State.ACTIVATED
 import com.twilio.audioswitch.selection.AudioDeviceSelector.State.STARTED
 import com.twilio.audioswitch.selection.AudioDeviceSelector.State.STOPPED
 import com.twilio.audioswitch.setupAudioManagerMock
+import com.twilio.audioswitch.setupScoHandlerMock
+import com.twilio.audioswitch.setupSystemClockMock
 import com.twilio.audioswitch.wired.WiredHeadsetReceiver
 import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.CoreMatchers.equalTo
@@ -64,13 +65,14 @@ class AudioDeviceSelectorTest {
             audioManager,
             buildWrapper,
             audioFocusRequest)
-    private val handler = mock<Handler>()
+    private var handler = setupScoHandlerMock()
+    private var systemClockWrapper = setupSystemClockMock()
     private var bluetoothHeadsetReceiver = BluetoothHeadsetReceiver(context,
             logger,
             BluetoothIntentProcessorImpl(),
             audioDeviceManager,
-            EnableBluetoothScoJob(logger, audioDeviceManager, handler),
-            DisableBluetoothScoJob(logger, audioDeviceManager, handler))
+            EnableBluetoothScoJob(logger, audioDeviceManager, handler, systemClockWrapper),
+            DisableBluetoothScoJob(logger, audioDeviceManager, handler, systemClockWrapper))
     private var audioDeviceSelector = AudioDeviceSelector(
             logger,
             audioDeviceManager,
