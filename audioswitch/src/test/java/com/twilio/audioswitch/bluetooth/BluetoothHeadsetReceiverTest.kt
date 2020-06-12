@@ -202,6 +202,12 @@ class BluetoothHeadsetReceiverTest {
     fun `onReceive should receive no device listener callbacks when an SCO audio event is received`(
         scoEvent: Int
     ) {
+        /*
+         * Needed to initialize the sco jobs as this test simulates conditions after these jobs
+         * have been started.
+         */
+        bluetoothHeadsetReceiver.enableBluetoothSco(true)
+        bluetoothHeadsetReceiver.enableBluetoothSco(false)
         val intent = mock<Intent> {
             whenever(mock.action).thenReturn(AudioManager.ACTION_SCO_AUDIO_STATE_UPDATED)
             whenever(mock.getIntExtra(AudioManager.EXTRA_SCO_AUDIO_STATE, SCO_AUDIO_STATE_ERROR))

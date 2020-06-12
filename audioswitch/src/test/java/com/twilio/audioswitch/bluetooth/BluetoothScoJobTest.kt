@@ -7,7 +7,6 @@ import com.nhaarman.mockitokotlin2.isA
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
-import com.nhaarman.mockitokotlin2.verifyZeroInteractions
 import com.nhaarman.mockitokotlin2.whenever
 import com.twilio.audioswitch.android.LogWrapper
 import com.twilio.audioswitch.assertScoJobIsCanceled
@@ -76,7 +75,7 @@ class BluetoothScoJobTest {
         systemClockWrapper = mock {
             whenever(mock.elapsedRealtime()).thenReturn(0L, TIMEOUT)
         }
-        handler = setupTimeoutMock()
+        handler = setupHandlerMock()
         scoJob = EnableBluetoothScoJob(logger, audioDeviceManager, handler, systemClockWrapper)
 
         scoJob.executeBluetoothScoJob()
@@ -90,7 +89,7 @@ class BluetoothScoJobTest {
         systemClockWrapper = mock {
             whenever(mock.elapsedRealtime()).thenReturn(0L, TIMEOUT)
         }
-        handler = setupTimeoutMock()
+        handler = setupHandlerMock()
         scoJob = EnableBluetoothScoJob(logger, audioDeviceManager, handler, systemClockWrapper)
         val deviceListener = mock<BluetoothDeviceConnectionListener>()
         scoJob.deviceListener = deviceListener
@@ -105,7 +104,7 @@ class BluetoothScoJobTest {
         systemClockWrapper = mock {
             whenever(mock.elapsedRealtime()).thenReturn(0L, TIMEOUT + 1000)
         }
-        handler = setupTimeoutMock()
+        handler = setupHandlerMock()
         scoJob = EnableBluetoothScoJob(logger, audioDeviceManager, handler, systemClockWrapper)
 
         scoJob.executeBluetoothScoJob()
@@ -114,7 +113,15 @@ class BluetoothScoJobTest {
         assertScoJobIsCanceled(handler, scoJob)
     }
 
-    private fun setupTimeoutMock() =
+    @Test
+    fun `cancelBluetoothScoJob should cancel sco runnable`() {
+        scoJob.executeBluetoothScoJob()
+        scoJob.cancelBluetoothScoJob()
+
+        assertScoJobIsCanceled(handler, scoJob)
+    }
+
+    private fun setupHandlerMock() =
         mock<Handler> {
             whenever(mock.post(any())).thenAnswer {
                 (it.arguments[0] as BluetoothScoRunnable).run()
@@ -126,28 +133,4 @@ class BluetoothScoJobTest {
                 true
             }
         }
-
-    @Test
-    fun `cancelBluetoothScoJob should cancel sco runnable if it is running`() {
-        scoJob.executeBluetoothScoJob()
-        scoJob.cancelBluetoothScoJob()
-
-        assertScoJobIsCanceled(handler, scoJob)
-    }
-
-    @Test
-    fun `executeBluetoothScoJob should not cancel sco runnable if it is not running`() {
-        scoJob.cancelBluetoothScoJob()
-
-        verifyZeroInteractions(handler)
-    }
-
-    @Test
-    fun `executeBluetoothScoJob should only allow a single running job`() {
-        scoJob.executeBluetoothScoJob()
-        scoJob.executeBluetoothScoJob()
-
-        verify(handler).post(isA())
-        verify(audioManager).startBluetoothSco()
-    }
 }

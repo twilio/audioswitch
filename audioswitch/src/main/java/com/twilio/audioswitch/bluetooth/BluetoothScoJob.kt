@@ -17,26 +17,23 @@ internal abstract class BluetoothScoJob(
     private val systemClockWrapper: SystemClockWrapper
 ) {
 
-    var bluetoothScoRunnable: BluetoothScoRunnable? = null
+    @VisibleForTesting(otherwise = PRIVATE)
+    lateinit var bluetoothScoRunnable: BluetoothScoRunnable
+    @VisibleForTesting(otherwise = PRIVATE)
     var deviceListener: BluetoothDeviceConnectionListener? = null
 
     protected abstract val scoAction: () -> Unit
     protected abstract val timeoutError: ConnectionError
 
     fun executeBluetoothScoJob() {
-        if (bluetoothScoRunnable == null) {
-            bluetoothScoRunnable = BluetoothScoRunnable()
-            bluetoothScoHandler.post(bluetoothScoRunnable)
-            logger.d(TAG, "Scheduled bluetooth sco job")
-        }
+        bluetoothScoRunnable = BluetoothScoRunnable()
+        bluetoothScoHandler.post(bluetoothScoRunnable)
+        logger.d(TAG, "Scheduled bluetooth sco job")
     }
 
     fun cancelBluetoothScoJob() {
-        bluetoothScoRunnable?.let {
-            bluetoothScoHandler.removeCallbacks(it)
-            bluetoothScoRunnable = null
-            logger.d(TAG, "Canceled bluetooth sco job")
-        }
+        bluetoothScoHandler.removeCallbacks(bluetoothScoRunnable)
+        logger.d(TAG, "Canceled bluetooth sco job")
     }
 
     inner class BluetoothScoRunnable : Runnable {
