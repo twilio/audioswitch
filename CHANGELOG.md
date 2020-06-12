@@ -1,5 +1,15 @@
 # Changelog
 
+### 0.1.4
+
+Enhancements
+- AAR minification is now enabled for release artifacts.
+
+Bug Fixes
+
+- Fixed a bug where the audio output doesn't automatically route to a newly connected bluetooth headset.
+- Fixed a bug where the selected audio device doesn't get routed back to the default audio device when an error occurs when attempting to connect to a headset.
+
 ### 0.1.3
 
 Bug Fixes
