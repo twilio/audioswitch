@@ -6,10 +6,13 @@ import android.content.Context
 import android.media.AudioManager
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
+import com.twilio.audioswitch.android.BluetoothIntentProcessorImpl
 import com.twilio.audioswitch.android.BuildWrapper
 import com.twilio.audioswitch.android.LogWrapper
 import com.twilio.audioswitch.selection.AudioDeviceManager
 import com.twilio.audioswitch.selection.AudioFocusRequestWrapper
+import com.twilio.audioswitch.setupScoHandlerMock
+import com.twilio.audioswitch.setupSystemClockMock
 import org.junit.Test
 
 class BluetoothControllerTest {
@@ -19,7 +22,6 @@ class BluetoothControllerTest {
     private val logger = mock<LogWrapper>()
     private val bluetoothAdapter = mock<BluetoothAdapter>()
     private val preConnectedDeviceListener = PreConnectedDeviceListener(logger, bluetoothAdapter)
-    private val bluetoothHeadsetReceiver = BluetoothHeadsetReceiver(context, logger, mock())
     private val buildWrapper = mock<BuildWrapper>()
     private val audioFocusRequest = mock<AudioFocusRequestWrapper>()
     private val audioDeviceManager = AudioDeviceManager(context,
@@ -27,9 +29,19 @@ class BluetoothControllerTest {
             audioManager,
             buildWrapper,
             audioFocusRequest)
+    private var handler = setupScoHandlerMock()
+    private var systemClockWrapper = setupSystemClockMock()
+    private val deviceListener = mock<BluetoothDeviceConnectionListener>()
+    private var bluetoothHeadsetReceiver = BluetoothHeadsetReceiver(
+            context,
+            logger,
+            BluetoothIntentProcessorImpl(),
+            audioDeviceManager,
+            EnableBluetoothScoJob(logger, audioDeviceManager, handler, systemClockWrapper),
+            DisableBluetoothScoJob(logger, audioDeviceManager, handler, systemClockWrapper),
+            deviceListener)
     private var bluetoothController = BluetoothController(
             context,
-            audioDeviceManager,
             bluetoothAdapter,
             preConnectedDeviceListener,
             bluetoothHeadsetReceiver)

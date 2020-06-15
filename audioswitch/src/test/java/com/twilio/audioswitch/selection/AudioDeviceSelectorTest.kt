@@ -17,18 +17,26 @@ import com.nhaarman.mockitokotlin2.verifyZeroInteractions
 import com.nhaarman.mockitokotlin2.whenever
 import com.twilio.audioswitch.android.BluetoothDeviceWrapper
 import com.twilio.audioswitch.android.BluetoothDeviceWrapperImpl
+import com.twilio.audioswitch.android.BluetoothIntentProcessorImpl
 import com.twilio.audioswitch.android.BuildWrapper
 import com.twilio.audioswitch.android.DEFAULT_DEVICE_NAME
 import com.twilio.audioswitch.android.LogWrapper
 import com.twilio.audioswitch.bluetooth.BluetoothController
 import com.twilio.audioswitch.bluetooth.BluetoothControllerAssertions
+import com.twilio.audioswitch.bluetooth.BluetoothDeviceConnectionListener.ConnectionError.SCO_CONNECTION_ERROR
 import com.twilio.audioswitch.bluetooth.BluetoothHeadsetReceiver
+import com.twilio.audioswitch.bluetooth.DisableBluetoothScoJob
+import com.twilio.audioswitch.bluetooth.EnableBluetoothScoJob
 import com.twilio.audioswitch.bluetooth.PreConnectedDeviceListener
+import com.twilio.audioswitch.selection.AudioDevice.BluetoothHeadset
 import com.twilio.audioswitch.selection.AudioDevice.Earpiece
 import com.twilio.audioswitch.selection.AudioDevice.Speakerphone
 import com.twilio.audioswitch.selection.AudioDeviceSelector.State.ACTIVATED
 import com.twilio.audioswitch.selection.AudioDeviceSelector.State.STARTED
 import com.twilio.audioswitch.selection.AudioDeviceSelector.State.STOPPED
+import com.twilio.audioswitch.setupAudioManagerMock
+import com.twilio.audioswitch.setupScoHandlerMock
+import com.twilio.audioswitch.setupSystemClockMock
 import com.twilio.audioswitch.wired.WiredHeadsetReceiver
 import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.CoreMatchers.equalTo
@@ -47,16 +55,10 @@ class AudioDeviceSelectorTest {
         whenever(mock.packageManager).thenReturn(packageManager)
     }
     private val logger = mock<LogWrapper>()
-    private val audioManager = mock<AudioManager> {
-        whenever(mock.mode).thenReturn(AudioManager.MODE_NORMAL)
-        whenever(mock.isMicrophoneMute).thenReturn(true)
-        whenever(mock.isSpeakerphoneOn).thenReturn(true)
-        whenever(mock.getDevices(AudioManager.GET_DEVICES_OUTPUTS)).thenReturn(emptyArray())
-    }
+    private val audioManager = setupAudioManagerMock()
     private val bluetoothAdapter = mock<BluetoothAdapter>()
     private val audioDeviceChangeListener = mock<AudioDeviceChangeListener>()
     private val preConnectedDeviceListener = PreConnectedDeviceListener(logger, bluetoothAdapter)
-    private val bluetoothHeadsetReceiver = BluetoothHeadsetReceiver(context, logger, mock())
     private val wiredHeadsetReceiver = WiredHeadsetReceiver(context, logger)
     private val buildWrapper = mock<BuildWrapper>()
     private val audioFocusRequest = mock<AudioFocusRequestWrapper>()
@@ -65,13 +67,20 @@ class AudioDeviceSelectorTest {
             audioManager,
             buildWrapper,
             audioFocusRequest)
+    private var handler = setupScoHandlerMock()
+    private var systemClockWrapper = setupSystemClockMock()
+    private var bluetoothHeadsetReceiver = BluetoothHeadsetReceiver(context,
+            logger,
+            BluetoothIntentProcessorImpl(),
+            audioDeviceManager,
+            EnableBluetoothScoJob(logger, audioDeviceManager, handler, systemClockWrapper),
+            DisableBluetoothScoJob(logger, audioDeviceManager, handler, systemClockWrapper))
     private var audioDeviceSelector = AudioDeviceSelector(
             logger,
             audioDeviceManager,
             wiredHeadsetReceiver,
             BluetoothController(
                     context,
-                    audioDeviceManager,
                     bluetoothAdapter,
                     preConnectedDeviceListener,
                     bluetoothHeadsetReceiver)
@@ -434,5 +443,37 @@ class AudioDeviceSelectorTest {
     @Test
     fun `TODO test all permutations of possible audio devices and their priorities`() {
         TODO("Not yet implemented")
+    }
+
+    @Test
+    fun `onBluetoothConnectionError should set the bluetooth device to null and revert back to the earpiece device`() {
+        val bluetoothDevice = mock<BluetoothDeviceWrapper> {
+            whenever(mock.name).thenReturn("Bluetooth")
+        }
+        audioDeviceSelector.start(audioDeviceChangeListener)
+        audioDeviceSelector.bluetoothDeviceConnectionListener.onBluetoothConnected(bluetoothDevice)
+
+        val bluetoothAudioDevice = audioDeviceSelector.bluetoothAudioDevice
+        assertThat(audioDeviceSelector.selectedAudioDevice, equalTo(bluetoothAudioDevice))
+
+        audioDeviceSelector.activate()
+        audioDeviceSelector.bluetoothDeviceConnectionListener
+                .onBluetoothConnectionError(SCO_CONNECTION_ERROR)
+
+        assertThat(audioDeviceSelector.selectedAudioDevice as Earpiece, equalTo(Earpiece()))
+    }
+
+    @Test
+    fun `selectDevice should not re activate the bluetooth device if the same device has been selected`() {
+        val bluetoothDevice = mock<BluetoothDeviceWrapper> {
+            whenever(mock.name).thenReturn("Bluetooth")
+        }
+        audioDeviceSelector.start(audioDeviceChangeListener)
+        audioDeviceSelector.bluetoothDeviceConnectionListener.onBluetoothConnected(bluetoothDevice)
+        audioDeviceSelector.activate()
+        audioDeviceSelector.selectDevice(BluetoothHeadset("Bluetooth"))
+
+        verify(audioManager).isSpeakerphoneOn = false
+        verify(audioManager).startBluetoothSco()
     }
 }

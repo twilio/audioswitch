@@ -29,10 +29,9 @@ internal fun setupFakeAudioDeviceSelector(context: Context):
                     AudioFocusRequestWrapper())
     val wiredHeadsetReceiver = WiredHeadsetReceiver(context, logger)
     val bluetoothIntentProcessor = FakeBluetoothIntentProcessor()
-    val bluetoothHeadsetReceiver = BluetoothHeadsetReceiver(context, logger, bluetoothIntentProcessor)
+    val bluetoothHeadsetReceiver = BluetoothHeadsetReceiver(context, logger, bluetoothIntentProcessor, audioDeviceManager)
     val bluetoothController = BluetoothAdapter.getDefaultAdapter()?.let { bluetoothAdapter ->
         BluetoothController(context,
-                audioDeviceManager,
                 bluetoothAdapter,
                 PreConnectedDeviceListener(logger, bluetoothAdapter),
                 bluetoothHeadsetReceiver)

@@ -115,7 +115,7 @@ jobs:
       - run:
           name: Integration Tests
           command: >
-            gcloud firebase test android run --no-record-video --project video-app-79418
+            gcloud firebase test android run --use-orchestrator --environment-variables clearPackageData=true --no-record-video --project video-app-79418
             ui-test-args.yaml:integration-tests
 
   publish-pre-release:
