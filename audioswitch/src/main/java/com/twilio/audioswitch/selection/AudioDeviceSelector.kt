@@ -4,6 +4,7 @@ import android.bluetooth.BluetoothAdapter
 import android.content.Context
 import android.media.AudioManager
 import com.twilio.audioswitch.android.BluetoothDeviceWrapper
+import com.twilio.audioswitch.android.BluetoothDeviceWrapperImpl
 import com.twilio.audioswitch.android.BluetoothIntentProcessorImpl
 import com.twilio.audioswitch.android.BuildWrapper
 import com.twilio.audioswitch.android.LogWrapper
@@ -94,7 +95,7 @@ class AudioDeviceSelector {
         override fun onBluetoothConnected(
             bluetoothDeviceWrapper: BluetoothDeviceWrapper
         ) {
-            bluetoothAudioDevice = BluetoothHeadset(bluetoothDeviceWrapper.name)
+            bluetoothAudioDevice = BluetoothHeadset(bluetoothDeviceWrapper.name, bluetoothDeviceWrapper)
             if (state == ACTIVATED) {
                 userSelectedDevice = bluetoothAudioDevice
             }
@@ -199,15 +200,21 @@ class AudioDeviceSelector {
         when (audioDevice) {
             is BluetoothHeadset -> {
                 audioDeviceManager.enableSpeakerphone(false)
-                bluetoothController?.activate()
+                (bluetoothAudioDevice as BluetoothHeadset?)?.let { device ->
+                    bluetoothController?.activate(device.bluetoothDeviceWrapper as BluetoothDeviceWrapperImpl)
+                }
             }
             is Earpiece, is WiredHeadset -> {
                 audioDeviceManager.enableSpeakerphone(false)
-                bluetoothController?.deactivate()
+                (bluetoothAudioDevice as BluetoothHeadset?)?.let { device ->
+                    bluetoothController?.deactivate(device.bluetoothDeviceWrapper as BluetoothDeviceWrapperImpl)
+                }
             }
             is Speakerphone -> {
                 audioDeviceManager.enableSpeakerphone(true)
-                bluetoothController?.deactivate()
+                (bluetoothAudioDevice as BluetoothHeadset?)?.let { device ->
+                    bluetoothController?.deactivate(device.bluetoothDeviceWrapper as BluetoothDeviceWrapperImpl)
+                }
             }
         }
     }
@@ -219,7 +226,9 @@ class AudioDeviceSelector {
     fun deactivate() {
         when (state) {
             ACTIVATED -> {
-                bluetoothController?.deactivate()
+                (bluetoothAudioDevice as BluetoothHeadset?)?.let { device ->
+                    bluetoothController?.deactivate(device.bluetoothDeviceWrapper as BluetoothDeviceWrapperImpl)
+                }
 
                 // Restore stored audio state
                 audioDeviceManager.restoreAudioState()
