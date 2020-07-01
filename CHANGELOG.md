@@ -1,5 +1,11 @@
 # Changelog
 
+### 0.1.5
+
+Bug Fixes
+
+- Disabled AAR minification to fix Android Studio issues such as getting stuck in code analysis and not being able to find declarations of AudioSwitch code.
+
 ### 0.1.4
 
 Enhancements
