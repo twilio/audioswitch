@@ -40,11 +40,15 @@ internal class BluetoothController internal constructor(
         bluetoothHeadsetReceiver.stop()
     }
 
-    fun activate(deviceWrapper: BluetoothDeviceWrapperImpl) {
-        preConnectedDeviceListener.connectHeadset(deviceWrapper.device)
+    fun select(device: BluetoothDeviceWrapperImpl) {
+        preConnectedDeviceListener.selectDevice(device)
     }
 
-    fun deactivate(deviceWrapper: BluetoothDeviceWrapperImpl) {
-        preConnectedDeviceListener.disconnectHeadset(deviceWrapper.device)
+    fun activate() {
+        bluetoothHeadsetReceiver.enableBluetoothSco(true)
+    }
+
+    fun deactivate() {
+        bluetoothHeadsetReceiver.enableBluetoothSco(false)
     }
 }
