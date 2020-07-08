@@ -276,6 +276,8 @@ class AudioDeviceSelector {
             mutableAudioDevices.add(Speakerphone())
         }
 
+        logger.d(TAG, "Available AudioDevice list updated: $availableAudioDevices")
+
         // Check whether the user selected device is still present
         if (!userSelectedDevicePresent(mutableAudioDevices)) {
             userSelectedDevice = null
