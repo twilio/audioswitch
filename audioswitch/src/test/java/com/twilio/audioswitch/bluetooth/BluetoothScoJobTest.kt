@@ -7,6 +7,7 @@ import com.nhaarman.mockitokotlin2.isA
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
+import com.nhaarman.mockitokotlin2.verifyZeroInteractions
 import com.nhaarman.mockitokotlin2.whenever
 import com.twilio.audioswitch.android.LogWrapper
 import com.twilio.audioswitch.assertScoJobIsCanceled
@@ -73,7 +74,7 @@ class BluetoothScoJobTest {
     @Test
     fun `BluetoothScoRunnable should timeout if elapsedTime equals the time limit`() {
         systemClockWrapper = mock {
-            whenever(mock.elapsedRealtime()).thenReturn(0L, 0L, TIMEOUT)
+            whenever(mock.elapsedRealtime()).thenReturn(0L, TIMEOUT)
         }
         handler = setupHandlerMock()
         scoJob = EnableBluetoothScoJob(logger, audioDeviceManager, handler, systemClockWrapper)
@@ -102,7 +103,7 @@ class BluetoothScoJobTest {
     @Test
     fun `BluetoothScoRunnable should timeout if elapsedTime is greater than the time limit`() {
         systemClockWrapper = mock {
-            whenever(mock.elapsedRealtime()).thenReturn(0L, 0L, TIMEOUT + 1000)
+            whenever(mock.elapsedRealtime()).thenReturn(0L, TIMEOUT + 1000)
         }
         handler = setupHandlerMock()
         scoJob = EnableBluetoothScoJob(logger, audioDeviceManager, handler, systemClockWrapper)
@@ -119,6 +120,13 @@ class BluetoothScoJobTest {
         scoJob.cancelBluetoothScoJob()
 
         assertScoJobIsCanceled(handler, scoJob)
+    }
+
+    @Test
+    fun `cancelBluetoothScoJob should not cancel sco runnable if it has not been initialized`() {
+        scoJob.cancelBluetoothScoJob()
+
+        verifyZeroInteractions(handler)
     }
 
     private fun setupHandlerMock() =

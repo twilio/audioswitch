@@ -18,7 +18,7 @@ internal abstract class BluetoothScoJob(
 ) {
 
     @VisibleForTesting(otherwise = PRIVATE)
-    var bluetoothScoRunnable: BluetoothScoRunnable = BluetoothScoRunnable()
+    var bluetoothScoRunnable: BluetoothScoRunnable? = null
     @VisibleForTesting(otherwise = PRIVATE)
     var deviceListener: BluetoothDeviceConnectionListener? = null
 
@@ -32,8 +32,11 @@ internal abstract class BluetoothScoJob(
     }
 
     fun cancelBluetoothScoJob() {
-        bluetoothScoHandler.removeCallbacks(bluetoothScoRunnable)
-        logger.d(TAG, "Canceled bluetooth sco job")
+        bluetoothScoRunnable?.let {
+            bluetoothScoHandler.removeCallbacks(bluetoothScoRunnable)
+            bluetoothScoRunnable = null
+            logger.d(TAG, "Canceled bluetooth sco job")
+        }
     }
 
     inner class BluetoothScoRunnable : Runnable {
