@@ -9,7 +9,7 @@ import com.twilio.audioswitch.bluetooth.BluetoothDeviceConnectionListener.Connec
 import java.util.concurrent.TimeoutException
 
 internal const val TIMEOUT = 5000L
-private const val TAG = "BluetoothScoManager"
+private const val TAG = "BluetoothScoJob"
 
 internal abstract class BluetoothScoJob(
     private val logger: LogWrapper,
