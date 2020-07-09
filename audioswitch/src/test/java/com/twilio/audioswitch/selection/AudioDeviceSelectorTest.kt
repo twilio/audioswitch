@@ -24,10 +24,10 @@ import com.twilio.audioswitch.android.LogWrapper
 import com.twilio.audioswitch.bluetooth.BluetoothController
 import com.twilio.audioswitch.bluetooth.BluetoothControllerAssertions
 import com.twilio.audioswitch.bluetooth.BluetoothDeviceConnectionListener.ConnectionError.SCO_CONNECTION_ERROR
+import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager
 import com.twilio.audioswitch.bluetooth.BluetoothHeadsetReceiver
 import com.twilio.audioswitch.bluetooth.DisableBluetoothScoJob
 import com.twilio.audioswitch.bluetooth.EnableBluetoothScoJob
-import com.twilio.audioswitch.bluetooth.PreConnectedDeviceListener
 import com.twilio.audioswitch.selection.AudioDevice.BluetoothHeadset
 import com.twilio.audioswitch.selection.AudioDevice.Earpiece
 import com.twilio.audioswitch.selection.AudioDevice.Speakerphone
@@ -58,7 +58,7 @@ class AudioDeviceSelectorTest {
     private val audioManager = setupAudioManagerMock()
     private val bluetoothAdapter = mock<BluetoothAdapter>()
     private val audioDeviceChangeListener = mock<AudioDeviceChangeListener>()
-    private val preConnectedDeviceListener = PreConnectedDeviceListener(logger, bluetoothAdapter)
+    private val preConnectedDeviceListener = BluetoothHeadsetManager(logger, bluetoothAdapter)
     private val wiredHeadsetReceiver = WiredHeadsetReceiver(context, logger)
     private val buildWrapper = mock<BuildWrapper>()
     private val audioFocusRequest = mock<AudioFocusRequestWrapper>()

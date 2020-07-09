@@ -17,17 +17,17 @@ internal class BluetoothControllerAssertions {
 
     fun assertStart(
         context: Context,
-        preConnectedDeviceListener: PreConnectedDeviceListener,
+        bluetoothHeadsetManager: BluetoothHeadsetManager,
         bluetoothDeviceReceiver: BluetoothHeadsetReceiver,
         deviceListener: BluetoothDeviceConnectionListener,
         bluetoothAdapter: BluetoothAdapter
     ) {
 
-        assertThat(preConnectedDeviceListener.deviceListener, equalTo(deviceListener))
+        assertThat(bluetoothHeadsetManager.deviceListener, equalTo(deviceListener))
         assertThat(bluetoothDeviceReceiver.deviceListener, equalTo(deviceListener))
         verify(bluetoothAdapter).getProfileProxy(
                 context,
-                preConnectedDeviceListener,
+                bluetoothHeadsetManager,
                 BluetoothProfile.HEADSET)
         verify(context, times(3)).registerReceiver(
                 eq(bluetoothDeviceReceiver), isA())
@@ -35,12 +35,12 @@ internal class BluetoothControllerAssertions {
 
     fun assertNotStarted(
         context: Context,
-        preConnectedDeviceListener: PreConnectedDeviceListener,
+        bluetoothHeadsetManager: BluetoothHeadsetManager,
         bluetoothDeviceReceiver: BluetoothHeadsetReceiver,
         bluetoothAdapter: BluetoothAdapter
     ) {
 
-        assertThat(preConnectedDeviceListener.deviceListener, `is`(nullValue()))
+        assertThat(bluetoothHeadsetManager.deviceListener, `is`(nullValue()))
         assertThat(bluetoothDeviceReceiver.deviceListener, `is`(nullValue()))
         verifyZeroInteractions(bluetoothAdapter)
         verify(context, times(0)).registerReceiver(

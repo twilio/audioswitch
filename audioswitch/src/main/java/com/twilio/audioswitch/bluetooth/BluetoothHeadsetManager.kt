@@ -9,7 +9,7 @@ import com.twilio.audioswitch.selection.AudioDevice
 
 private const val TAG = "PreConnectedDeviceListener"
 
-internal class PreConnectedDeviceListener(
+internal class BluetoothHeadsetManager(
     private val logger: LogWrapper,
     private val bluetoothAdapter: BluetoothAdapter,
     private val deviceCache: BluetoothDeviceCacheManager,

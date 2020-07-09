@@ -11,8 +11,8 @@ import com.twilio.audioswitch.bluetooth.BluetoothDeviceCacheManager
 import com.twilio.audioswitch.bluetooth.BluetoothDeviceConnectionListener
 import com.twilio.audioswitch.bluetooth.BluetoothDeviceConnectionListener.ConnectionError
 import com.twilio.audioswitch.bluetooth.BluetoothDeviceConnectionListener.ConnectionError.SCO_CONNECTION_ERROR
+import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager
 import com.twilio.audioswitch.bluetooth.BluetoothHeadsetReceiver
-import com.twilio.audioswitch.bluetooth.PreConnectedDeviceListener
 import com.twilio.audioswitch.selection.AudioDevice.BluetoothHeadset
 import com.twilio.audioswitch.selection.AudioDevice.Earpiece
 import com.twilio.audioswitch.selection.AudioDevice.Speakerphone
@@ -55,7 +55,7 @@ class AudioDeviceSelector {
         this.bluetoothController = BluetoothAdapter.getDefaultAdapter()?.let { bluetoothAdapter ->
             BluetoothController(context,
                     bluetoothAdapter,
-                    PreConnectedDeviceListener(logger, bluetoothAdapter, deviceCache),
+                    BluetoothHeadsetManager(logger, bluetoothAdapter, deviceCache),
                     BluetoothHeadsetReceiver(context, logger, BluetoothIntentProcessorImpl(),
                             audioDeviceManager, deviceCache)
             )
