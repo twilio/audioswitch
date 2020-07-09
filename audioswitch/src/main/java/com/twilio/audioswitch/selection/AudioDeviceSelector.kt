@@ -3,7 +3,6 @@ package com.twilio.audioswitch.selection
 import android.bluetooth.BluetoothAdapter
 import android.content.Context
 import android.media.AudioManager
-import com.twilio.audioswitch.android.BluetoothDeviceWrapperImpl
 import com.twilio.audioswitch.android.BluetoothIntentProcessorImpl
 import com.twilio.audioswitch.android.BuildWrapper
 import com.twilio.audioswitch.android.LogWrapper
@@ -109,15 +108,6 @@ class AudioDeviceSelector {
                         " device due to a sco connection error.")
                 enumerateDevices()
             }
-        }
-    }
-
-    private fun updateBluetoothDevices() {
-        deviceCache?.cachedDevices?.let { cachedDevices ->
-            mutableAudioDevices.forEachIndexed { index, device ->
-                if (device is BluetoothHeadset) mutableAudioDevices.removeAt(index)
-            }
-            mutableAudioDevices.addAll(cachedDevices)
         }
     }
 
@@ -265,7 +255,9 @@ class AudioDeviceSelector {
 
     private fun enumerateDevices() {
         mutableAudioDevices.clear()
-        updateBluetoothDevices()
+        deviceCache?.cachedDevices?.let { devices ->
+            if (devices.isNotEmpty()) mutableAudioDevices.add(devices.last())
+        }
         if (wiredHeadsetAvailable) {
             mutableAudioDevices.add(WiredHeadset())
         }
@@ -297,10 +289,6 @@ class AudioDeviceSelector {
                 listener.invoke(
                         mutableAudioDevices,
                         selectedDevice)
-
-                if (selectedDevice is BluetoothHeadset) {
-                    bluetoothController?.select(selectedDevice.bluetoothDeviceWrapper as BluetoothDeviceWrapperImpl)
-                }
             } ?: run {
                 listener.invoke(mutableAudioDevices, null)
             }

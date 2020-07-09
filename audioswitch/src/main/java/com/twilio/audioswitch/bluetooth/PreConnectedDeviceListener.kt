@@ -6,7 +6,6 @@ import android.bluetooth.BluetoothProfile
 import com.twilio.audioswitch.android.BluetoothDeviceWrapperImpl
 import com.twilio.audioswitch.android.LogWrapper
 import com.twilio.audioswitch.selection.AudioDevice
-import kotlin.reflect.full.declaredFunctions
 
 private const val TAG = "PreConnectedDeviceListener"
 
@@ -35,15 +34,7 @@ internal class PreConnectedDeviceListener(
 
     override fun onServiceDisconnected(profile: Int) {
         logger.d(TAG, "Bluetooth disconnected")
-    }
-
-    fun selectDevice(deviceWrapper: BluetoothDeviceWrapperImpl) {
-        headsetProxy?.let { proxy ->
-            val result = proxy::class.declaredFunctions.find { it.name == "setActiveDevice" }
-                    ?.call(proxy, deviceWrapper.device) as Boolean
-            if (result) logger.d(TAG, "Set the following bluetooth device to active: " +
-                    deviceWrapper.name)
-        }
+        deviceListener?.onBluetoothDisconnected()
     }
 
     fun stop() {

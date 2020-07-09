@@ -6,7 +6,6 @@ import android.bluetooth.BluetoothProfile
 import android.content.Context
 import android.content.IntentFilter
 import android.media.AudioManager
-import com.twilio.audioswitch.android.BluetoothDeviceWrapperImpl
 
 internal class BluetoothController internal constructor(
     private val context: Context,
@@ -38,10 +37,6 @@ internal class BluetoothController internal constructor(
     fun stop() {
         preConnectedDeviceListener.stop()
         bluetoothHeadsetReceiver.stop()
-    }
-
-    fun select(device: BluetoothDeviceWrapperImpl) {
-        preConnectedDeviceListener.selectDevice(device)
     }
 
     fun activate() {
