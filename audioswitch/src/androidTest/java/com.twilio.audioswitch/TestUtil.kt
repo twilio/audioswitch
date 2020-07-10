@@ -9,6 +9,7 @@ import com.twilio.audioswitch.android.BuildWrapper
 import com.twilio.audioswitch.android.FakeBluetoothIntentProcessor
 import com.twilio.audioswitch.android.LogWrapper
 import com.twilio.audioswitch.bluetooth.BluetoothController
+import com.twilio.audioswitch.bluetooth.BluetoothDeviceCacheManager
 import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager
 import com.twilio.audioswitch.bluetooth.BluetoothHeadsetReceiver
 import com.twilio.audioswitch.selection.AudioDeviceManager
@@ -29,11 +30,12 @@ internal fun setupFakeAudioDeviceSelector(context: Context):
                     AudioFocusRequestWrapper())
     val wiredHeadsetReceiver = WiredHeadsetReceiver(context, logger)
     val bluetoothIntentProcessor = FakeBluetoothIntentProcessor()
-    val bluetoothHeadsetReceiver = BluetoothHeadsetReceiver(context, logger, bluetoothIntentProcessor, audioDeviceManager)
+    val deviceCache = BluetoothDeviceCacheManager(logger)
+    val bluetoothHeadsetReceiver = BluetoothHeadsetReceiver(context, logger, bluetoothIntentProcessor, audioDeviceManager, deviceCache)
     val bluetoothController = BluetoothAdapter.getDefaultAdapter()?.let { bluetoothAdapter ->
         BluetoothController(context,
                 bluetoothAdapter,
-                BluetoothHeadsetManager(logger, bluetoothAdapter),
+                BluetoothHeadsetManager(logger, bluetoothAdapter, deviceCache),
                 bluetoothHeadsetReceiver)
     } ?: run {
         null
@@ -41,7 +43,8 @@ internal fun setupFakeAudioDeviceSelector(context: Context):
     return Pair(AudioDeviceSelector(logger,
             audioDeviceManager,
             wiredHeadsetReceiver,
-            bluetoothController),
+            bluetoothController,
+            deviceCache),
             bluetoothHeadsetReceiver)
 }
 

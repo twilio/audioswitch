@@ -4,6 +4,7 @@ import androidx.test.annotation.UiThreadTest
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
 import androidx.test.platform.app.InstrumentationRegistry
+import com.twilio.audioswitch.android.FakeBluetoothDevice
 import com.twilio.audioswitch.selection.AudioDevice.BluetoothHeadset
 import com.twilio.audioswitch.selection.AudioDevice.Earpiece
 import com.twilio.audioswitch.selection.AudioDeviceSelector
@@ -27,8 +28,8 @@ class AutomaticDeviceSelectionTest {
         audioDeviceSelector.start { _, _ -> }
         simulateBluetoothConnection(context, bluetoothHeadsetReceiver)
 
-        val bluetoothHeadset = BluetoothHeadset("Fake Bluetooth")
-        assertEquals(bluetoothHeadset, audioDeviceSelector.selectedAudioDevice)
+        val bluetoothHeadset = BluetoothHeadset(FakeBluetoothDevice())
+        assertEquals(bluetoothHeadset.name, audioDeviceSelector.selectedAudioDevice!!.name)
     }
 
     @UiThreadTest
