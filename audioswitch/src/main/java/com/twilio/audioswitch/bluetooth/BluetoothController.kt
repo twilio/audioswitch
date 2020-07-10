@@ -14,9 +14,9 @@ internal class BluetoothController internal constructor(
     private val bluetoothHeadsetReceiver: BluetoothHeadsetReceiver
 ) {
 
-    fun start(deviceListener: BluetoothDeviceConnectionListener) {
-        bluetoothHeadsetManager.deviceListener = deviceListener
-        bluetoothHeadsetReceiver.setupDeviceListener(deviceListener)
+    fun start(headsetListener: BluetoothHeadsetConnectionListener) {
+        bluetoothHeadsetManager.headsetListener = headsetListener
+        bluetoothHeadsetReceiver.setupDeviceListener(headsetListener)
 
         bluetoothAdapter.getProfileProxy(
                 context,

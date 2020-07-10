@@ -31,7 +31,7 @@ internal class BluetoothHeadsetReceiver(
     private val headsetCache: BluetoothHeadsetCacheManager,
     private val enableBluetoothScoJob: BluetoothScoJob = EnableBluetoothScoJob(logger, audioDeviceManager),
     private val disableBluetoothScoJob: BluetoothScoJob = DisableBluetoothScoJob(logger, audioDeviceManager),
-    var deviceListener: BluetoothDeviceConnectionListener? = null
+    var headsetListener: BluetoothHeadsetConnectionListener? = null
 ) : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
@@ -45,7 +45,7 @@ internal class BluetoothHeadsetReceiver(
                                         bluetoothDevice.name +
                                         " connected")
                         headsetCache.addDevice(BluetoothHeadset(bluetoothDevice))
-                        deviceListener?.onBluetoothDeviceStateChanged()
+                        headsetListener?.onBluetoothHeadsetStateChanged()
                     }
                 }
                 ACTION_ACL_DISCONNECTED -> {
@@ -56,7 +56,7 @@ internal class BluetoothHeadsetReceiver(
                                         bluetoothDevice.name +
                                         " disconnected")
                         headsetCache.removeDevice(BluetoothHeadset(bluetoothDevice))
-                        deviceListener?.onBluetoothDeviceStateChanged()
+                        headsetListener?.onBluetoothHeadsetStateChanged()
                     }
                 }
                 ACTION_SCO_AUDIO_STATE_UPDATED -> {
@@ -89,16 +89,16 @@ internal class BluetoothHeadsetReceiver(
         }
     }
 
-    fun setupDeviceListener(deviceListener: BluetoothDeviceConnectionListener) {
-        this.deviceListener = deviceListener
-        enableBluetoothScoJob.deviceListener = deviceListener
-        disableBluetoothScoJob.deviceListener = deviceListener
+    fun setupDeviceListener(headsetListener: BluetoothHeadsetConnectionListener) {
+        this.headsetListener = headsetListener
+        enableBluetoothScoJob.headsetListener = headsetListener
+        disableBluetoothScoJob.headsetListener = headsetListener
     }
 
     fun stop() {
-        deviceListener = null
-        enableBluetoothScoJob.deviceListener = null
-        disableBluetoothScoJob.deviceListener = null
+        headsetListener = null
+        enableBluetoothScoJob.headsetListener = null
+        disableBluetoothScoJob.headsetListener = null
         context.unregisterReceiver(this)
     }
 

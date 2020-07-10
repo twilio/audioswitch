@@ -19,12 +19,12 @@ internal class BluetoothControllerAssertions {
         context: Context,
         bluetoothHeadsetManager: BluetoothHeadsetManager,
         bluetoothDeviceReceiver: BluetoothHeadsetReceiver,
-        deviceListener: BluetoothDeviceConnectionListener,
+        headsetListener: BluetoothHeadsetConnectionListener,
         bluetoothAdapter: BluetoothAdapter
     ) {
 
-        assertThat(bluetoothHeadsetManager.deviceListener, equalTo(deviceListener))
-        assertThat(bluetoothDeviceReceiver.deviceListener, equalTo(deviceListener))
+        assertThat(bluetoothHeadsetManager.headsetListener, equalTo(headsetListener))
+        assertThat(bluetoothDeviceReceiver.headsetListener, equalTo(headsetListener))
         verify(bluetoothAdapter).getProfileProxy(
                 context,
                 bluetoothHeadsetManager,
@@ -40,8 +40,8 @@ internal class BluetoothControllerAssertions {
         bluetoothAdapter: BluetoothAdapter
     ) {
 
-        assertThat(bluetoothHeadsetManager.deviceListener, `is`(nullValue()))
-        assertThat(bluetoothDeviceReceiver.deviceListener, `is`(nullValue()))
+        assertThat(bluetoothHeadsetManager.headsetListener, `is`(nullValue()))
+        assertThat(bluetoothDeviceReceiver.headsetListener, `is`(nullValue()))
         verifyZeroInteractions(bluetoothAdapter)
         verify(context, times(0)).registerReceiver(
                 eq(bluetoothDeviceReceiver), isA())

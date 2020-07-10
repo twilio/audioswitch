@@ -444,7 +444,7 @@ class AudioDeviceSelectorTest {
         audioDeviceSelector.activate()
 
         deviceCache.addDevice(AudioDevice.BluetoothHeadset(bluetoothDevice))
-        audioDeviceSelector.bluetoothDeviceConnectionListener.onBluetoothDeviceStateChanged()
+        audioDeviceSelector.bluetoothDeviceConnectionListener.onBluetoothHeadsetStateChanged()
 
         verify(audioManager, times(2)).isSpeakerphoneOn = false
         verify(audioManager).startBluetoothSco()

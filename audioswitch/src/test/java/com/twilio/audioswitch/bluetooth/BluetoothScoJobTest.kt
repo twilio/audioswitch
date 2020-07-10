@@ -91,12 +91,12 @@ class BluetoothScoJobTest {
         }
         handler = setupHandlerMock()
         scoJob = EnableBluetoothScoJob(logger, audioDeviceManager, handler, systemClockWrapper)
-        val deviceListener = mock<BluetoothDeviceConnectionListener>()
-        scoJob.deviceListener = deviceListener
+        val deviceListener = mock<BluetoothHeadsetConnectionListener>()
+        scoJob.headsetListener = deviceListener
 
         scoJob.executeBluetoothScoJob()
 
-        verify(deviceListener).onBluetoothDeviceStateChanged()
+        verify(deviceListener).onBluetoothHeadsetStateChanged()
     }
 
     @Test

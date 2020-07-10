@@ -7,8 +7,8 @@ import com.twilio.audioswitch.android.BluetoothIntentProcessorImpl
 import com.twilio.audioswitch.android.BuildWrapper
 import com.twilio.audioswitch.android.LogWrapper
 import com.twilio.audioswitch.bluetooth.BluetoothController
-import com.twilio.audioswitch.bluetooth.BluetoothDeviceConnectionListener
 import com.twilio.audioswitch.bluetooth.BluetoothHeadsetCacheManager
+import com.twilio.audioswitch.bluetooth.BluetoothHeadsetConnectionListener
 import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager
 import com.twilio.audioswitch.bluetooth.BluetoothHeadsetReceiver
 import com.twilio.audioswitch.selection.AudioDevice.BluetoothHeadset
@@ -92,8 +92,8 @@ class AudioDeviceSelector {
     internal enum class State {
         STARTED, ACTIVATED, STOPPED
     }
-    internal val bluetoothDeviceConnectionListener = object : BluetoothDeviceConnectionListener {
-        override fun onBluetoothDeviceStateChanged() {
+    internal val bluetoothDeviceConnectionListener = object : BluetoothHeadsetConnectionListener {
+        override fun onBluetoothHeadsetStateChanged() {
             enumerateDevices()
         }
     }

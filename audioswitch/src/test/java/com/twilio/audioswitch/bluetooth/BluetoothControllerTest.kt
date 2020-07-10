@@ -33,7 +33,7 @@ class BluetoothControllerTest {
             audioFocusRequest)
     private var handler = setupScoHandlerMock()
     private var systemClockWrapper = setupSystemClockMock()
-    private val deviceListener = mock<BluetoothDeviceConnectionListener>()
+    private val deviceListener = mock<BluetoothHeadsetConnectionListener>()
     private var bluetoothHeadsetReceiver = BluetoothHeadsetReceiver(
             context,
             logger,
@@ -52,7 +52,7 @@ class BluetoothControllerTest {
 
     @Test
     fun `start should register bluetooth listeners`() {
-        val deviceListener = mock<BluetoothDeviceConnectionListener>()
+        val deviceListener = mock<BluetoothHeadsetConnectionListener>()
         bluetoothController.start(deviceListener)
 
         bluetoothControllerAssertions.assertStart(

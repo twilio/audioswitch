@@ -16,7 +16,7 @@ import org.junit.Test
 
 class BluetoothHeadsetManagerTest {
 
-    private val deviceListener = mock<BluetoothDeviceConnectionListener>()
+    private val deviceListener = mock<BluetoothHeadsetConnectionListener>()
     private val logger = mock<LogWrapper>()
     private val bluetoothAdapter = mock<BluetoothAdapter>()
     private val deviceCache = BluetoothHeadsetCacheManager(logger)
@@ -69,7 +69,7 @@ class BluetoothHeadsetManagerTest {
 
     @Test
     fun `onServiceConnected should not notify the deviceListener if the deviceListener is null`() {
-        bluetoothHeadsetManager.deviceListener = null
+        bluetoothHeadsetManager.headsetListener = null
         val expectedDevice = mock<BluetoothDevice>()
         val bluetoothDevices = listOf(expectedDevice)
         val bluetoothProfile = mock<BluetoothHeadset> {
@@ -85,12 +85,12 @@ class BluetoothHeadsetManagerTest {
     fun `onServiceDisconnected should notify the deviceListener`() {
         bluetoothHeadsetManager.onServiceDisconnected(0)
 
-        verify(deviceListener).onBluetoothDeviceStateChanged()
+        verify(deviceListener).onBluetoothHeadsetStateChanged()
     }
 
     @Test
     fun `onServiceDisconnected should not notify the deviceListener if deviceListener is null`() {
-        bluetoothHeadsetManager.deviceListener = null
+        bluetoothHeadsetManager.headsetListener = null
         bluetoothHeadsetManager.onServiceDisconnected(0)
 
         verifyZeroInteractions(deviceListener)
@@ -113,6 +113,6 @@ class BluetoothHeadsetManagerTest {
 
         bluetoothHeadsetManager.stop()
 
-        assertThat(bluetoothHeadsetManager.deviceListener, `is`(nullValue()))
+        assertThat(bluetoothHeadsetManager.headsetListener, `is`(nullValue()))
     }
 }

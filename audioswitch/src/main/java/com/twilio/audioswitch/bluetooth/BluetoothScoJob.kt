@@ -19,7 +19,7 @@ internal abstract class BluetoothScoJob(
     @VisibleForTesting(otherwise = PRIVATE)
     var bluetoothScoRunnable: BluetoothScoRunnable? = null
     @VisibleForTesting(otherwise = PRIVATE)
-    var deviceListener: BluetoothDeviceConnectionListener? = null
+    var headsetListener: BluetoothHeadsetConnectionListener? = null
 
     protected abstract val scoAction: () -> Unit
 
@@ -50,7 +50,7 @@ internal abstract class BluetoothScoJob(
                 bluetoothScoHandler.postDelayed(this, 500)
             } else {
                 logger.e(TAG, "Bluetooth sco job timed out", TimeoutException())
-                deviceListener?.onBluetoothDeviceStateChanged()
+                headsetListener?.onBluetoothHeadsetStateChanged()
                 cancelBluetoothScoJob()
             }
         }
