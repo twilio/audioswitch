@@ -26,7 +26,7 @@ internal class BluetoothHeadsetManager(
 
                 val bluetoothHeadset = AudioDevice.BluetoothHeadset(
                         BluetoothDeviceWrapperImpl(device))
-                headsetCache.addDevice(bluetoothHeadset)
+                headsetCache.add(bluetoothHeadset)
                 headsetListener?.onBluetoothHeadsetStateChanged()
             }
         }

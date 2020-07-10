@@ -372,7 +372,7 @@ class AudioDeviceSelectorTest {
 
     @Test
     fun `activate should enable audio routing to the bluetooth device`() {
-        deviceCache.addDevice(AudioDevice.BluetoothHeadset(bluetoothDevice))
+        deviceCache.add(AudioDevice.BluetoothHeadset(bluetoothDevice))
         audioDeviceSelector.start(audioDeviceChangeListener)
         audioDeviceSelector.activate()
 
@@ -443,7 +443,7 @@ class AudioDeviceSelectorTest {
         audioDeviceSelector.start(audioDeviceChangeListener)
         audioDeviceSelector.activate()
 
-        deviceCache.addDevice(AudioDevice.BluetoothHeadset(bluetoothDevice))
+        deviceCache.add(AudioDevice.BluetoothHeadset(bluetoothDevice))
         audioDeviceSelector.bluetoothDeviceConnectionListener.onBluetoothHeadsetStateChanged()
 
         verify(audioManager, times(2)).isSpeakerphoneOn = false
@@ -452,7 +452,7 @@ class AudioDeviceSelectorTest {
 
     @Test
     fun `selectDevice should not re activate the bluetooth device if the same device has been selected`() {
-        deviceCache.addDevice(AudioDevice.BluetoothHeadset(bluetoothDevice))
+        deviceCache.add(AudioDevice.BluetoothHeadset(bluetoothDevice))
         audioDeviceSelector.start(audioDeviceChangeListener)
         audioDeviceSelector.activate()
 

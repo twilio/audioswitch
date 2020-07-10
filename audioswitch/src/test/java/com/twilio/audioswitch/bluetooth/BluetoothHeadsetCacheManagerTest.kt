@@ -17,12 +17,14 @@ class BluetoothHeadsetCacheManagerTest {
         val bluetoothDeviceMock = mock<BluetoothDevice> {
             whenever(mock.name).thenReturn("Headset 1")
         }
-        cacheManager.addDevice(AudioDevice.BluetoothHeadset(
+        cacheManager.add(AudioDevice.BluetoothHeadset(
                 BluetoothDeviceWrapperImpl(bluetoothDeviceMock)))
 
-        cacheManager.removeDevice(AudioDevice.BluetoothHeadset(
+        cacheManager.remove(AudioDevice.BluetoothHeadset(
                 BluetoothDeviceWrapperImpl(bluetoothDeviceMock)))
 
         assertThat(cacheManager.cachedDevices.isEmpty(), equalTo(true))
     }
+
+
 }

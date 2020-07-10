@@ -138,7 +138,7 @@ class BluetoothHeadsetReceiverTest {
         }
         val bluetoothHeadset = AudioDevice.BluetoothHeadset(
                 BluetoothDeviceWrapperImpl(bluetoothDevice))
-        deviceCache.addDevice(bluetoothHeadset)
+        deviceCache.add(bluetoothHeadset)
 
         bluetoothHeadsetReceiver.onReceive(mock(), intent)
 
