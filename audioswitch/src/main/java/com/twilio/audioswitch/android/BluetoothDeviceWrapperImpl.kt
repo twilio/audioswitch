@@ -2,7 +2,7 @@ package com.twilio.audioswitch.android
 
 import android.bluetooth.BluetoothDevice
 
-internal const val DEFAULT_DEVICE_NAME = "Bluetooth"
+internal const val DEFAULT_DEVICE_NAME = "Bluetooth Headset"
 
 internal data class BluetoothDeviceWrapperImpl(
     val device: BluetoothDevice,

@@ -9,16 +9,17 @@ import android.media.AudioManager
 import android.media.AudioManager.SCO_AUDIO_STATE_CONNECTED
 import android.media.AudioManager.SCO_AUDIO_STATE_DISCONNECTED
 import android.media.AudioManager.SCO_AUDIO_STATE_ERROR
-import com.nhaarman.mockitokotlin2.isA
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.verifyZeroInteractions
 import com.nhaarman.mockitokotlin2.whenever
+import com.twilio.audioswitch.android.BluetoothDeviceWrapperImpl
 import com.twilio.audioswitch.android.BluetoothIntentProcessorImpl
 import com.twilio.audioswitch.android.BuildWrapper
 import com.twilio.audioswitch.android.LogWrapper
 import com.twilio.audioswitch.assertScoJobIsCanceled
+import com.twilio.audioswitch.selection.AudioDevice
 import com.twilio.audioswitch.selection.AudioDeviceManager
 import com.twilio.audioswitch.selection.AudioFocusRequestWrapper
 import com.twilio.audioswitch.setupAudioManagerMock
@@ -51,10 +52,12 @@ class BluetoothHeadsetReceiverTest {
     private var systemClockWrapper = setupSystemClockMock()
     private val enableBluetoothScoJob = EnableBluetoothScoJob(logger, audioDeviceManager, handler, systemClockWrapper)
     private val disableBluetoothScoJob = DisableBluetoothScoJob(logger, audioDeviceManager, handler, systemClockWrapper)
+    private val deviceCache = BluetoothDeviceCacheManager(logger)
     private var bluetoothHeadsetReceiver = BluetoothHeadsetReceiver(context,
             logger,
             BluetoothIntentProcessorImpl(),
             audioDeviceManager,
+            deviceCache,
             enableBluetoothScoJob,
             disableBluetoothScoJob,
             deviceListener)
@@ -98,7 +101,7 @@ class BluetoothHeadsetReceiverTest {
 
     @Parameters(method = "parameters")
     @Test
-    fun `onReceive should register a new device when an ACL connected event is received`(
+    fun `onReceive should invoke the onBluetoothDeviceStateChanged callback and add to the device cache when an ACL connected event is received with a valid headset`(
         deviceClass: BluetoothClass?,
         isNewDeviceConnected: Boolean
     ) {
@@ -112,12 +115,18 @@ class BluetoothHeadsetReceiverTest {
         bluetoothHeadsetReceiver.onReceive(mock(), intent)
 
         val invocationCount = if (isNewDeviceConnected) 1 else 0
-        verify(deviceListener, times(invocationCount)).onBluetoothConnected(isA())
+        verify(deviceListener, times(invocationCount)).onBluetoothDeviceStateChanged()
+        val expectedCachedDevice = AudioDevice.BluetoothHeadset(BluetoothDeviceWrapperImpl(bluetoothDevice))
+        if (isNewDeviceConnected) {
+            assertThat(deviceCache.cachedDevices.first(), equalTo(expectedCachedDevice))
+        } else {
+            assertThat(deviceCache.cachedDevices.isEmpty(), equalTo(true))
+        }
     }
 
     @Parameters(method = "parameters")
     @Test
-    fun `onReceive should disconnect a device when an ACL disconnected event is received`(
+    fun `onReceive should invoke the onBluetoothDeviceStateChanged callback and remove from the device cache when an ACL disconnected event is received with a valid headset`(
         deviceClass: BluetoothClass?,
         isDeviceDisconnected: Boolean
     ) {
@@ -127,11 +136,16 @@ class BluetoothHeadsetReceiverTest {
             whenever(mock.getParcelableExtra<BluetoothDevice>(BluetoothDevice.EXTRA_DEVICE))
                     .thenReturn(bluetoothDevice)
         }
+        val bluetoothHeadset = AudioDevice.BluetoothHeadset(
+                BluetoothDeviceWrapperImpl(bluetoothDevice))
+        deviceCache.addDevice(bluetoothHeadset)
 
         bluetoothHeadsetReceiver.onReceive(mock(), intent)
 
         val invocationCount = if (isDeviceDisconnected) 1 else 0
-        verify(deviceListener, times(invocationCount)).onBluetoothDisconnected()
+        verify(deviceListener, times(invocationCount)).onBluetoothDeviceStateChanged()
+        assertThat(deviceCache.cachedDevices.contains(bluetoothHeadset),
+                equalTo(!isDeviceDisconnected))
     }
 
     @Test
@@ -233,6 +247,7 @@ class BluetoothHeadsetReceiverTest {
                 logger,
                 BluetoothIntentProcessorImpl(),
                 audioDeviceManager,
+                deviceCache,
                 enableBluetoothScoJob,
                 disableBluetoothScoJob)
 

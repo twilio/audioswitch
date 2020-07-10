@@ -5,7 +5,6 @@ import androidx.annotation.VisibleForTesting
 import androidx.annotation.VisibleForTesting.PRIVATE
 import com.twilio.audioswitch.android.LogWrapper
 import com.twilio.audioswitch.android.SystemClockWrapper
-import com.twilio.audioswitch.bluetooth.BluetoothDeviceConnectionListener.ConnectionError
 import java.util.concurrent.TimeoutException
 
 internal const val TIMEOUT = 5000L
@@ -23,7 +22,6 @@ internal abstract class BluetoothScoJob(
     var deviceListener: BluetoothDeviceConnectionListener? = null
 
     protected abstract val scoAction: () -> Unit
-    protected abstract val timeoutError: ConnectionError
 
     fun executeBluetoothScoJob() {
         bluetoothScoRunnable = BluetoothScoRunnable()
@@ -52,7 +50,7 @@ internal abstract class BluetoothScoJob(
                 bluetoothScoHandler.postDelayed(this, 500)
             } else {
                 logger.e(TAG, "Bluetooth sco job timed out", TimeoutException())
-                deviceListener?.onBluetoothConnectionError(timeoutError)
+                deviceListener?.onBluetoothDeviceStateChanged()
                 cancelBluetoothScoJob()
             }
         }

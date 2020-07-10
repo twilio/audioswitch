@@ -11,7 +11,6 @@ import com.nhaarman.mockitokotlin2.verifyZeroInteractions
 import com.nhaarman.mockitokotlin2.whenever
 import com.twilio.audioswitch.android.LogWrapper
 import com.twilio.audioswitch.assertScoJobIsCanceled
-import com.twilio.audioswitch.bluetooth.BluetoothDeviceConnectionListener.ConnectionError.SCO_CONNECTION_ERROR
 import com.twilio.audioswitch.bluetooth.BluetoothScoJob.BluetoothScoRunnable
 import com.twilio.audioswitch.selection.AudioDeviceManager
 import com.twilio.audioswitch.setupScoHandlerMock
@@ -97,7 +96,7 @@ class BluetoothScoJobTest {
 
         scoJob.executeBluetoothScoJob()
 
-        verify(deviceListener).onBluetoothConnectionError(SCO_CONNECTION_ERROR)
+        verify(deviceListener).onBluetoothDeviceStateChanged()
     }
 
     @Test

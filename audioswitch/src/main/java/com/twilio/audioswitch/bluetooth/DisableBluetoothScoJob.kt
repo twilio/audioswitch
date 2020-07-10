@@ -4,7 +4,6 @@ import android.os.Handler
 import android.os.Looper
 import com.twilio.audioswitch.android.LogWrapper
 import com.twilio.audioswitch.android.SystemClockWrapper
-import com.twilio.audioswitch.bluetooth.BluetoothDeviceConnectionListener.ConnectionError.SCO_DISCONNECTION_ERROR
 import com.twilio.audioswitch.selection.AudioDeviceManager
 
 internal class DisableBluetoothScoJob(
@@ -17,6 +16,4 @@ internal class DisableBluetoothScoJob(
     override val scoAction = {
         audioDeviceManager.enableBluetoothSco(false)
     }
-
-    override val timeoutError = SCO_DISCONNECTION_ERROR
 }

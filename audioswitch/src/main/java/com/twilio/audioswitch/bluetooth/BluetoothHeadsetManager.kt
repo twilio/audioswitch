@@ -7,7 +7,7 @@ import com.twilio.audioswitch.android.BluetoothDeviceWrapperImpl
 import com.twilio.audioswitch.android.LogWrapper
 import com.twilio.audioswitch.selection.AudioDevice
 
-private const val TAG = "PreConnectedDeviceListener"
+private const val TAG = "BluetoothHeadsetManager"
 
 internal class BluetoothHeadsetManager(
     private val logger: LogWrapper,
@@ -24,17 +24,17 @@ internal class BluetoothHeadsetManager(
             deviceList.forEach { device ->
                 logger.d(TAG, "Bluetooth " + device.name + " connected")
 
-                val bluetoothHeadset = AudioDevice.BluetoothHeadset(device.name,
+                val bluetoothHeadset = AudioDevice.BluetoothHeadset(
                         BluetoothDeviceWrapperImpl(device))
                 deviceCache.addDevice(bluetoothHeadset)
-                deviceListener?.onBluetoothConnected()
+                deviceListener?.onBluetoothDeviceStateChanged()
             }
         }
     }
 
     override fun onServiceDisconnected(profile: Int) {
         logger.d(TAG, "Bluetooth disconnected")
-        deviceListener?.onBluetoothDisconnected()
+        deviceListener?.onBluetoothDeviceStateChanged()
     }
 
     fun stop() {

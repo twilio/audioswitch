@@ -12,8 +12,8 @@ sealed class AudioDevice {
 
     /** An [AudioDevice] representing a Bluetooth Headset.*/
     data class BluetoothHeadset internal constructor(
-        override val name: String,
-        val bluetoothDeviceWrapper: BluetoothDeviceWrapper
+        val bluetoothDeviceWrapper: BluetoothDeviceWrapper,
+        override val name: String = bluetoothDeviceWrapper.name
     ) : AudioDevice()
 
     /** An [AudioDevice] representing a Wired Headset.*/

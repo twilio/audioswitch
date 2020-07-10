@@ -1,6 +1,7 @@
 package com.twilio.audioswitch.bluetooth
 
 import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothHeadset
 import android.bluetooth.BluetoothProfile
 import android.content.Context
 import android.media.AudioManager
@@ -21,7 +22,8 @@ class BluetoothControllerTest {
     private val audioManager = mock<AudioManager>()
     private val logger = mock<LogWrapper>()
     private val bluetoothAdapter = mock<BluetoothAdapter>()
-    private val preConnectedDeviceListener = BluetoothHeadsetManager(logger, bluetoothAdapter)
+    private val deviceCache = BluetoothDeviceCacheManager(logger)
+    private val bluetoothHeadsetManager = BluetoothHeadsetManager(logger, bluetoothAdapter, deviceCache)
     private val buildWrapper = mock<BuildWrapper>()
     private val audioFocusRequest = mock<AudioFocusRequestWrapper>()
     private val audioDeviceManager = AudioDeviceManager(context,
@@ -37,13 +39,14 @@ class BluetoothControllerTest {
             logger,
             BluetoothIntentProcessorImpl(),
             audioDeviceManager,
+            deviceCache,
             EnableBluetoothScoJob(logger, audioDeviceManager, handler, systemClockWrapper),
             DisableBluetoothScoJob(logger, audioDeviceManager, handler, systemClockWrapper),
             deviceListener)
     private var bluetoothController = BluetoothController(
             context,
             bluetoothAdapter,
-            preConnectedDeviceListener,
+            bluetoothHeadsetManager,
             bluetoothHeadsetReceiver)
     private val bluetoothControllerAssertions = BluetoothControllerAssertions()
 
@@ -54,7 +57,7 @@ class BluetoothControllerTest {
 
         bluetoothControllerAssertions.assertStart(
                 context,
-                preConnectedDeviceListener,
+                bluetoothHeadsetManager,
                 bluetoothHeadsetReceiver,
                 deviceListener,
                 bluetoothAdapter)
@@ -62,8 +65,8 @@ class BluetoothControllerTest {
 
     @Test
     fun `stop should successfully close resources`() {
-        val bluetoothProfile = mock<BluetoothProfile>()
-        preConnectedDeviceListener.onServiceConnected(0, bluetoothProfile)
+        val bluetoothProfile = mock<BluetoothHeadset>()
+        bluetoothHeadsetManager.onServiceConnected(0, bluetoothProfile)
 
         bluetoothController.stop()
 

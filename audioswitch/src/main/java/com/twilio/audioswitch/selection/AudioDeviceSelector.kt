@@ -9,8 +9,6 @@ import com.twilio.audioswitch.android.LogWrapper
 import com.twilio.audioswitch.bluetooth.BluetoothController
 import com.twilio.audioswitch.bluetooth.BluetoothDeviceCacheManager
 import com.twilio.audioswitch.bluetooth.BluetoothDeviceConnectionListener
-import com.twilio.audioswitch.bluetooth.BluetoothDeviceConnectionListener.ConnectionError
-import com.twilio.audioswitch.bluetooth.BluetoothDeviceConnectionListener.ConnectionError.SCO_CONNECTION_ERROR
 import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager
 import com.twilio.audioswitch.bluetooth.BluetoothHeadsetReceiver
 import com.twilio.audioswitch.selection.AudioDevice.BluetoothHeadset
@@ -69,13 +67,14 @@ class AudioDeviceSelector {
         logger: LogWrapper,
         audioDeviceManager: AudioDeviceManager,
         wiredHeadsetReceiver: WiredHeadsetReceiver,
-        bluetoothController: BluetoothController?
+        bluetoothController: BluetoothController?,
+        deviceCache: BluetoothDeviceCacheManager
     ) {
         this.logger = logger
-        this.deviceCache = BluetoothDeviceCacheManager(logger)
         this.audioDeviceManager = audioDeviceManager
         this.wiredHeadsetReceiver = wiredHeadsetReceiver
         this.bluetoothController = bluetoothController
+        this.deviceCache = deviceCache
     }
 
     private var logger: LogWrapper = LogWrapper()
@@ -94,20 +93,8 @@ class AudioDeviceSelector {
         STARTED, ACTIVATED, STOPPED
     }
     internal val bluetoothDeviceConnectionListener = object : BluetoothDeviceConnectionListener {
-        override fun onBluetoothConnected() {
+        override fun onBluetoothDeviceStateChanged() {
             enumerateDevices()
-        }
-
-        override fun onBluetoothDisconnected() {
-            enumerateDevices()
-        }
-
-        override fun onBluetoothConnectionError(error: ConnectionError) {
-            if (error is SCO_CONNECTION_ERROR) {
-                logger.d(TAG, "Removing the bluetooth audio device as the selected" +
-                        " device due to a sco connection error.")
-                enumerateDevices()
-            }
         }
     }
 
