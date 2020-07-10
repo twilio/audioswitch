@@ -52,7 +52,7 @@ class BluetoothHeadsetReceiverTest {
     private var systemClockWrapper = setupSystemClockMock()
     private val enableBluetoothScoJob = EnableBluetoothScoJob(logger, audioDeviceManager, handler, systemClockWrapper)
     private val disableBluetoothScoJob = DisableBluetoothScoJob(logger, audioDeviceManager, handler, systemClockWrapper)
-    private val deviceCache = BluetoothDeviceCacheManager(logger)
+    private val deviceCache = BluetoothHeadsetCacheManager(logger)
     private var bluetoothHeadsetReceiver = BluetoothHeadsetReceiver(context,
             logger,
             BluetoothIntentProcessorImpl(),

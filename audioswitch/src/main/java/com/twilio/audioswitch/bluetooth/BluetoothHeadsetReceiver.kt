@@ -28,7 +28,7 @@ internal class BluetoothHeadsetReceiver(
     private val logger: LogWrapper,
     private val bluetoothIntentProcessor: BluetoothIntentProcessor,
     audioDeviceManager: AudioDeviceManager,
-    private val deviceCache: BluetoothDeviceCacheManager,
+    private val headsetCache: BluetoothHeadsetCacheManager,
     private val enableBluetoothScoJob: BluetoothScoJob = EnableBluetoothScoJob(logger, audioDeviceManager),
     private val disableBluetoothScoJob: BluetoothScoJob = DisableBluetoothScoJob(logger, audioDeviceManager),
     var deviceListener: BluetoothDeviceConnectionListener? = null
@@ -44,7 +44,7 @@ internal class BluetoothHeadsetReceiver(
                                 "Bluetooth ACL device " +
                                         bluetoothDevice.name +
                                         " connected")
-                        deviceCache.addDevice(BluetoothHeadset(bluetoothDevice))
+                        headsetCache.addDevice(BluetoothHeadset(bluetoothDevice))
                         deviceListener?.onBluetoothDeviceStateChanged()
                     }
                 }
@@ -55,7 +55,7 @@ internal class BluetoothHeadsetReceiver(
                                 "Bluetooth ACL device " +
                                         bluetoothDevice.name +
                                         " disconnected")
-                        deviceCache.removeDevice(BluetoothHeadset(bluetoothDevice))
+                        headsetCache.removeDevice(BluetoothHeadset(bluetoothDevice))
                         deviceListener?.onBluetoothDeviceStateChanged()
                     }
                 }

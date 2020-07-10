@@ -22,7 +22,7 @@ import com.twilio.audioswitch.android.BuildWrapper
 import com.twilio.audioswitch.android.LogWrapper
 import com.twilio.audioswitch.bluetooth.BluetoothController
 import com.twilio.audioswitch.bluetooth.BluetoothControllerAssertions
-import com.twilio.audioswitch.bluetooth.BluetoothDeviceCacheManager
+import com.twilio.audioswitch.bluetooth.BluetoothHeadsetCacheManager
 import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager
 import com.twilio.audioswitch.bluetooth.BluetoothHeadsetReceiver
 import com.twilio.audioswitch.bluetooth.DisableBluetoothScoJob
@@ -59,7 +59,7 @@ class AudioDeviceSelectorTest {
     private val audioManager = setupAudioManagerMock()
     private val bluetoothAdapter = mock<BluetoothAdapter>()
     private val audioDeviceChangeListener = mock<AudioDeviceChangeListener>()
-    private val deviceCache = BluetoothDeviceCacheManager(logger)
+    private val deviceCache = BluetoothHeadsetCacheManager(logger)
     private val bluetoothHeadsetManager = BluetoothHeadsetManager(logger, bluetoothAdapter,
             deviceCache)
     private val wiredHeadsetReceiver = WiredHeadsetReceiver(context, logger)

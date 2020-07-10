@@ -12,7 +12,7 @@ private const val TAG = "BluetoothHeadsetManager"
 internal class BluetoothHeadsetManager(
     private val logger: LogWrapper,
     private val bluetoothAdapter: BluetoothAdapter,
-    private val deviceCache: BluetoothDeviceCacheManager,
+    private val headsetCache: BluetoothHeadsetCacheManager,
     var deviceListener: BluetoothDeviceConnectionListener? = null
 ) : BluetoothProfile.ServiceListener {
 
@@ -26,7 +26,7 @@ internal class BluetoothHeadsetManager(
 
                 val bluetoothHeadset = AudioDevice.BluetoothHeadset(
                         BluetoothDeviceWrapperImpl(device))
-                deviceCache.addDevice(bluetoothHeadset)
+                headsetCache.addDevice(bluetoothHeadset)
                 deviceListener?.onBluetoothDeviceStateChanged()
             }
         }

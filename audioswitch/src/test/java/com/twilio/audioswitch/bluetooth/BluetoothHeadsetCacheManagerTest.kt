@@ -9,11 +9,11 @@ import org.hamcrest.CoreMatchers.equalTo
 import org.junit.Assert.assertThat
 import org.junit.Test
 
-class BluetoothDeviceCacheManagerTest {
+class BluetoothHeadsetCacheManagerTest {
 
     @Test
     fun `removingDevice removes an existing device from the cache`() {
-        val cacheManager = BluetoothDeviceCacheManager(mock())
+        val cacheManager = BluetoothHeadsetCacheManager(mock())
         val bluetoothDeviceMock = mock<BluetoothDevice> {
             whenever(mock.name).thenReturn("Headset 1")
         }

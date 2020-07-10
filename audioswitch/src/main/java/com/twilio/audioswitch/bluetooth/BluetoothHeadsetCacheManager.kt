@@ -5,7 +5,7 @@ import com.twilio.audioswitch.selection.AudioDevice.BluetoothHeadset
 
 private const val TAG = "BluetoothDeviceCacheManager"
 
-internal class BluetoothDeviceCacheManager(private val logger: LogWrapper) {
+internal class BluetoothHeadsetCacheManager(private val logger: LogWrapper) {
 
     private val mutableCachedDevices = mutableSetOf<BluetoothHeadset>()
     val cachedDevices: Set<BluetoothHeadset> get() = mutableCachedDevices

@@ -7,8 +7,8 @@ import com.twilio.audioswitch.android.BluetoothIntentProcessorImpl
 import com.twilio.audioswitch.android.BuildWrapper
 import com.twilio.audioswitch.android.LogWrapper
 import com.twilio.audioswitch.bluetooth.BluetoothController
-import com.twilio.audioswitch.bluetooth.BluetoothDeviceCacheManager
 import com.twilio.audioswitch.bluetooth.BluetoothDeviceConnectionListener
+import com.twilio.audioswitch.bluetooth.BluetoothHeadsetCacheManager
 import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager
 import com.twilio.audioswitch.bluetooth.BluetoothHeadsetReceiver
 import com.twilio.audioswitch.selection.AudioDevice.BluetoothHeadset
@@ -47,8 +47,8 @@ class AudioDeviceSelector {
                         AudioFocusRequestWrapper())
         this.logger = logger
         this.audioDeviceManager = audioDeviceManager
-        val deviceCache = BluetoothDeviceCacheManager(logger)
-        this.deviceCache = deviceCache
+        val deviceCache = BluetoothHeadsetCacheManager(logger)
+        this.headsetCache = deviceCache
         this.wiredHeadsetReceiver = WiredHeadsetReceiver(context, logger)
         this.bluetoothController = BluetoothAdapter.getDefaultAdapter()?.let { bluetoothAdapter ->
             BluetoothController(context,
@@ -68,17 +68,17 @@ class AudioDeviceSelector {
         audioDeviceManager: AudioDeviceManager,
         wiredHeadsetReceiver: WiredHeadsetReceiver,
         bluetoothController: BluetoothController?,
-        deviceCache: BluetoothDeviceCacheManager
+        headsetCache: BluetoothHeadsetCacheManager
     ) {
         this.logger = logger
         this.audioDeviceManager = audioDeviceManager
         this.wiredHeadsetReceiver = wiredHeadsetReceiver
         this.bluetoothController = bluetoothController
-        this.deviceCache = deviceCache
+        this.headsetCache = headsetCache
     }
 
     private var logger: LogWrapper = LogWrapper()
-    private var deviceCache: BluetoothDeviceCacheManager? = null
+    private var headsetCache: BluetoothHeadsetCacheManager? = null
     private val audioDeviceManager: AudioDeviceManager
     private val wiredHeadsetReceiver: WiredHeadsetReceiver
     internal val bluetoothController: BluetoothController?
@@ -242,7 +242,7 @@ class AudioDeviceSelector {
 
     private fun enumerateDevices() {
         mutableAudioDevices.clear()
-        deviceCache?.cachedDevices?.let { devices ->
+        headsetCache?.cachedDevices?.let { devices ->
             if (devices.isNotEmpty()) mutableAudioDevices.add(devices.last())
         }
         if (wiredHeadsetAvailable) {
