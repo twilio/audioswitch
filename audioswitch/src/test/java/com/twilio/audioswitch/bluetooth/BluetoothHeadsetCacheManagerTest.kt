@@ -11,20 +11,36 @@ import org.junit.Test
 
 class BluetoothHeadsetCacheManagerTest {
 
-    @Test
-    fun `removingDevice removes an existing device from the cache`() {
-        val cacheManager = BluetoothHeadsetCacheManager(mock())
-        val bluetoothDeviceMock = mock<BluetoothDevice> {
-            whenever(mock.name).thenReturn("Headset 1")
-        }
-        cacheManager.add(AudioDevice.BluetoothHeadset(
-                BluetoothDeviceWrapperImpl(bluetoothDeviceMock)))
+    private var cacheManager = BluetoothHeadsetCacheManager(mock())
 
-        cacheManager.remove(AudioDevice.BluetoothHeadset(
-                BluetoothDeviceWrapperImpl(bluetoothDeviceMock)))
+    @Test
+    fun `remove removes an existing headset from the cache`() {
+        val headset = createHeadset("Headset")
+        cacheManager.add(headset)
+
+        cacheManager.remove(headset)
 
         assertThat(cacheManager.cachedDevices.isEmpty(), equalTo(true))
     }
 
+    @Test
+    fun `clear should remove all of the headsets from the cache`() {
+        val headset1 = createHeadset("Headset 1")
+        val headset2 = createHeadset("Headset 2")
+        cacheManager.add(headset1)
+        cacheManager.add(headset2)
+        assertThat(cacheManager.cachedDevices.size, equalTo(2))
 
+        cacheManager.clear()
+
+        assertThat(cacheManager.cachedDevices.isEmpty(), equalTo(true))
+    }
+
+    private fun createHeadset(name: String): AudioDevice.BluetoothHeadset {
+        val device = mock<BluetoothDevice> {
+            whenever(mock.name).thenReturn(name)
+        }
+        return AudioDevice.BluetoothHeadset(
+                BluetoothDeviceWrapperImpl(device))
+    }
 }

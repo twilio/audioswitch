@@ -12,11 +12,16 @@ internal class BluetoothHeadsetCacheManager(private val logger: LogWrapper) {
 
     fun add(bluetoothHeadset: BluetoothHeadset) {
         val result = mutableCachedDevices.add(bluetoothHeadset)
-        if (result) logger.d(TAG, "Add new bluetooth device to cache: ${bluetoothHeadset.name}")
+        if (result) logger.d(TAG, "Added a new bluetooth headset to the cache: ${bluetoothHeadset.name}")
     }
 
     fun remove(bluetoothHeadset: BluetoothHeadset) {
         val result = mutableCachedDevices.remove(bluetoothHeadset)
-        if (result) logger.d(TAG, "Remove bluetooth device from cache: ${bluetoothHeadset.name}")
+        if (result) logger.d(TAG, "Removed a bluetooth headset from the cache: ${bluetoothHeadset.name}")
+    }
+
+    fun clear() {
+        mutableCachedDevices.clear()
+        logger.d(TAG, "Cleared the headset cache")
     }
 }
