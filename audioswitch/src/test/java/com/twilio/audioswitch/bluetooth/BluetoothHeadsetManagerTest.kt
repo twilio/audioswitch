@@ -5,6 +5,7 @@ import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothHeadset
 import android.bluetooth.BluetoothProfile
 import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.verifyZeroInteractions
 import com.nhaarman.mockitokotlin2.whenever
@@ -38,7 +39,7 @@ class BluetoothHeadsetManagerTest {
 
         bluetoothHeadsetManager.onServiceConnected(0, bluetoothProfile)
 
-//        deviceListener.onBluetoothConnected(isA())
+        deviceListener.onBluetoothHeadsetStateChanged()
     }
 
     @Test
@@ -53,7 +54,7 @@ class BluetoothHeadsetManagerTest {
 
         bluetoothHeadsetManager.onServiceConnected(0, bluetoothProfile)
 
-//        verify(deviceListener, times(2)).onBluetoothConnected(isA())
+        verify(deviceListener, times(2)).onBluetoothHeadsetStateChanged()
     }
 
     @Test
@@ -107,7 +108,7 @@ class BluetoothHeadsetManagerTest {
     }
 
     @Test
-    fun `stop should unasign the deviceListener`() {
+    fun `stop should unassign the deviceListener`() {
         val bluetoothProfile = mock<BluetoothHeadset>()
         bluetoothHeadsetManager.onServiceConnected(0, bluetoothProfile)
 
