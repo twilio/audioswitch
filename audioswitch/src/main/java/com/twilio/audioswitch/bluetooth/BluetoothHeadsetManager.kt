@@ -34,6 +34,7 @@ internal class BluetoothHeadsetManager(
 
     override fun onServiceDisconnected(profile: Int) {
         logger.d(TAG, "Bluetooth disconnected")
+        headsetCache.clear()
         headsetListener?.onBluetoothHeadsetStateChanged()
     }
 

@@ -11,6 +11,7 @@ import com.nhaarman.mockitokotlin2.verifyZeroInteractions
 import com.nhaarman.mockitokotlin2.whenever
 import com.twilio.audioswitch.android.LogWrapper
 import org.hamcrest.CoreMatchers.`is`
+import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.CoreMatchers.nullValue
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Test
@@ -43,7 +44,7 @@ class BluetoothHeadsetManagerTest {
     }
 
     @Test
-    fun `onServiceConnected should notify the deviceListener with multiple devices`() {
+    fun `onServiceConnected should notify the deviceListener with multiple headsets`() {
         val expectedDevice = mock<BluetoothDevice> {
             whenever(mock.name).thenReturn("Test")
         }
@@ -58,7 +59,25 @@ class BluetoothHeadsetManagerTest {
     }
 
     @Test
-    fun `onServiceConnected should not notify the deviceListener if there are no connected bluetooth devices`() {
+    fun `onServiceConnected should add to the headset cache with multiple headsets`() {
+        val device = mock<BluetoothDevice> {
+            whenever(mock.name).thenReturn("Test")
+        }
+        val device2 = mock<BluetoothDevice> {
+            whenever(mock.name).thenReturn("Test 2")
+        }
+        val bluetoothDevices = listOf(device, device2)
+        val bluetoothProfile = mock<BluetoothHeadset> {
+            whenever(mock.connectedDevices).thenReturn(bluetoothDevices)
+        }
+
+        bluetoothHeadsetManager.onServiceConnected(0, bluetoothProfile)
+
+        assertThat(deviceCache.cachedDevices.size, equalTo(2))
+    }
+
+    @Test
+    fun `onServiceConnected should not notify the deviceListener if there are no connected bluetooth headsets`() {
         val bluetoothProfile = mock<BluetoothHeadset> {
             whenever(mock.connectedDevices).thenReturn(emptyList())
         }
@@ -115,5 +134,25 @@ class BluetoothHeadsetManagerTest {
         bluetoothHeadsetManager.stop()
 
         assertThat(bluetoothHeadsetManager.headsetListener, `is`(nullValue()))
+    }
+
+    @Test
+    fun `onServiceDisconnected should clear the headset cache`() {
+        val device = mock<BluetoothDevice> {
+            whenever(mock.name).thenReturn("Test")
+        }
+        val device2 = mock<BluetoothDevice> {
+            whenever(mock.name).thenReturn("Test 2")
+        }
+        val bluetoothDevices = listOf(device, device2)
+        val bluetoothProfile = mock<BluetoothHeadset> {
+            whenever(mock.connectedDevices).thenReturn(bluetoothDevices)
+        }
+        bluetoothHeadsetManager.onServiceConnected(0, bluetoothProfile)
+        assertThat(deviceCache.cachedDevices.size, equalTo(2))
+
+        bluetoothHeadsetManager.onServiceDisconnected(0)
+
+        assertThat(deviceCache.cachedDevices.isEmpty(), equalTo(true))
     }
 }
