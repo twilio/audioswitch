@@ -22,7 +22,7 @@ internal abstract class BluetoothScoJob(
 
     protected abstract fun scoAction()
 
-    protected open fun scoTimeOutAction() {}
+    open fun scoTimeOutAction() {}
 
     fun executeBluetoothScoJob() {
         bluetoothScoRunnable = BluetoothScoRunnable()

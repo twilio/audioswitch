@@ -50,9 +50,9 @@ class BluetoothHeadsetReceiverTest {
             audioFocusRequest)
     private var handler = setupScoHandlerMock()
     private var systemClockWrapper = setupSystemClockMock()
-    private val enableBluetoothScoJob = EnableBluetoothScoJob(logger, audioDeviceManager, handler, systemClockWrapper)
-    private val disableBluetoothScoJob = DisableBluetoothScoJob(logger, audioDeviceManager, handler, systemClockWrapper)
     private val deviceCache = BluetoothHeadsetCacheManager(logger)
+    private val enableBluetoothScoJob = EnableBluetoothScoJob(logger, audioDeviceManager, deviceCache, handler, systemClockWrapper)
+    private val disableBluetoothScoJob = DisableBluetoothScoJob(logger, audioDeviceManager, handler, systemClockWrapper)
     private var bluetoothHeadsetReceiver = BluetoothHeadsetReceiver(context,
             logger,
             BluetoothIntentProcessorImpl(),
