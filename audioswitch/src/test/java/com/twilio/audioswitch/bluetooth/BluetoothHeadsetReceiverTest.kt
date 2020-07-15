@@ -261,16 +261,14 @@ class BluetoothHeadsetReceiverTest {
     }
 
     @Test
-    fun `stop should unassign the device listener for the sco jobs`() {
+    fun `stop should unassign the device listener for the enable sco job`() {
         bluetoothHeadsetReceiver.setupDeviceListener(deviceListener)
 
         assertThat(enableBluetoothScoJob.headsetListener, equalTo(deviceListener))
-        assertThat(disableBluetoothScoJob.headsetListener, equalTo(deviceListener))
 
         bluetoothHeadsetReceiver.stop()
 
         assertThat(enableBluetoothScoJob.headsetListener, `is`(nullValue()))
-        assertThat(disableBluetoothScoJob.headsetListener, `is`(nullValue()))
     }
 
     @Test
