@@ -44,7 +44,6 @@ internal abstract class BluetoothScoJob(
 
         override fun run() {
             if (elapsedTime < TIMEOUT) {
-                logger.d(TAG, "Invoking bluetooth sco action")
                 scoAction.invoke()
                 elapsedTime = systemClockWrapper.elapsedRealtime() - startTime
                 bluetoothScoHandler.postDelayed(this, 500)

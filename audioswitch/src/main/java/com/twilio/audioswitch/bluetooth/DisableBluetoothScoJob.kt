@@ -14,6 +14,7 @@ internal class DisableBluetoothScoJob(
 ) : BluetoothScoJob(logger, bluetoothScoHandler, systemClockWrapper) {
 
     override val scoAction = {
+        logger.d(TAG, "Attempting to disable bluetooth SCO")
         audioDeviceManager.enableBluetoothSco(false)
     }
 }
