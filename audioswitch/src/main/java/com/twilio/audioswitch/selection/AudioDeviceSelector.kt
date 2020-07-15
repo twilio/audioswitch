@@ -203,6 +203,7 @@ class AudioDeviceSelector {
         when (state) {
             ACTIVATED -> {
                 bluetoothController?.deactivate()
+
                 // Restore stored audio state
                 audioDeviceManager.restoreAudioState()
                 state = STARTED
