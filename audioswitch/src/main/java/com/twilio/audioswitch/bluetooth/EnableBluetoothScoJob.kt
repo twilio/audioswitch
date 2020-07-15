@@ -22,6 +22,6 @@ internal class EnableBluetoothScoJob(
     }
 
     override fun scoTimeOutAction() {
-        headsetCache.getActiveHeadset()?.let { headsetCache.remove(it) }
+        headsetCache.activeHeadset?.let { headsetCache.remove(it) }
     }
 }

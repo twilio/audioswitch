@@ -2,7 +2,9 @@ package com.twilio.audioswitch.bluetooth
 
 import com.nhaarman.mockitokotlin2.mock
 import com.twilio.audioswitch.createHeadset
+import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.CoreMatchers.equalTo
+import org.hamcrest.CoreMatchers.nullValue
 import org.junit.Assert.assertThat
 import org.junit.Test
 
@@ -34,7 +36,18 @@ class BluetoothHeadsetCacheManagerTest {
     }
 
     @Test
-    fun `getActiveHeadset should return the last headset`() {
-        TODO("Not yet implemented")
+    fun `activeHeadset should return the last cached headset`() {
+        val headset1 = createHeadset("Headset 1")
+        val headset2 = createHeadset("Headset 2")
+        cacheManager.add(headset1)
+        cacheManager.add(headset2)
+        assertThat(cacheManager.cachedHeadsets.size, equalTo(2))
+
+        assertThat(cacheManager.activeHeadset, equalTo(headset2))
+    }
+
+    @Test
+    fun `activeHeadset should return null if there are no cached headsets`() {
+        assertThat(cacheManager.activeHeadset, `is`(nullValue()))
     }
 }
