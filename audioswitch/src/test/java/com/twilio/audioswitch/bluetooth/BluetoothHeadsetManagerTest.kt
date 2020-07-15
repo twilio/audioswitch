@@ -73,7 +73,7 @@ class BluetoothHeadsetManagerTest {
 
         bluetoothHeadsetManager.onServiceConnected(0, bluetoothProfile)
 
-        assertThat(deviceCache.cachedDevices.size, equalTo(2))
+        assertThat(deviceCache.cachedHeadsets.size, equalTo(2))
     }
 
     @Test
@@ -149,10 +149,10 @@ class BluetoothHeadsetManagerTest {
             whenever(mock.connectedDevices).thenReturn(bluetoothDevices)
         }
         bluetoothHeadsetManager.onServiceConnected(0, bluetoothProfile)
-        assertThat(deviceCache.cachedDevices.size, equalTo(2))
+        assertThat(deviceCache.cachedHeadsets.size, equalTo(2))
 
         bluetoothHeadsetManager.onServiceDisconnected(0)
 
-        assertThat(deviceCache.cachedDevices.isEmpty(), equalTo(true))
+        assertThat(deviceCache.cachedHeadsets.isEmpty(), equalTo(true))
     }
 }

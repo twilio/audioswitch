@@ -1,10 +1,7 @@
 package com.twilio.audioswitch.bluetooth
 
-import android.bluetooth.BluetoothDevice
 import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.whenever
-import com.twilio.audioswitch.android.BluetoothDeviceWrapperImpl
-import com.twilio.audioswitch.selection.AudioDevice
+import com.twilio.audioswitch.createHeadset
 import org.hamcrest.CoreMatchers.equalTo
 import org.junit.Assert.assertThat
 import org.junit.Test
@@ -20,7 +17,7 @@ class BluetoothHeadsetCacheManagerTest {
 
         cacheManager.remove(headset)
 
-        assertThat(cacheManager.cachedDevices.isEmpty(), equalTo(true))
+        assertThat(cacheManager.cachedHeadsets.isEmpty(), equalTo(true))
     }
 
     @Test
@@ -29,18 +26,15 @@ class BluetoothHeadsetCacheManagerTest {
         val headset2 = createHeadset("Headset 2")
         cacheManager.add(headset1)
         cacheManager.add(headset2)
-        assertThat(cacheManager.cachedDevices.size, equalTo(2))
+        assertThat(cacheManager.cachedHeadsets.size, equalTo(2))
 
         cacheManager.clear()
 
-        assertThat(cacheManager.cachedDevices.isEmpty(), equalTo(true))
+        assertThat(cacheManager.cachedHeadsets.isEmpty(), equalTo(true))
     }
 
-    private fun createHeadset(name: String): AudioDevice.BluetoothHeadset {
-        val device = mock<BluetoothDevice> {
-            whenever(mock.name).thenReturn(name)
-        }
-        return AudioDevice.BluetoothHeadset(
-                BluetoothDeviceWrapperImpl(device))
+    @Test
+    fun `getActiveHeadset should return the last headset`() {
+        TODO("Not yet implemented")
     }
 }

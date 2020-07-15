@@ -243,7 +243,7 @@ class AudioDeviceSelector {
 
     private fun enumerateDevices() {
         mutableAudioDevices.clear()
-        headsetCache?.cachedDevices?.let { devices ->
+        headsetCache?.cachedHeadsets?.let { devices ->
             if (devices.isNotEmpty()) mutableAudioDevices.add(devices.last())
         }
         if (wiredHeadsetAvailable) {

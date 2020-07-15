@@ -118,9 +118,9 @@ class BluetoothHeadsetReceiverTest {
         verify(deviceListener, times(invocationCount)).onBluetoothHeadsetStateChanged()
         val expectedCachedDevice = AudioDevice.BluetoothHeadset(BluetoothDeviceWrapperImpl(bluetoothDevice))
         if (isNewDeviceConnected) {
-            assertThat(deviceCache.cachedDevices.first(), equalTo(expectedCachedDevice))
+            assertThat(deviceCache.cachedHeadsets.first(), equalTo(expectedCachedDevice))
         } else {
-            assertThat(deviceCache.cachedDevices.isEmpty(), equalTo(true))
+            assertThat(deviceCache.cachedHeadsets.isEmpty(), equalTo(true))
         }
     }
 
@@ -144,7 +144,7 @@ class BluetoothHeadsetReceiverTest {
 
         val invocationCount = if (isDeviceDisconnected) 1 else 0
         verify(deviceListener, times(invocationCount)).onBluetoothHeadsetStateChanged()
-        assertThat(deviceCache.cachedDevices.contains(bluetoothHeadset),
+        assertThat(deviceCache.cachedHeadsets.contains(bluetoothHeadset),
                 equalTo(!isDeviceDisconnected))
     }
 

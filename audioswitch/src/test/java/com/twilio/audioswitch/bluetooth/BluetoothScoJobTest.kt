@@ -53,7 +53,7 @@ class BluetoothScoJobTest {
 
         scoJob.executeBluetoothScoJob()
 
-        assertThat(deviceCache.cachedDevices.isEmpty(), equalTo(true))
+        assertThat(deviceCache.cachedHeadsets.isEmpty(), equalTo(true))
     }
 
     @Test
@@ -66,7 +66,7 @@ class BluetoothScoJobTest {
 
         scoJob.executeBluetoothScoJob()
 
-        assertThat(deviceCache.cachedDevices.isEmpty(), equalTo(true))
+        assertThat(deviceCache.cachedHeadsets.isEmpty(), equalTo(true))
     }
 
     @Test
