@@ -1,7 +1,5 @@
 package com.twilio.audioswitch.selection
 
-import com.twilio.audioswitch.android.BluetoothDeviceWrapper
-
 /**
  * This class represents a single audio device that has been retrieved by the [AudioDeviceSelector].
  */
@@ -11,10 +9,7 @@ sealed class AudioDevice {
     abstract val name: String
 
     /** An [AudioDevice] representing a Bluetooth Headset.*/
-    data class BluetoothHeadset internal constructor(
-        val bluetoothDeviceWrapper: BluetoothDeviceWrapper,
-        override val name: String = bluetoothDeviceWrapper.name
-    ) : AudioDevice()
+    data class BluetoothHeadset internal constructor(override val name: String) : AudioDevice()
 
     /** An [AudioDevice] representing a Wired Headset.*/
     data class WiredHeadset internal constructor(override val name: String = "Wired Headset") : AudioDevice()

@@ -3,7 +3,6 @@ package com.twilio.audioswitch.bluetooth
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothHeadset
 import android.bluetooth.BluetoothProfile
-import com.twilio.audioswitch.android.BluetoothDeviceWrapperImpl
 import com.twilio.audioswitch.android.LogWrapper
 import com.twilio.audioswitch.selection.AudioDevice
 
@@ -25,7 +24,7 @@ internal class BluetoothHeadsetManager(
                 logger.d(TAG, "Bluetooth " + device.name + " connected")
 
                 val bluetoothHeadset = AudioDevice.BluetoothHeadset(
-                        BluetoothDeviceWrapperImpl(device))
+                        device.name)
                 headsetCache.add(bluetoothHeadset)
                 headsetListener?.onBluetoothHeadsetStateChanged()
             }

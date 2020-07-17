@@ -44,7 +44,7 @@ internal class BluetoothHeadsetReceiver(
                                 "Bluetooth ACL device " +
                                         bluetoothDevice.name +
                                         " connected")
-                        headsetCache.add(BluetoothHeadset(bluetoothDevice))
+                        headsetCache.add(BluetoothHeadset(bluetoothDevice.name))
                         headsetListener?.onBluetoothHeadsetStateChanged()
                     }
                 }
@@ -55,7 +55,7 @@ internal class BluetoothHeadsetReceiver(
                                 "Bluetooth ACL device " +
                                         bluetoothDevice.name +
                                         " disconnected")
-                        headsetCache.remove(BluetoothHeadset(bluetoothDevice))
+                        headsetCache.remove(BluetoothHeadset(bluetoothDevice.name))
                         headsetListener?.onBluetoothHeadsetStateChanged()
                     }
                 }
