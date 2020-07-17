@@ -14,7 +14,6 @@ import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.verifyZeroInteractions
 import com.nhaarman.mockitokotlin2.whenever
-import com.twilio.audioswitch.android.BluetoothDeviceWrapperImpl
 import com.twilio.audioswitch.android.BluetoothIntentProcessorImpl
 import com.twilio.audioswitch.android.BuildWrapper
 import com.twilio.audioswitch.android.LogWrapper
@@ -33,6 +32,8 @@ import org.hamcrest.CoreMatchers.nullValue
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
+
+private const val DEVICE_NAME = "Bluetooth"
 
 @RunWith(JUnitParamsRunner::class)
 class BluetoothHeadsetReceiverTest {
@@ -65,7 +66,7 @@ class BluetoothHeadsetReceiverTest {
         whenever(mock.deviceClass).thenReturn(AUDIO_VIDEO_HANDSFREE)
     }
     private val bluetoothDevice = mock<BluetoothDevice> {
-        whenever(mock.name).thenReturn("Test")
+        whenever(mock.name).thenReturn(DEVICE_NAME)
         whenever(mock.bluetoothClass).thenReturn(bluetoothClass)
     }
 
@@ -116,7 +117,7 @@ class BluetoothHeadsetReceiverTest {
 
         val invocationCount = if (isNewDeviceConnected) 1 else 0
         verify(deviceListener, times(invocationCount)).onBluetoothHeadsetStateChanged()
-        val expectedCachedDevice = AudioDevice.BluetoothHeadset(BluetoothDeviceWrapperImpl(bluetoothDevice))
+        val expectedCachedDevice = AudioDevice.BluetoothHeadset(DEVICE_NAME)
         if (isNewDeviceConnected) {
             assertThat(deviceCache.cachedHeadsets.first(), equalTo(expectedCachedDevice))
         } else {
@@ -136,8 +137,7 @@ class BluetoothHeadsetReceiverTest {
             whenever(mock.getParcelableExtra<BluetoothDevice>(BluetoothDevice.EXTRA_DEVICE))
                     .thenReturn(bluetoothDevice)
         }
-        val bluetoothHeadset = AudioDevice.BluetoothHeadset(
-                BluetoothDeviceWrapperImpl(bluetoothDevice))
+        val bluetoothHeadset = AudioDevice.BluetoothHeadset(DEVICE_NAME)
         deviceCache.add(bluetoothHeadset)
 
         bluetoothHeadsetReceiver.onReceive(mock(), intent)

@@ -44,10 +44,12 @@ import org.junit.Assert.fail
 import org.junit.Ignore
 import org.junit.Test
 
+private const val DEVICE_NAME = "Bluetooth"
+
 class AudioDeviceSelectorTest {
 
-    val bluetoothDevice = mock<BluetoothDeviceWrapper> {
-        whenever(mock.name).thenReturn("Bluetooth")
+    private val bluetoothDevice = mock<BluetoothDeviceWrapper> {
+        whenever(mock.name).thenReturn(DEVICE_NAME)
     }
     private val packageManager = mock<PackageManager> {
         whenever(mock.hasSystemFeature(any())).thenReturn(true)
@@ -372,7 +374,7 @@ class AudioDeviceSelectorTest {
 
     @Test
     fun `activate should enable audio routing to the bluetooth device`() {
-        deviceCache.add(AudioDevice.BluetoothHeadset(bluetoothDevice))
+        deviceCache.add(AudioDevice.BluetoothHeadset(DEVICE_NAME))
         audioDeviceSelector.start(audioDeviceChangeListener)
         audioDeviceSelector.activate()
 
@@ -443,7 +445,7 @@ class AudioDeviceSelectorTest {
         audioDeviceSelector.start(audioDeviceChangeListener)
         audioDeviceSelector.activate()
 
-        deviceCache.add(AudioDevice.BluetoothHeadset(bluetoothDevice))
+        deviceCache.add(AudioDevice.BluetoothHeadset(DEVICE_NAME))
         audioDeviceSelector.bluetoothDeviceConnectionListener.onBluetoothHeadsetStateChanged()
 
         verify(audioManager, times(2)).isSpeakerphoneOn = false
@@ -452,11 +454,11 @@ class AudioDeviceSelectorTest {
 
     @Test
     fun `selectDevice should not re activate the bluetooth device if the same device has been selected`() {
-        deviceCache.add(AudioDevice.BluetoothHeadset(bluetoothDevice))
+        deviceCache.add(AudioDevice.BluetoothHeadset(DEVICE_NAME))
         audioDeviceSelector.start(audioDeviceChangeListener)
         audioDeviceSelector.activate()
 
-        audioDeviceSelector.selectDevice(AudioDevice.BluetoothHeadset(bluetoothDevice))
+        audioDeviceSelector.selectDevice(AudioDevice.BluetoothHeadset(DEVICE_NAME))
 
         verify(audioManager).isSpeakerphoneOn = false
         verify(audioManager).startBluetoothSco()

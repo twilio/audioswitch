@@ -1,6 +1,5 @@
 package com.twilio.audioswitch
 
-import android.bluetooth.BluetoothDevice
 import android.media.AudioManager
 import android.os.Handler
 import com.nhaarman.mockitokotlin2.any
@@ -8,7 +7,6 @@ import com.nhaarman.mockitokotlin2.isA
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
-import com.twilio.audioswitch.android.BluetoothDeviceWrapperImpl
 import com.twilio.audioswitch.android.SystemClockWrapper
 import com.twilio.audioswitch.bluetooth.BluetoothScoJob
 import com.twilio.audioswitch.selection.AudioDevice
@@ -42,10 +40,4 @@ internal fun assertScoJobIsCanceled(handler: Handler, scoJob: BluetoothScoJob) {
     assertThat(scoJob.bluetoothScoRunnable, `is`(nullValue()))
 }
 
-fun createHeadset(name: String): AudioDevice.BluetoothHeadset {
-    val device = mock<BluetoothDevice> {
-        whenever(mock.name).thenReturn(name)
-    }
-    return AudioDevice.BluetoothHeadset(
-            BluetoothDeviceWrapperImpl(device))
-}
+fun createHeadset(name: String): AudioDevice.BluetoothHeadset = AudioDevice.BluetoothHeadset(name)

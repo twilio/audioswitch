@@ -90,7 +90,9 @@ class BluetoothHeadsetManagerTest {
     @Test
     fun `onServiceConnected should not notify the deviceListener if the deviceListener is null`() {
         bluetoothHeadsetManager.headsetListener = null
-        val expectedDevice = mock<BluetoothDevice>()
+        val expectedDevice = mock<BluetoothDevice> {
+            whenever(mock.name).thenReturn("Test")
+        }
         val bluetoothDevices = listOf(expectedDevice)
         val bluetoothProfile = mock<BluetoothHeadset> {
             whenever(mock.connectedDevices).thenReturn(bluetoothDevices)
