@@ -272,6 +272,10 @@ class AudioDeviceSelector {
             null
         }
 
+        // Activate the device if in the active state
+        if (state == ACTIVATED) {
+            activate()
+        }
         audioDeviceChangeListener?.let { listener ->
             selectedDevice?.let { selectedDevice ->
                 listener.invoke(
@@ -280,11 +284,6 @@ class AudioDeviceSelector {
             } ?: run {
                 listener.invoke(mutableAudioDevices, null)
             }
-        }
-
-        // Activate the device if in the active state
-        if (state == ACTIVATED) {
-            activate()
         }
     }
 
