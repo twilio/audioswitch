@@ -18,11 +18,8 @@ internal abstract class BluetoothScoJob(
 
     @VisibleForTesting(otherwise = PRIVATE)
     var bluetoothScoRunnable: BluetoothScoRunnable? = null
-    var headsetListener: BluetoothHeadsetConnectionListener? = null
 
     protected abstract fun scoAction()
-
-    open fun scoTimeOutAction() {}
 
     fun executeBluetoothScoJob() {
         bluetoothScoRunnable = BluetoothScoRunnable()
@@ -50,9 +47,7 @@ internal abstract class BluetoothScoJob(
                 bluetoothScoHandler.postDelayed(this, 500)
             } else {
                 logger.e(TAG, "Bluetooth sco job timed out", TimeoutException())
-                scoTimeOutAction()
                 cancelBluetoothScoJob()
-                headsetListener?.onBluetoothHeadsetStateChanged()
             }
         }
     }

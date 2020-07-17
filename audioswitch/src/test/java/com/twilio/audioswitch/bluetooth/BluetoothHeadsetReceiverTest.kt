@@ -51,7 +51,7 @@ class BluetoothHeadsetReceiverTest {
     private var handler = setupScoHandlerMock()
     private var systemClockWrapper = setupSystemClockMock()
     private val deviceCache = BluetoothHeadsetCacheManager(logger)
-    private val enableBluetoothScoJob = EnableBluetoothScoJob(logger, audioDeviceManager, deviceCache, handler, systemClockWrapper)
+    private val enableBluetoothScoJob = EnableBluetoothScoJob(logger, audioDeviceManager, handler, systemClockWrapper)
     private val disableBluetoothScoJob = DisableBluetoothScoJob(logger, audioDeviceManager, handler, systemClockWrapper)
     private var bluetoothHeadsetReceiver = BluetoothHeadsetReceiver(context,
             logger,
@@ -258,17 +258,6 @@ class BluetoothHeadsetReceiverTest {
         bluetoothHeadsetReceiver.stop()
 
         assertThat(bluetoothHeadsetReceiver.headsetListener, `is`(nullValue()))
-    }
-
-    @Test
-    fun `stop should unassign the device listener for the enable sco job`() {
-        bluetoothHeadsetReceiver.setupDeviceListener(deviceListener)
-
-        assertThat(enableBluetoothScoJob.headsetListener, equalTo(deviceListener))
-
-        bluetoothHeadsetReceiver.stop()
-
-        assertThat(enableBluetoothScoJob.headsetListener, `is`(nullValue()))
     }
 
     @Test

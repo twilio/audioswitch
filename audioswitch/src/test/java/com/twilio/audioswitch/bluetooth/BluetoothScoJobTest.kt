@@ -12,7 +12,6 @@ import com.nhaarman.mockitokotlin2.whenever
 import com.twilio.audioswitch.android.LogWrapper
 import com.twilio.audioswitch.assertScoJobIsCanceled
 import com.twilio.audioswitch.bluetooth.BluetoothScoJob.BluetoothScoRunnable
-import com.twilio.audioswitch.createHeadset
 import com.twilio.audioswitch.selection.AudioDeviceManager
 import com.twilio.audioswitch.setupScoHandlerMock
 import com.twilio.audioswitch.setupSystemClockMock
@@ -32,7 +31,7 @@ class BluetoothScoJobTest {
             mock())
     private var systemClockWrapper = setupSystemClockMock()
     private val deviceCache = BluetoothHeadsetCacheManager(logger)
-    private var scoJob = EnableBluetoothScoJob(logger, audioDeviceManager, deviceCache, handler, systemClockWrapper)
+    private var scoJob = EnableBluetoothScoJob(logger, audioDeviceManager, handler, systemClockWrapper)
 
     @Test
     fun `EnableBluetoothScoJob scoAction should execute enableBluetoothSco with true`() {
@@ -42,27 +41,12 @@ class BluetoothScoJobTest {
     }
 
     @Test
-    fun `EnableBluetoothScoJob scoTimeOutAction should remove the active bluetooth headset`() {
-        val headset = createHeadset("Headset")
-        deviceCache.add(headset)
-        systemClockWrapper = mock {
-            whenever(mock.elapsedRealtime()).thenReturn(0L, TIMEOUT)
-        }
-        handler = setupHandlerMock()
-        scoJob = EnableBluetoothScoJob(logger, audioDeviceManager, deviceCache, handler, systemClockWrapper)
-
-        scoJob.executeBluetoothScoJob()
-
-        assertThat(deviceCache.cachedHeadsets.isEmpty(), equalTo(true))
-    }
-
-    @Test
     fun `EnableBluetoothScoJob scoTimeOutAction should not remove the active bluetooth headset if it doesn't exist`() {
         systemClockWrapper = mock {
             whenever(mock.elapsedRealtime()).thenReturn(0L, TIMEOUT)
         }
         handler = setupHandlerMock()
-        scoJob = EnableBluetoothScoJob(logger, audioDeviceManager, deviceCache, handler, systemClockWrapper)
+        scoJob = EnableBluetoothScoJob(logger, audioDeviceManager, handler, systemClockWrapper)
 
         scoJob.executeBluetoothScoJob()
 
@@ -95,7 +79,7 @@ class BluetoothScoJobTest {
                 true
             }
         }
-        scoJob = EnableBluetoothScoJob(logger, audioDeviceManager, deviceCache, handler, systemClockWrapper)
+        scoJob = EnableBluetoothScoJob(logger, audioDeviceManager, handler, systemClockWrapper)
 
         scoJob.executeBluetoothScoJob()
 
@@ -108,26 +92,11 @@ class BluetoothScoJobTest {
             whenever(mock.elapsedRealtime()).thenReturn(0L, TIMEOUT)
         }
         handler = setupHandlerMock()
-        scoJob = EnableBluetoothScoJob(logger, audioDeviceManager, deviceCache, handler, systemClockWrapper)
+        scoJob = EnableBluetoothScoJob(logger, audioDeviceManager, handler, systemClockWrapper)
 
         scoJob.executeBluetoothScoJob()
 
         assertScoJobIsCanceled(handler, scoJob)
-    }
-
-    @Test
-    fun `BluetoothScoRunnable should send a connection error event if a timeout occurs`() {
-        systemClockWrapper = mock {
-            whenever(mock.elapsedRealtime()).thenReturn(0L, 0L, TIMEOUT)
-        }
-        handler = setupHandlerMock()
-        scoJob = EnableBluetoothScoJob(logger, audioDeviceManager, deviceCache, handler, systemClockWrapper)
-        val deviceListener = mock<BluetoothHeadsetConnectionListener>()
-        scoJob.headsetListener = deviceListener
-
-        scoJob.executeBluetoothScoJob()
-
-        verify(deviceListener).onBluetoothHeadsetStateChanged()
     }
 
     @Test
@@ -136,7 +105,7 @@ class BluetoothScoJobTest {
             whenever(mock.elapsedRealtime()).thenReturn(0L, TIMEOUT + 1000)
         }
         handler = setupHandlerMock()
-        scoJob = EnableBluetoothScoJob(logger, audioDeviceManager, deviceCache, handler, systemClockWrapper)
+        scoJob = EnableBluetoothScoJob(logger, audioDeviceManager, handler, systemClockWrapper)
 
         scoJob.executeBluetoothScoJob()
 

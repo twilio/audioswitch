@@ -40,7 +40,7 @@ class BluetoothControllerTest {
             BluetoothIntentProcessorImpl(),
             audioDeviceManager,
             deviceCache,
-            EnableBluetoothScoJob(logger, audioDeviceManager, deviceCache, handler, systemClockWrapper),
+            EnableBluetoothScoJob(logger, audioDeviceManager, handler, systemClockWrapper),
             DisableBluetoothScoJob(logger, audioDeviceManager, handler, systemClockWrapper),
             deviceListener)
     private var bluetoothController = BluetoothController(
