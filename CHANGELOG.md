@@ -1,5 +1,11 @@
 # Changelog
 
+### 0.1.6
+
+Bug Fixes
+
+- Improved the accuracy of the `BluetoothHeadset` within the `availableAudioDevices` returned from the `AudioDeviceSelector` when multiple Bluetooth Headsets are connected.
+
 ### 0.1.5
 
 Bug Fixes
