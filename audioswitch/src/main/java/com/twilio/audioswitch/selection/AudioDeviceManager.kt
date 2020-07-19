@@ -24,6 +24,7 @@ internal class AudioDeviceManager(
     private var savedIsMicrophoneMuted = false
     private var savedSpeakerphoneEnabled = false
     private var audioRequest: AudioFocusRequest? = null
+    private var audioFocusChangeListener: AudioManager.OnAudioFocusChangeListener? = null
 
     fun hasEarpiece(): Boolean {
         val hasEarpiece = context.packageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY)
@@ -59,8 +60,9 @@ internal class AudioDeviceManager(
             audioRequest = audioFocusRequest.buildRequest()
             audioRequest?.let { audioManager.requestAudioFocus(it) }
         } else {
+            audioFocusChangeListener = AudioManager.OnAudioFocusChangeListener { }
             audioManager.requestAudioFocus(
-                    {},
+                    audioFocusChangeListener,
                     AudioManager.STREAM_VOICE_CALL,
                     AudioManager.AUDIOFOCUS_GAIN_TRANSIENT)
         }
@@ -100,7 +102,7 @@ internal class AudioDeviceManager(
         if (build.getVersion() >= Build.VERSION_CODES.O) {
             audioRequest?.let { audioManager.abandonAudioFocusRequest(it) }
         } else {
-            audioManager.abandonAudioFocus { }
+            audioManager.abandonAudioFocus(audioFocusChangeListener)
         }
     }
 }
