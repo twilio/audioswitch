@@ -29,9 +29,10 @@ internal class BluetoothHeadsetReceiver(
     private val bluetoothIntentProcessor: BluetoothIntentProcessor,
     audioDeviceManager: AudioDeviceManager,
     private val headsetCache: BluetoothHeadsetCacheManager,
-    private val enableBluetoothScoJob: BluetoothScoJob = EnableBluetoothScoJob(logger, audioDeviceManager),
-    private val disableBluetoothScoJob: BluetoothScoJob = DisableBluetoothScoJob(logger, audioDeviceManager),
-    var headsetListener: BluetoothHeadsetConnectionListener? = null
+    private val enableBluetoothScoJob: EnableBluetoothScoJob = EnableBluetoothScoJob(logger, audioDeviceManager),
+    private val disableBluetoothScoJob: DisableBluetoothScoJob = DisableBluetoothScoJob(logger, audioDeviceManager),
+    var headsetListener: BluetoothHeadsetConnectionListener? = null,
+    private val headsetState: HeadsetState = HeadsetState
 ) : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
@@ -45,6 +46,7 @@ internal class BluetoothHeadsetReceiver(
                                         bluetoothDevice.name +
                                         " connected")
                         headsetCache.add(BluetoothHeadset(bluetoothDevice.name))
+                        headsetState.state = HeadsetState.State.Connected
                         headsetListener?.onBluetoothHeadsetStateChanged()
                     }
                 }
@@ -56,6 +58,12 @@ internal class BluetoothHeadsetReceiver(
                                         bluetoothDevice.name +
                                         " disconnected")
                         headsetCache.remove(BluetoothHeadset(bluetoothDevice.name))
+                        headsetState.state = when {
+                            headsetCache.cachedHeadsets.isEmpty() -> {
+                                HeadsetState.State.Disconnected
+                            }
+                            else -> HeadsetState.State.Connected
+                        }
                         headsetListener?.onBluetoothHeadsetStateChanged()
                     }
                 }

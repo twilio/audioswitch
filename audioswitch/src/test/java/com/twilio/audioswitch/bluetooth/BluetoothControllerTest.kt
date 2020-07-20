@@ -76,7 +76,7 @@ class BluetoothControllerTest {
 
     @Test
     fun `activate should start bluetooth device audio routing`() {
-        bluetoothController.activate()
+        bluetoothController.activate(audioDevice)
 
         verify(audioManager).startBluetoothSco()
     }

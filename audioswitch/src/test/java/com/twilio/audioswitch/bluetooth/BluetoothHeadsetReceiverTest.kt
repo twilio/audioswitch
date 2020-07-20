@@ -220,8 +220,8 @@ class BluetoothHeadsetReceiverTest {
          * Needed to initialize the sco jobs as this test simulates conditions after these jobs
          * have been started.
          */
-        bluetoothHeadsetReceiver.enableBluetoothSco(true)
-        bluetoothHeadsetReceiver.enableBluetoothSco(false)
+        bluetoothHeadsetReceiver.enableBluetoothSco(true, audioDevice)
+        bluetoothHeadsetReceiver.enableBluetoothSco(false, audioDevice)
         val intent = mock<Intent> {
             whenever(mock.action).thenReturn(AudioManager.ACTION_SCO_AUDIO_STATE_UPDATED)
             whenever(mock.getIntExtra(AudioManager.EXTRA_SCO_AUDIO_STATE, SCO_AUDIO_STATE_ERROR))
@@ -269,14 +269,14 @@ class BluetoothHeadsetReceiverTest {
 
     @Test
     fun `enableBluetoothSco job with true executes the enableBluetoothScoJob`() {
-        bluetoothHeadsetReceiver.enableBluetoothSco(true)
+        bluetoothHeadsetReceiver.enableBluetoothSco(true, audioDevice)
 
         verify(audioManager).startBluetoothSco()
     }
 
     @Test
     fun `enableBluetoothSco job with false executes the disableBluetoothScoJob`() {
-        bluetoothHeadsetReceiver.enableBluetoothSco(false)
+        bluetoothHeadsetReceiver.enableBluetoothSco(false, audioDevice)
 
         verify(audioManager).stopBluetoothSco()
     }
@@ -288,7 +288,7 @@ class BluetoothHeadsetReceiverTest {
             whenever(mock.getIntExtra(AudioManager.EXTRA_SCO_AUDIO_STATE, SCO_AUDIO_STATE_ERROR))
                     .thenReturn(SCO_AUDIO_STATE_CONNECTED)
         }
-        bluetoothHeadsetReceiver.enableBluetoothSco(true)
+        bluetoothHeadsetReceiver.enableBluetoothSco(true, audioDevice)
         bluetoothHeadsetReceiver.onReceive(mock(), intent)
 
         assertScoJobIsCanceled(handler, enableBluetoothScoJob)
@@ -301,7 +301,7 @@ class BluetoothHeadsetReceiverTest {
             whenever(mock.getIntExtra(AudioManager.EXTRA_SCO_AUDIO_STATE, SCO_AUDIO_STATE_ERROR))
                     .thenReturn(SCO_AUDIO_STATE_DISCONNECTED)
         }
-        bluetoothHeadsetReceiver.enableBluetoothSco(false)
+        bluetoothHeadsetReceiver.enableBluetoothSco(false, audioDevice)
         bluetoothHeadsetReceiver.onReceive(mock(), intent)
 
         assertScoJobIsCanceled(handler, disableBluetoothScoJob)

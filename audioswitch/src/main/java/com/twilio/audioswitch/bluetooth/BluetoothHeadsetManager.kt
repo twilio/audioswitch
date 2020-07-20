@@ -12,7 +12,8 @@ internal class BluetoothHeadsetManager(
     private val logger: LogWrapper,
     private val bluetoothAdapter: BluetoothAdapter,
     private val headsetCache: BluetoothHeadsetCacheManager,
-    var headsetListener: BluetoothHeadsetConnectionListener? = null
+    var headsetListener: BluetoothHeadsetConnectionListener? = null,
+    private val headsetState: HeadsetState = HeadsetState
 ) : BluetoothProfile.ServiceListener {
 
     private var headsetProxy: BluetoothHeadset? = null
@@ -26,6 +27,7 @@ internal class BluetoothHeadsetManager(
                 val bluetoothHeadset = AudioDevice.BluetoothHeadset(
                         device.name)
                 headsetCache.add(bluetoothHeadset)
+                headsetState.state = HeadsetState.State.Connected
                 headsetListener?.onBluetoothHeadsetStateChanged()
             }
         }
@@ -34,6 +36,7 @@ internal class BluetoothHeadsetManager(
     override fun onServiceDisconnected(profile: Int) {
         logger.d(TAG, "Bluetooth disconnected")
         headsetCache.clear()
+        headsetState.state = HeadsetState.State.Disconnected
         headsetListener?.onBluetoothHeadsetStateChanged()
     }
 

@@ -11,6 +11,7 @@ import com.twilio.audioswitch.bluetooth.BluetoothHeadsetCacheManager
 import com.twilio.audioswitch.bluetooth.BluetoothHeadsetConnectionListener
 import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager
 import com.twilio.audioswitch.bluetooth.BluetoothHeadsetReceiver
+import com.twilio.audioswitch.bluetooth.HeadsetState
 import com.twilio.audioswitch.selection.AudioDevice.BluetoothHeadset
 import com.twilio.audioswitch.selection.AudioDevice.Earpiece
 import com.twilio.audioswitch.selection.AudioDevice.Speakerphone
@@ -61,6 +62,7 @@ class AudioDeviceSelector {
             logger.d(TAG, "Bluetooth is not supported on this device")
             null
         }
+        this.headsetState = HeadsetState.apply { this.logger = logger }
     }
 
     internal constructor(
@@ -68,13 +70,15 @@ class AudioDeviceSelector {
         audioDeviceManager: AudioDeviceManager,
         wiredHeadsetReceiver: WiredHeadsetReceiver,
         bluetoothController: BluetoothController?,
-        headsetCache: BluetoothHeadsetCacheManager
+        headsetCache: BluetoothHeadsetCacheManager,
+        headsetState: HeadsetState
     ) {
         this.logger = logger
         this.audioDeviceManager = audioDeviceManager
         this.wiredHeadsetReceiver = wiredHeadsetReceiver
         this.bluetoothController = bluetoothController
         this.headsetCache = headsetCache
+        this.headsetState = headsetState
     }
 
     private var logger: LogWrapper = LogWrapper()
@@ -87,6 +91,7 @@ class AudioDeviceSelector {
     private var userSelectedDevice: AudioDevice? = null
     private var wiredHeadsetAvailable = false
     private val mutableAudioDevices = ArrayList<AudioDevice>()
+    private val headsetState: HeadsetState
 
     internal var state: State = STOPPED
     internal enum class State {
@@ -182,15 +187,21 @@ class AudioDeviceSelector {
         when (audioDevice) {
             is BluetoothHeadset -> {
                 audioDeviceManager.enableSpeakerphone(false)
-                bluetoothController?.activate()
+                if (headsetState.state == HeadsetState.State.Connected) {
+                    bluetoothController?.activate()
+                }
             }
             is Earpiece, is WiredHeadset -> {
                 audioDeviceManager.enableSpeakerphone(false)
-                bluetoothController?.deactivate()
+                if (headsetState.state == HeadsetState.State.Activated) {
+                    bluetoothController?.deactivate()
+                }
             }
             is Speakerphone -> {
                 audioDeviceManager.enableSpeakerphone(true)
-                bluetoothController?.deactivate()
+                if (headsetState.state == HeadsetState.State.Activated) {
+                    bluetoothController?.deactivate()
+                }
             }
         }
     }
@@ -202,7 +213,9 @@ class AudioDeviceSelector {
     fun deactivate() {
         when (state) {
             ACTIVATED -> {
-                bluetoothController?.deactivate()
+                if (headsetState.state == HeadsetState.State.Activated) {
+                    bluetoothController?.deactivate()
+                }
 
                 // Restore stored audio state
                 audioDeviceManager.restoreAudioState()
