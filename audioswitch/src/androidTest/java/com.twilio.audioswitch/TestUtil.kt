@@ -5,16 +5,22 @@ import android.bluetooth.BluetoothDevice
 import android.content.Context
 import android.content.Intent
 import android.media.AudioManager
+import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
 import com.twilio.audioswitch.android.BuildWrapper
+import com.twilio.audioswitch.android.DEVICE_NAME
 import com.twilio.audioswitch.android.FakeBluetoothIntentProcessor
+import com.twilio.audioswitch.android.HEADSET_NAME
 import com.twilio.audioswitch.android.LogWrapper
 import com.twilio.audioswitch.bluetooth.BluetoothController
+import com.twilio.audioswitch.bluetooth.BluetoothHeadsetCacheManager
+import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager
 import com.twilio.audioswitch.bluetooth.BluetoothHeadsetReceiver
-import com.twilio.audioswitch.bluetooth.PreConnectedDeviceListener
 import com.twilio.audioswitch.selection.AudioDeviceManager
 import com.twilio.audioswitch.selection.AudioDeviceSelector
 import com.twilio.audioswitch.selection.AudioFocusRequestWrapper
 import com.twilio.audioswitch.wired.WiredHeadsetReceiver
+
+val TAG = "TestUtil"
 
 internal fun setupFakeAudioDeviceSelector(context: Context):
         Pair<AudioDeviceSelector, BluetoothHeadsetReceiver> {
@@ -29,11 +35,12 @@ internal fun setupFakeAudioDeviceSelector(context: Context):
                     AudioFocusRequestWrapper())
     val wiredHeadsetReceiver = WiredHeadsetReceiver(context, logger)
     val bluetoothIntentProcessor = FakeBluetoothIntentProcessor()
-    val bluetoothHeadsetReceiver = BluetoothHeadsetReceiver(context, logger, bluetoothIntentProcessor, audioDeviceManager)
+    val deviceCache = BluetoothHeadsetCacheManager(logger)
+    val bluetoothHeadsetReceiver = BluetoothHeadsetReceiver(context, logger, bluetoothIntentProcessor, audioDeviceManager, deviceCache)
     val bluetoothController = BluetoothAdapter.getDefaultAdapter()?.let { bluetoothAdapter ->
         BluetoothController(context,
                 bluetoothAdapter,
-                PreConnectedDeviceListener(logger, bluetoothAdapter),
+                BluetoothHeadsetManager(logger, bluetoothAdapter, deviceCache),
                 bluetoothHeadsetReceiver)
     } ?: run {
         null
@@ -41,11 +48,28 @@ internal fun setupFakeAudioDeviceSelector(context: Context):
     return Pair(AudioDeviceSelector(logger,
             audioDeviceManager,
             wiredHeadsetReceiver,
-            bluetoothController),
+            bluetoothController,
+            deviceCache),
             bluetoothHeadsetReceiver)
 }
 
-internal fun simulateBluetoothConnection(context: Context, bluetoothHeadsetReceiver: BluetoothHeadsetReceiver) {
-    val intent = Intent(BluetoothDevice.ACTION_ACL_CONNECTED)
+internal fun simulateBluetoothSystemIntent(
+    context: Context,
+    bluetoothHeadsetReceiver: BluetoothHeadsetReceiver,
+    deviceName: String = HEADSET_NAME,
+    action: String = BluetoothDevice.ACTION_ACL_CONNECTED
+) {
+    val intent = Intent(action).apply {
+        putExtra(DEVICE_NAME, deviceName)
+    }
     bluetoothHeadsetReceiver.onReceive(context, intent)
 }
+
+fun getTargetContext(): Context = getInstrumentation().targetContext
+
+fun getInstrumentationContext(): Context = getInstrumentation().context
+
+fun isSpeakerPhoneOn() =
+        (getTargetContext().getSystemService(Context.AUDIO_SERVICE) as AudioManager?)?.let {
+            it.isSpeakerphoneOn
+        } ?: false

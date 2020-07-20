@@ -9,6 +9,10 @@ import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import com.twilio.audioswitch.android.SystemClockWrapper
 import com.twilio.audioswitch.bluetooth.BluetoothScoJob
+import com.twilio.audioswitch.selection.AudioDevice
+import org.hamcrest.CoreMatchers.`is`
+import org.hamcrest.CoreMatchers.nullValue
+import org.hamcrest.MatcherAssert.assertThat
 
 internal fun setupAudioManagerMock() =
         mock<AudioManager> {
@@ -33,4 +37,7 @@ internal fun setupSystemClockMock() =
 
 internal fun assertScoJobIsCanceled(handler: Handler, scoJob: BluetoothScoJob) {
     verify(handler).removeCallbacks(isA())
+    assertThat(scoJob.bluetoothScoRunnable, `is`(nullValue()))
 }
+
+fun createHeadset(name: String): AudioDevice.BluetoothHeadset = AudioDevice.BluetoothHeadset(name)

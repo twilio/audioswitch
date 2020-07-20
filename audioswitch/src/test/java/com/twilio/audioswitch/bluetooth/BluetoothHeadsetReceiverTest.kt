@@ -9,7 +9,6 @@ import android.media.AudioManager
 import android.media.AudioManager.SCO_AUDIO_STATE_CONNECTED
 import android.media.AudioManager.SCO_AUDIO_STATE_DISCONNECTED
 import android.media.AudioManager.SCO_AUDIO_STATE_ERROR
-import com.nhaarman.mockitokotlin2.isA
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
@@ -19,6 +18,7 @@ import com.twilio.audioswitch.android.BluetoothIntentProcessorImpl
 import com.twilio.audioswitch.android.BuildWrapper
 import com.twilio.audioswitch.android.LogWrapper
 import com.twilio.audioswitch.assertScoJobIsCanceled
+import com.twilio.audioswitch.selection.AudioDevice
 import com.twilio.audioswitch.selection.AudioDeviceManager
 import com.twilio.audioswitch.selection.AudioFocusRequestWrapper
 import com.twilio.audioswitch.setupAudioManagerMock
@@ -33,11 +33,13 @@ import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
 
+private const val DEVICE_NAME = "Bluetooth"
+
 @RunWith(JUnitParamsRunner::class)
 class BluetoothHeadsetReceiverTest {
 
     private val context = mock<Context>()
-    private val deviceListener = mock<BluetoothDeviceConnectionListener>()
+    private val deviceListener = mock<BluetoothHeadsetConnectionListener>()
     private val logger = mock<LogWrapper>()
     private val audioManager = setupAudioManagerMock()
     private val buildWrapper = mock<BuildWrapper>()
@@ -49,12 +51,14 @@ class BluetoothHeadsetReceiverTest {
             audioFocusRequest)
     private var handler = setupScoHandlerMock()
     private var systemClockWrapper = setupSystemClockMock()
+    private val deviceCache = BluetoothHeadsetCacheManager(logger)
     private val enableBluetoothScoJob = EnableBluetoothScoJob(logger, audioDeviceManager, handler, systemClockWrapper)
     private val disableBluetoothScoJob = DisableBluetoothScoJob(logger, audioDeviceManager, handler, systemClockWrapper)
     private var bluetoothHeadsetReceiver = BluetoothHeadsetReceiver(context,
             logger,
             BluetoothIntentProcessorImpl(),
             audioDeviceManager,
+            deviceCache,
             enableBluetoothScoJob,
             disableBluetoothScoJob,
             deviceListener)
@@ -62,7 +66,7 @@ class BluetoothHeadsetReceiverTest {
         whenever(mock.deviceClass).thenReturn(AUDIO_VIDEO_HANDSFREE)
     }
     private val bluetoothDevice = mock<BluetoothDevice> {
-        whenever(mock.name).thenReturn("Test")
+        whenever(mock.name).thenReturn(DEVICE_NAME)
         whenever(mock.bluetoothClass).thenReturn(bluetoothClass)
     }
 
@@ -98,7 +102,7 @@ class BluetoothHeadsetReceiverTest {
 
     @Parameters(method = "parameters")
     @Test
-    fun `onReceive should register a new device when an ACL connected event is received`(
+    fun `onReceive should invoke the onBluetoothDeviceStateChanged callback and add to the device cache when an ACL connected event is received with a valid headset`(
         deviceClass: BluetoothClass?,
         isNewDeviceConnected: Boolean
     ) {
@@ -112,12 +116,18 @@ class BluetoothHeadsetReceiverTest {
         bluetoothHeadsetReceiver.onReceive(mock(), intent)
 
         val invocationCount = if (isNewDeviceConnected) 1 else 0
-        verify(deviceListener, times(invocationCount)).onBluetoothConnected(isA())
+        verify(deviceListener, times(invocationCount)).onBluetoothHeadsetStateChanged()
+        val expectedCachedDevice = AudioDevice.BluetoothHeadset(DEVICE_NAME)
+        if (isNewDeviceConnected) {
+            assertThat(deviceCache.cachedHeadsets.first(), equalTo(expectedCachedDevice))
+        } else {
+            assertThat(deviceCache.cachedHeadsets.isEmpty(), equalTo(true))
+        }
     }
 
     @Parameters(method = "parameters")
     @Test
-    fun `onReceive should disconnect a device when an ACL disconnected event is received`(
+    fun `onReceive should invoke the onBluetoothDeviceStateChanged callback and remove from the device cache when an ACL disconnected event is received with a valid headset`(
         deviceClass: BluetoothClass?,
         isDeviceDisconnected: Boolean
     ) {
@@ -127,11 +137,15 @@ class BluetoothHeadsetReceiverTest {
             whenever(mock.getParcelableExtra<BluetoothDevice>(BluetoothDevice.EXTRA_DEVICE))
                     .thenReturn(bluetoothDevice)
         }
+        val bluetoothHeadset = AudioDevice.BluetoothHeadset(DEVICE_NAME)
+        deviceCache.add(bluetoothHeadset)
 
         bluetoothHeadsetReceiver.onReceive(mock(), intent)
 
         val invocationCount = if (isDeviceDisconnected) 1 else 0
-        verify(deviceListener, times(invocationCount)).onBluetoothDisconnected()
+        verify(deviceListener, times(invocationCount)).onBluetoothHeadsetStateChanged()
+        assertThat(deviceCache.cachedHeadsets.contains(bluetoothHeadset),
+                equalTo(!isDeviceDisconnected))
     }
 
     @Test
@@ -150,7 +164,7 @@ class BluetoothHeadsetReceiverTest {
 
     @Test
     fun `onReceive should not register a new device when the deviceListener is null`() {
-        bluetoothHeadsetReceiver.deviceListener = null
+        bluetoothHeadsetReceiver.headsetListener = null
         val intent = mock<Intent> {
             whenever(mock.action).thenReturn(BluetoothDevice.ACTION_ACL_CONNECTED)
             whenever(mock.getParcelableExtra<BluetoothDevice>(BluetoothDevice.EXTRA_DEVICE))
@@ -177,7 +191,7 @@ class BluetoothHeadsetReceiverTest {
 
     @Test
     fun `onReceive should not disconnect a device when the deviceListener is null`() {
-        bluetoothHeadsetReceiver.deviceListener = null
+        bluetoothHeadsetReceiver.headsetListener = null
         val intent = mock<Intent> {
             whenever(mock.action).thenReturn(BluetoothDevice.ACTION_ACL_DISCONNECTED)
             whenever(mock.getParcelableExtra<BluetoothDevice>(BluetoothDevice.EXTRA_DEVICE))
@@ -233,29 +247,17 @@ class BluetoothHeadsetReceiverTest {
                 logger,
                 BluetoothIntentProcessorImpl(),
                 audioDeviceManager,
+                deviceCache,
                 enableBluetoothScoJob,
                 disableBluetoothScoJob)
 
         bluetoothHeadsetReceiver.setupDeviceListener(deviceListener)
 
-        assertThat(bluetoothHeadsetReceiver.deviceListener, equalTo(deviceListener))
+        assertThat(bluetoothHeadsetReceiver.headsetListener, equalTo(deviceListener))
 
         bluetoothHeadsetReceiver.stop()
 
-        assertThat(bluetoothHeadsetReceiver.deviceListener, `is`(nullValue()))
-    }
-
-    @Test
-    fun `stop should unassign the device listener for the sco jobs`() {
-        bluetoothHeadsetReceiver.setupDeviceListener(deviceListener)
-
-        assertThat(enableBluetoothScoJob.deviceListener, equalTo(deviceListener))
-        assertThat(disableBluetoothScoJob.deviceListener, equalTo(deviceListener))
-
-        bluetoothHeadsetReceiver.stop()
-
-        assertThat(enableBluetoothScoJob.deviceListener, `is`(nullValue()))
-        assertThat(disableBluetoothScoJob.deviceListener, `is`(nullValue()))
+        assertThat(bluetoothHeadsetReceiver.headsetListener, `is`(nullValue()))
     }
 
     @Test

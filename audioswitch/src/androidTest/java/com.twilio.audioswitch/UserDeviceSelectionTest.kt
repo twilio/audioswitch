@@ -54,7 +54,7 @@ class UserDeviceSelectionTest {
     fun `it_should_select_the_bluetooth_audio_device_when_the_user_selects_it`() {
         val (audioDeviceSelector, bluetoothHeadsetReceiver) = setupFakeAudioDeviceSelector(context)
         audioDeviceSelector.start { _, _ -> }
-        simulateBluetoothConnection(context, bluetoothHeadsetReceiver)
+        simulateBluetoothSystemIntent(context, bluetoothHeadsetReceiver)
         val bluetoothDevice = audioDeviceSelector.availableAudioDevices
                 .find { it is BluetoothHeadset }
         assertThat(bluetoothDevice, `is`(notNullValue()))

@@ -7,14 +7,16 @@ import com.nhaarman.mockitokotlin2.isA
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
+import com.nhaarman.mockitokotlin2.verifyZeroInteractions
 import com.nhaarman.mockitokotlin2.whenever
 import com.twilio.audioswitch.android.LogWrapper
 import com.twilio.audioswitch.assertScoJobIsCanceled
-import com.twilio.audioswitch.bluetooth.BluetoothDeviceConnectionListener.ConnectionError.SCO_CONNECTION_ERROR
 import com.twilio.audioswitch.bluetooth.BluetoothScoJob.BluetoothScoRunnable
 import com.twilio.audioswitch.selection.AudioDeviceManager
 import com.twilio.audioswitch.setupScoHandlerMock
 import com.twilio.audioswitch.setupSystemClockMock
+import org.hamcrest.CoreMatchers.equalTo
+import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Test
 
 class BluetoothScoJobTest {
@@ -28,13 +30,27 @@ class BluetoothScoJobTest {
             mock(),
             mock())
     private var systemClockWrapper = setupSystemClockMock()
+    private val deviceCache = BluetoothHeadsetCacheManager(logger)
     private var scoJob = EnableBluetoothScoJob(logger, audioDeviceManager, handler, systemClockWrapper)
 
     @Test
-    fun `EnableBluetoothScoJob should execute enableBluetoothSco with true`() {
+    fun `EnableBluetoothScoJob scoAction should execute enableBluetoothSco with true`() {
         scoJob.executeBluetoothScoJob()
 
         verify(audioManager).startBluetoothSco()
+    }
+
+    @Test
+    fun `EnableBluetoothScoJob scoTimeOutAction should not remove the active bluetooth headset if it doesn't exist`() {
+        systemClockWrapper = mock {
+            whenever(mock.elapsedRealtime()).thenReturn(0L, TIMEOUT)
+        }
+        handler = setupHandlerMock()
+        scoJob = EnableBluetoothScoJob(logger, audioDeviceManager, handler, systemClockWrapper)
+
+        scoJob.executeBluetoothScoJob()
+
+        assertThat(deviceCache.cachedHeadsets.isEmpty(), equalTo(true))
     }
 
     @Test
@@ -73,36 +89,20 @@ class BluetoothScoJobTest {
     @Test
     fun `BluetoothScoRunnable should timeout if elapsedTime equals the time limit`() {
         systemClockWrapper = mock {
-            whenever(mock.elapsedRealtime()).thenReturn(0L, 0L, TIMEOUT)
+            whenever(mock.elapsedRealtime()).thenReturn(0L, TIMEOUT)
         }
         handler = setupHandlerMock()
         scoJob = EnableBluetoothScoJob(logger, audioDeviceManager, handler, systemClockWrapper)
 
         scoJob.executeBluetoothScoJob()
 
-        verify(audioManager).startBluetoothSco()
         assertScoJobIsCanceled(handler, scoJob)
-    }
-
-    @Test
-    fun `BluetoothScoRunnable should send a connection error event if a timeout occurs`() {
-        systemClockWrapper = mock {
-            whenever(mock.elapsedRealtime()).thenReturn(0L, 0L, TIMEOUT)
-        }
-        handler = setupHandlerMock()
-        scoJob = EnableBluetoothScoJob(logger, audioDeviceManager, handler, systemClockWrapper)
-        val deviceListener = mock<BluetoothDeviceConnectionListener>()
-        scoJob.deviceListener = deviceListener
-
-        scoJob.executeBluetoothScoJob()
-
-        verify(deviceListener).onBluetoothConnectionError(SCO_CONNECTION_ERROR)
     }
 
     @Test
     fun `BluetoothScoRunnable should timeout if elapsedTime is greater than the time limit`() {
         systemClockWrapper = mock {
-            whenever(mock.elapsedRealtime()).thenReturn(0L, 0L, TIMEOUT + 1000)
+            whenever(mock.elapsedRealtime()).thenReturn(0L, TIMEOUT + 1000)
         }
         handler = setupHandlerMock()
         scoJob = EnableBluetoothScoJob(logger, audioDeviceManager, handler, systemClockWrapper)
@@ -119,6 +119,13 @@ class BluetoothScoJobTest {
         scoJob.cancelBluetoothScoJob()
 
         assertScoJobIsCanceled(handler, scoJob)
+    }
+
+    @Test
+    fun `cancelBluetoothScoJob should not cancel sco runnable if it has not been initialized`() {
+        scoJob.cancelBluetoothScoJob()
+
+        verifyZeroInteractions(handler)
     }
 
     private fun setupHandlerMock() =

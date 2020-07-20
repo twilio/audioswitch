@@ -18,6 +18,7 @@ import android.media.AudioManager.SCO_AUDIO_STATE_ERROR
 import com.twilio.audioswitch.android.BluetoothDeviceWrapper
 import com.twilio.audioswitch.android.BluetoothIntentProcessor
 import com.twilio.audioswitch.android.LogWrapper
+import com.twilio.audioswitch.selection.AudioDevice.BluetoothHeadset
 import com.twilio.audioswitch.selection.AudioDeviceManager
 
 private const val TAG = "BluetoothDeviceReceiver"
@@ -27,9 +28,10 @@ internal class BluetoothHeadsetReceiver(
     private val logger: LogWrapper,
     private val bluetoothIntentProcessor: BluetoothIntentProcessor,
     audioDeviceManager: AudioDeviceManager,
+    private val headsetCache: BluetoothHeadsetCacheManager,
     private val enableBluetoothScoJob: BluetoothScoJob = EnableBluetoothScoJob(logger, audioDeviceManager),
     private val disableBluetoothScoJob: BluetoothScoJob = DisableBluetoothScoJob(logger, audioDeviceManager),
-    var deviceListener: BluetoothDeviceConnectionListener? = null
+    var headsetListener: BluetoothHeadsetConnectionListener? = null
 ) : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
@@ -42,7 +44,8 @@ internal class BluetoothHeadsetReceiver(
                                 "Bluetooth ACL device " +
                                         bluetoothDevice.name +
                                         " connected")
-                        deviceListener?.onBluetoothConnected(bluetoothDevice)
+                        headsetCache.add(BluetoothHeadset(bluetoothDevice.name))
+                        headsetListener?.onBluetoothHeadsetStateChanged()
                     }
                 }
                 ACTION_ACL_DISCONNECTED -> {
@@ -52,7 +55,8 @@ internal class BluetoothHeadsetReceiver(
                                 "Bluetooth ACL device " +
                                         bluetoothDevice.name +
                                         " disconnected")
-                        deviceListener?.onBluetoothDisconnected()
+                        headsetCache.remove(BluetoothHeadset(bluetoothDevice.name))
+                        headsetListener?.onBluetoothHeadsetStateChanged()
                     }
                 }
                 ACTION_SCO_AUDIO_STATE_UPDATED -> {
@@ -85,16 +89,12 @@ internal class BluetoothHeadsetReceiver(
         }
     }
 
-    fun setupDeviceListener(deviceListener: BluetoothDeviceConnectionListener) {
-        this.deviceListener = deviceListener
-        enableBluetoothScoJob.deviceListener = deviceListener
-        disableBluetoothScoJob.deviceListener = deviceListener
+    fun setupDeviceListener(headsetListener: BluetoothHeadsetConnectionListener) {
+        this.headsetListener = headsetListener
     }
 
     fun stop() {
-        deviceListener = null
-        enableBluetoothScoJob.deviceListener = null
-        disableBluetoothScoJob.deviceListener = null
+        headsetListener = null
         context.unregisterReceiver(this)
     }
 
