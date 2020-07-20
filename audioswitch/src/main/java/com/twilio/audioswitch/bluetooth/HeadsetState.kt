@@ -5,8 +5,8 @@ import com.twilio.audioswitch.bluetooth.HeadsetState.State.Disconnected
 
 private const val TAG = "HeadsetState"
 
-internal object HeadsetState {
-    var logger: LogWrapper? = null
+internal class HeadsetState(private val logger: LogWrapper) {
+
     var state: State = Disconnected
         set(value) {
             if (field != value) {

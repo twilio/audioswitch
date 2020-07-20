@@ -16,7 +16,7 @@ internal class EnableBluetoothScoJob(
     private val logger: LogWrapper,
     private val audioDeviceManager: AudioDeviceManager,
     private val headsetCache: BluetoothHeadsetCacheManager,
-    private val headsetState: HeadsetState = HeadsetState,
+    private val headsetState: HeadsetState,
     bluetoothScoHandler: Handler = Handler(Looper.getMainLooper()),
     systemClockWrapper: SystemClockWrapper = SystemClockWrapper()
 ) : BluetoothScoJob(logger, bluetoothScoHandler, systemClockWrapper) {

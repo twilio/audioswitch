@@ -13,7 +13,7 @@ private const val TAG = "DisableBluetoothScoJob"
 internal class DisableBluetoothScoJob(
     private val logger: LogWrapper,
     private val audioDeviceManager: AudioDeviceManager,
-    private val headsetState: HeadsetState = HeadsetState,
+    private val headsetState: HeadsetState,
     bluetoothScoHandler: Handler = Handler(Looper.getMainLooper()),
     systemClockWrapper: SystemClockWrapper = SystemClockWrapper()
 ) : BluetoothScoJob(logger, bluetoothScoHandler, systemClockWrapper) {

@@ -51,18 +51,18 @@ class AudioDeviceSelector {
         val deviceCache = BluetoothHeadsetCacheManager(logger)
         this.headsetCache = deviceCache
         this.wiredHeadsetReceiver = WiredHeadsetReceiver(context, logger)
+        this.headsetState = HeadsetState(logger)
         this.bluetoothController = BluetoothAdapter.getDefaultAdapter()?.let { bluetoothAdapter ->
             BluetoothController(context,
                     bluetoothAdapter,
-                    BluetoothHeadsetManager(logger, bluetoothAdapter, deviceCache),
+                    BluetoothHeadsetManager(logger, bluetoothAdapter, deviceCache, headsetState),
                     BluetoothHeadsetReceiver(context, logger, BluetoothIntentProcessorImpl(),
-                            audioDeviceManager, deviceCache)
+                            audioDeviceManager, deviceCache, headsetState)
             )
         } ?: run {
             logger.d(TAG, "Bluetooth is not supported on this device")
             null
         }
-        this.headsetState = HeadsetState.apply { this.logger = logger }
     }
 
     internal constructor(

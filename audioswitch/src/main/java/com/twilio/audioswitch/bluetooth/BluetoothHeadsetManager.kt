@@ -12,8 +12,8 @@ internal class BluetoothHeadsetManager(
     private val logger: LogWrapper,
     private val bluetoothAdapter: BluetoothAdapter,
     private val headsetCache: BluetoothHeadsetCacheManager,
-    var headsetListener: BluetoothHeadsetConnectionListener? = null,
-    private val headsetState: HeadsetState = HeadsetState
+    private val headsetState: HeadsetState,
+    var headsetListener: BluetoothHeadsetConnectionListener? = null
 ) : BluetoothProfile.ServiceListener {
 
     private var headsetProxy: BluetoothHeadset? = null
