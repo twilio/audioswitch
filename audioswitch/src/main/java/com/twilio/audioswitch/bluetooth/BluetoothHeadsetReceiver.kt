@@ -57,13 +57,19 @@ internal class BluetoothHeadsetReceiver(
                                 "Bluetooth ACL device " +
                                         bluetoothDevice.name +
                                         " disconnected")
-                        headsetCache.remove(BluetoothHeadset(bluetoothDevice.name))
-                        headsetState.state = when {
-                            headsetCache.cachedHeadsets.isEmpty() -> {
-                                HeadsetState.State.Disconnected
+
+                        var state = when (bluetoothDevice.name) {
+                            headsetCache.activeHeadset?.name -> {
+                                HeadsetState.State.Connected
                             }
-                            else -> HeadsetState.State.Connected
+                            else -> HeadsetState.State.Activated
                         }
+                        headsetCache.remove(BluetoothHeadset(bluetoothDevice.name))
+                        if(headsetCache.cachedHeadsets.isEmpty()) {
+                            state = HeadsetState.State.Disconnected
+                        }
+
+                        headsetState.state = state
                         headsetListener?.onBluetoothHeadsetStateChanged()
                     }
                 }

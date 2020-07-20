@@ -9,7 +9,14 @@ internal class BluetoothHeadsetCacheManager(private val logger: LogWrapper) {
 
     private val mutableCachedHeadsets = mutableSetOf<BluetoothHeadset>()
     val cachedHeadsets: Set<BluetoothHeadset> get() = mutableCachedHeadsets
-    val activeHeadset: BluetoothHeadset? get() = cachedHeadsets.lastOrNull()
+    val activeHeadset: BluetoothHeadset? get() {
+        /*
+        Since checking which headset is active from the OS is greylisted, this is the best we can
+        do to determine the active headset.
+         */
+        return cachedHeadsets.lastOrNull()
+    }
+
 
     fun add(bluetoothHeadset: BluetoothHeadset) {
         val result = mutableCachedHeadsets.add(bluetoothHeadset)
