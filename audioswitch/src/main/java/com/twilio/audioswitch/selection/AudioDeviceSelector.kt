@@ -188,7 +188,7 @@ class AudioDeviceSelector {
             is BluetoothHeadset -> {
                 audioDeviceManager.enableSpeakerphone(false)
                 if (headsetState.state == HeadsetState.State.Connected) {
-                    bluetoothController?.activate()
+                    bluetoothController?.activate(audioDevice)
                 }
             }
             is Earpiece, is WiredHeadset -> {
