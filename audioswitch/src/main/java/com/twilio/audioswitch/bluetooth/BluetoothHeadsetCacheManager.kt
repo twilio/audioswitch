@@ -17,7 +17,6 @@ internal class BluetoothHeadsetCacheManager(private val logger: LogWrapper) {
         return cachedHeadsets.lastOrNull()
     }
 
-
     fun add(bluetoothHeadset: BluetoothHeadset) {
         val result = mutableCachedHeadsets.add(bluetoothHeadset)
         if (result) logger.d(TAG, "Added a new bluetooth headset to the cache: ${bluetoothHeadset.name}")

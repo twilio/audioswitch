@@ -65,7 +65,7 @@ internal class BluetoothHeadsetReceiver(
                             else -> HeadsetState.State.Activated
                         }
                         headsetCache.remove(BluetoothHeadset(bluetoothDevice.name))
-                        if(headsetCache.cachedHeadsets.isEmpty()) {
+                        if (headsetCache.cachedHeadsets.isEmpty()) {
                             state = HeadsetState.State.Disconnected
                         }
 

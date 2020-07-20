@@ -9,8 +9,10 @@ internal object HeadsetState {
     var logger: LogWrapper? = null
     var state: State = Disconnected
         set(value) {
-            field = value
-            logger?.d(TAG, "Headset state changed to $field")
+            if (field != value) {
+                field = value
+                logger?.d(TAG, "Headset state changed to $field")
+            }
         }
 
     sealed class State {
