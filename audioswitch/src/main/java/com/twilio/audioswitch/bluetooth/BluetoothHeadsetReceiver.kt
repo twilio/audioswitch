@@ -78,10 +78,15 @@ internal class BluetoothHeadsetReceiver(
                         when (state) {
                             SCO_AUDIO_STATE_CONNECTED -> {
                                 logger.d(TAG, "Bluetooth SCO Audio connected")
+                                headsetState.state = HeadsetState.State.Activated
                                 enableBluetoothScoJob.cancelBluetoothScoJob()
                             }
                             SCO_AUDIO_STATE_DISCONNECTED -> {
                                 logger.d(TAG, "Bluetooth SCO Audio disconnected")
+                                if (headsetState.state == HeadsetState.State.Activated) {
+                                    logger.d(TAG, "Active Bluetooth headset changed")
+                                    enableBluetoothSco(true)
+                                }
                                 disableBluetoothScoJob.cancelBluetoothScoJob()
                             }
                             SCO_AUDIO_STATE_ERROR -> {
@@ -97,7 +102,7 @@ internal class BluetoothHeadsetReceiver(
 
     fun enableBluetoothSco(enable: Boolean, headset: BluetoothHeadset? = null) {
         if (enable) {
-            headset?.let { enableBluetoothScoJob.executeBluetoothScoJob(headset) }
+            enableBluetoothScoJob.executeBluetoothScoJob(headset)
         } else {
             disableBluetoothScoJob.executeBluetoothScoJob()
         }
