@@ -52,13 +52,15 @@ class BluetoothHeadsetReceiverTest {
     private var handler = setupScoHandlerMock()
     private var systemClockWrapper = setupSystemClockMock()
     private val deviceCache = BluetoothHeadsetCacheManager(logger)
-    private val enableBluetoothScoJob = EnableBluetoothScoJob(logger, audioDeviceManager, handler, systemClockWrapper)
-    private val disableBluetoothScoJob = DisableBluetoothScoJob(logger, audioDeviceManager, handler, systemClockWrapper)
+    private val headsetState = HeadsetState(logger)
+    private val enableBluetoothScoJob = EnableBluetoothScoJob(logger, audioDeviceManager, deviceCache, headsetState, handler, systemClockWrapper)
+    private val disableBluetoothScoJob = DisableBluetoothScoJob(logger, audioDeviceManager, headsetState, handler, systemClockWrapper)
     private var bluetoothHeadsetReceiver = BluetoothHeadsetReceiver(context,
             logger,
             BluetoothIntentProcessorImpl(),
             audioDeviceManager,
             deviceCache,
+            headsetState,
             enableBluetoothScoJob,
             disableBluetoothScoJob,
             deviceListener)
@@ -220,8 +222,8 @@ class BluetoothHeadsetReceiverTest {
          * Needed to initialize the sco jobs as this test simulates conditions after these jobs
          * have been started.
          */
-        bluetoothHeadsetReceiver.enableBluetoothSco(true, audioDevice)
-        bluetoothHeadsetReceiver.enableBluetoothSco(false, audioDevice)
+        bluetoothHeadsetReceiver.enableBluetoothSco(true, mock())
+        bluetoothHeadsetReceiver.enableBluetoothSco(false, mock())
         val intent = mock<Intent> {
             whenever(mock.action).thenReturn(AudioManager.ACTION_SCO_AUDIO_STATE_UPDATED)
             whenever(mock.getIntExtra(AudioManager.EXTRA_SCO_AUDIO_STATE, SCO_AUDIO_STATE_ERROR))
@@ -248,6 +250,7 @@ class BluetoothHeadsetReceiverTest {
                 BluetoothIntentProcessorImpl(),
                 audioDeviceManager,
                 deviceCache,
+                headsetState,
                 enableBluetoothScoJob,
                 disableBluetoothScoJob)
 
@@ -269,14 +272,14 @@ class BluetoothHeadsetReceiverTest {
 
     @Test
     fun `enableBluetoothSco job with true executes the enableBluetoothScoJob`() {
-        bluetoothHeadsetReceiver.enableBluetoothSco(true, audioDevice)
+        bluetoothHeadsetReceiver.enableBluetoothSco(true, mock())
 
         verify(audioManager).startBluetoothSco()
     }
 
     @Test
     fun `enableBluetoothSco job with false executes the disableBluetoothScoJob`() {
-        bluetoothHeadsetReceiver.enableBluetoothSco(false, audioDevice)
+        bluetoothHeadsetReceiver.enableBluetoothSco(false, mock())
 
         verify(audioManager).stopBluetoothSco()
     }
@@ -288,7 +291,7 @@ class BluetoothHeadsetReceiverTest {
             whenever(mock.getIntExtra(AudioManager.EXTRA_SCO_AUDIO_STATE, SCO_AUDIO_STATE_ERROR))
                     .thenReturn(SCO_AUDIO_STATE_CONNECTED)
         }
-        bluetoothHeadsetReceiver.enableBluetoothSco(true, audioDevice)
+        bluetoothHeadsetReceiver.enableBluetoothSco(true, mock())
         bluetoothHeadsetReceiver.onReceive(mock(), intent)
 
         assertScoJobIsCanceled(handler, enableBluetoothScoJob)
@@ -301,7 +304,7 @@ class BluetoothHeadsetReceiverTest {
             whenever(mock.getIntExtra(AudioManager.EXTRA_SCO_AUDIO_STATE, SCO_AUDIO_STATE_ERROR))
                     .thenReturn(SCO_AUDIO_STATE_DISCONNECTED)
         }
-        bluetoothHeadsetReceiver.enableBluetoothSco(false, audioDevice)
+        bluetoothHeadsetReceiver.enableBluetoothSco(false, mock())
         bluetoothHeadsetReceiver.onReceive(mock(), intent)
 
         assertScoJobIsCanceled(handler, disableBluetoothScoJob)

@@ -27,6 +27,7 @@ import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager
 import com.twilio.audioswitch.bluetooth.BluetoothHeadsetReceiver
 import com.twilio.audioswitch.bluetooth.DisableBluetoothScoJob
 import com.twilio.audioswitch.bluetooth.EnableBluetoothScoJob
+import com.twilio.audioswitch.bluetooth.HeadsetState
 import com.twilio.audioswitch.selection.AudioDevice.Earpiece
 import com.twilio.audioswitch.selection.AudioDevice.Speakerphone
 import com.twilio.audioswitch.selection.AudioDeviceSelector.State.ACTIVATED
@@ -62,8 +63,9 @@ class AudioDeviceSelectorTest {
     private val bluetoothAdapter = mock<BluetoothAdapter>()
     private val audioDeviceChangeListener = mock<AudioDeviceChangeListener>()
     private val deviceCache = BluetoothHeadsetCacheManager(logger)
+    private val headsetState = HeadsetState(logger)
     private val bluetoothHeadsetManager = BluetoothHeadsetManager(logger, bluetoothAdapter,
-            deviceCache)
+            deviceCache, headsetState)
     private val wiredHeadsetReceiver = WiredHeadsetReceiver(context, logger)
     private val buildWrapper = mock<BuildWrapper>()
     private val audioFocusRequest = mock<AudioFocusRequestWrapper>()
@@ -79,8 +81,9 @@ class AudioDeviceSelectorTest {
             BluetoothIntentProcessorImpl(),
             audioDeviceManager,
             deviceCache,
-            EnableBluetoothScoJob(logger, audioDeviceManager, handler, systemClockWrapper),
-            DisableBluetoothScoJob(logger, audioDeviceManager, handler, systemClockWrapper))
+            headsetState,
+            EnableBluetoothScoJob(logger, audioDeviceManager, deviceCache, headsetState, handler, systemClockWrapper),
+            DisableBluetoothScoJob(logger, audioDeviceManager, headsetState, handler, systemClockWrapper))
     private var audioDeviceSelector = AudioDeviceSelector(
             logger,
             audioDeviceManager,
@@ -90,7 +93,8 @@ class AudioDeviceSelectorTest {
                     bluetoothAdapter,
                     bluetoothHeadsetManager,
                     bluetoothHeadsetReceiver),
-            deviceCache
+            deviceCache,
+            headsetState
     )
     private val bluetoothControllerAssertions = BluetoothControllerAssertions()
 
@@ -144,7 +148,8 @@ class AudioDeviceSelectorTest {
                 audioDeviceManager,
                 wiredHeadsetReceiver,
                 null,
-                deviceCache
+                deviceCache,
+                headsetState
         )
 
         audioDeviceSelector.start(audioDeviceChangeListener)
@@ -250,7 +255,8 @@ class AudioDeviceSelectorTest {
                 audioDeviceManager,
                 wiredHeadsetReceiver,
                 null,
-                deviceCache
+                deviceCache,
+                headsetState
         )
         audioDeviceSelector.start(audioDeviceChangeListener)
         audioDeviceSelector.stop()
@@ -266,7 +272,8 @@ class AudioDeviceSelectorTest {
                 audioDeviceManager,
                 wiredHeadsetReceiver,
                 null,
-                deviceCache
+                deviceCache,
+                headsetState
         )
         audioDeviceSelector.start(audioDeviceChangeListener)
         audioDeviceSelector.activate()

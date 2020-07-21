@@ -22,10 +22,12 @@ class BluetoothHeadsetManagerTest {
     private val logger = mock<LogWrapper>()
     private val bluetoothAdapter = mock<BluetoothAdapter>()
     private val deviceCache = BluetoothHeadsetCacheManager(logger)
+    private val headsetState = HeadsetState(logger)
     private var bluetoothHeadsetManager = BluetoothHeadsetManager(
             logger,
             bluetoothAdapter,
             deviceCache,
+            headsetState,
             deviceListener)
 
     @Test

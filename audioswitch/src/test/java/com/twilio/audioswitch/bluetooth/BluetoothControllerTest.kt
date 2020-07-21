@@ -23,7 +23,8 @@ class BluetoothControllerTest {
     private val logger = mock<LogWrapper>()
     private val bluetoothAdapter = mock<BluetoothAdapter>()
     private val deviceCache = BluetoothHeadsetCacheManager(logger)
-    private val bluetoothHeadsetManager = BluetoothHeadsetManager(logger, bluetoothAdapter, deviceCache)
+    private val headsetState = HeadsetState(logger)
+    private val bluetoothHeadsetManager = BluetoothHeadsetManager(logger, bluetoothAdapter, deviceCache, headsetState)
     private val buildWrapper = mock<BuildWrapper>()
     private val audioFocusRequest = mock<AudioFocusRequestWrapper>()
     private val audioDeviceManager = AudioDeviceManager(context,
@@ -40,8 +41,9 @@ class BluetoothControllerTest {
             BluetoothIntentProcessorImpl(),
             audioDeviceManager,
             deviceCache,
-            EnableBluetoothScoJob(logger, audioDeviceManager, handler, systemClockWrapper),
-            DisableBluetoothScoJob(logger, audioDeviceManager, handler, systemClockWrapper),
+            headsetState,
+            EnableBluetoothScoJob(logger, audioDeviceManager, deviceCache, headsetState, handler, systemClockWrapper),
+            DisableBluetoothScoJob(logger, audioDeviceManager, headsetState, handler, systemClockWrapper),
             deviceListener)
     private var bluetoothController = BluetoothController(
             context,
@@ -76,7 +78,7 @@ class BluetoothControllerTest {
 
     @Test
     fun `activate should start bluetooth device audio routing`() {
-        bluetoothController.activate(audioDevice)
+        bluetoothController.activate(mock())
 
         verify(audioManager).startBluetoothSco()
     }

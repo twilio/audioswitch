@@ -31,7 +31,8 @@ class BluetoothScoJobTest {
             mock())
     private var systemClockWrapper = setupSystemClockMock()
     private val deviceCache = BluetoothHeadsetCacheManager(logger)
-    private var scoJob = EnableBluetoothScoJob(logger, audioDeviceManager, handler, systemClockWrapper)
+    private val headsetState = HeadsetState(logger)
+    private var scoJob = EnableBluetoothScoJob(logger, audioDeviceManager, deviceCache, headsetState, handler, systemClockWrapper)
 
     @Test
     fun `EnableBluetoothScoJob scoAction should execute enableBluetoothSco with true`() {
@@ -46,7 +47,7 @@ class BluetoothScoJobTest {
             whenever(mock.elapsedRealtime()).thenReturn(0L, TIMEOUT)
         }
         handler = setupHandlerMock()
-        scoJob = EnableBluetoothScoJob(logger, audioDeviceManager, handler, systemClockWrapper)
+        scoJob = EnableBluetoothScoJob(logger, audioDeviceManager, deviceCache, headsetState, handler, systemClockWrapper)
 
         scoJob.executeBluetoothScoJob()
 
@@ -55,7 +56,7 @@ class BluetoothScoJobTest {
 
     @Test
     fun `DisableBluetoothScoJob should execute enableBluetoothSco with false`() {
-        val scoJob = DisableBluetoothScoJob(logger, audioDeviceManager, handler, systemClockWrapper)
+        val scoJob = DisableBluetoothScoJob(logger, audioDeviceManager, headsetState, handler, systemClockWrapper)
 
         scoJob.executeBluetoothScoJob()
 
@@ -79,7 +80,7 @@ class BluetoothScoJobTest {
                 true
             }
         }
-        scoJob = EnableBluetoothScoJob(logger, audioDeviceManager, handler, systemClockWrapper)
+        scoJob = EnableBluetoothScoJob(logger, audioDeviceManager, deviceCache, headsetState, handler, systemClockWrapper)
 
         scoJob.executeBluetoothScoJob()
 
@@ -92,7 +93,7 @@ class BluetoothScoJobTest {
             whenever(mock.elapsedRealtime()).thenReturn(0L, TIMEOUT)
         }
         handler = setupHandlerMock()
-        scoJob = EnableBluetoothScoJob(logger, audioDeviceManager, handler, systemClockWrapper)
+        scoJob = EnableBluetoothScoJob(logger, audioDeviceManager, deviceCache, headsetState, handler, systemClockWrapper)
 
         scoJob.executeBluetoothScoJob()
 
@@ -105,7 +106,7 @@ class BluetoothScoJobTest {
             whenever(mock.elapsedRealtime()).thenReturn(0L, TIMEOUT + 1000)
         }
         handler = setupHandlerMock()
-        scoJob = EnableBluetoothScoJob(logger, audioDeviceManager, handler, systemClockWrapper)
+        scoJob = EnableBluetoothScoJob(logger, audioDeviceManager, deviceCache, headsetState, handler, systemClockWrapper)
 
         scoJob.executeBluetoothScoJob()
 
