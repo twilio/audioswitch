@@ -17,14 +17,15 @@ internal class AudioDeviceManager(
     private val logger: LogWrapper,
     private val audioManager: AudioManager,
     private val build: BuildWrapper,
-    private val audioFocusRequest: AudioFocusRequestWrapper
+    private val audioFocusRequest: AudioFocusRequestWrapper,
+    private val audioFocusChangeListener: AudioManager.OnAudioFocusChangeListener =
+            AudioManager.OnAudioFocusChangeListener { }
 ) {
 
     private var savedAudioMode = 0
     private var savedIsMicrophoneMuted = false
     private var savedSpeakerphoneEnabled = false
     private var audioRequest: AudioFocusRequest? = null
-    private var audioFocusChangeListener: AudioManager.OnAudioFocusChangeListener? = null
 
     fun hasEarpiece(): Boolean {
         val hasEarpiece = context.packageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY)
@@ -60,7 +61,6 @@ internal class AudioDeviceManager(
             audioRequest = audioFocusRequest.buildRequest()
             audioRequest?.let { audioManager.requestAudioFocus(it) }
         } else {
-            audioFocusChangeListener = AudioManager.OnAudioFocusChangeListener { }
             audioManager.requestAudioFocus(
                     audioFocusChangeListener,
                     AudioManager.STREAM_VOICE_CALL,

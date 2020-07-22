@@ -43,7 +43,6 @@ import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Assert.fail
 import org.junit.Ignore
 import org.junit.Test
-import org.mockito.ArgumentCaptor
 
 private const val DEVICE_NAME = "Bluetooth"
 
@@ -68,11 +67,14 @@ class AudioDeviceSelectorTest {
     private val wiredHeadsetReceiver = WiredHeadsetReceiver(context, logger)
     private val buildWrapper = mock<BuildWrapper>()
     private val audioFocusRequest = mock<AudioFocusRequestWrapper>()
+    private val audioFocusChangeListener = mock<AudioManager.OnAudioFocusChangeListener>()
     private val audioDeviceManager = AudioDeviceManager(context,
             logger,
             audioManager,
             buildWrapper,
-            audioFocusRequest)
+            audioFocusRequest,
+            audioFocusChangeListener
+    )
     private var handler = setupScoHandlerMock()
     private var systemClockWrapper = setupSystemClockMock()
     private var bluetoothHeadsetReceiver = BluetoothHeadsetReceiver(context,
@@ -314,9 +316,9 @@ class AudioDeviceSelectorTest {
         audioDeviceSelector.activate()
 
         verify(audioManager).requestAudioFocus(
-                isA(),
-                eq(AudioManager.STREAM_VOICE_CALL),
-                eq(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT)
+                audioFocusChangeListener,
+                AudioManager.STREAM_VOICE_CALL,
+                AudioManager.AUDIOFOCUS_GAIN_TRANSIENT
         )
     }
 
@@ -349,16 +351,9 @@ class AudioDeviceSelectorTest {
         whenever(buildWrapper.getVersion()).thenReturn(Build.VERSION_CODES.N_MR1)
         audioDeviceSelector.start(audioDeviceChangeListener)
         audioDeviceSelector.activate()
-        val audioFocusListenerCaptor =
-            ArgumentCaptor.forClass(AudioManager.OnAudioFocusChangeListener::class.java)
-        verify(audioManager).requestAudioFocus(
-            audioFocusListenerCaptor.capture(),
-            eq(AudioManager.STREAM_VOICE_CALL),
-            eq(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT)
-        )
         audioDeviceSelector.stop()
-        audioDeviceSelector.deactivate()
-        verify(audioManager).abandonAudioFocus(audioFocusListenerCaptor.value)
+
+        verify(audioManager).abandonAudioFocus(audioFocusChangeListener)
     }
 
     @Test
