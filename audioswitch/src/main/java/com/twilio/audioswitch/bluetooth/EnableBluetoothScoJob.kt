@@ -5,6 +5,7 @@ import android.os.Looper
 import com.twilio.audioswitch.android.LogWrapper
 import com.twilio.audioswitch.android.SystemClockWrapper
 import com.twilio.audioswitch.bluetooth.HeadsetState.State.Activating
+import com.twilio.audioswitch.bluetooth.HeadsetState.State.ActivationError
 import com.twilio.audioswitch.selection.AudioDevice
 import com.twilio.audioswitch.selection.AudioDeviceManager
 
@@ -33,13 +34,7 @@ internal class EnableBluetoothScoJob(
     }
 
     override fun scoTimeOutAction() {
-//        headset?.let { headset ->
-//            headsetState.state = if (headsetCache.cachedHeadsets.isEmpty()) {
-//                Disconnected
-//            } else {
-//                Connected
-//            }
-//            deviceListener?.onBluetoothHeadsetStateChanged()
-//        }
+        headsetState.state = ActivationError
+        deviceListener?.onBluetoothHeadsetActivationError()
     }
 }

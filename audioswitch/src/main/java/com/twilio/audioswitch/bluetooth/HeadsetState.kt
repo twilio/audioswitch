@@ -19,6 +19,7 @@ internal class HeadsetState(private val logger: LogWrapper) {
         object Disconnected : State()
         object Connected : State()
         object Activating : State()
+        object ActivationError : State()
         object Activated : State()
     }
 }

@@ -96,6 +96,11 @@ class AudioDeviceSelector {
         override fun onBluetoothHeadsetStateChanged() {
             enumerateDevices()
         }
+
+        override fun onBluetoothHeadsetActivationError() {
+            if (userSelectedDevice is BluetoothHeadset) userSelectedDevice = null
+            enumerateDevices()
+        }
     }
 
     internal val wiredDeviceConnectionListener = object : WiredDeviceConnectionListener {
@@ -182,7 +187,8 @@ class AudioDeviceSelector {
         when (audioDevice) {
             is BluetoothHeadset -> {
                 audioDeviceManager.enableSpeakerphone(false)
-                if (headsetState.state == HeadsetState.State.Connected) {
+                if (headsetState.state == HeadsetState.State.Connected ||
+                        headsetState.state == HeadsetState.State.ActivationError) {
                     bluetoothController?.activate(audioDevice)
                 }
             }
@@ -251,7 +257,7 @@ class AudioDeviceSelector {
 
     private fun enumerateDevices() {
         mutableAudioDevices.clear()
-        if (headsetState.state == HeadsetState.State.Connected) {
+        if (headsetState.state != HeadsetState.State.Disconnected) {
             mutableAudioDevices.add(BluetoothHeadset())
         }
         if (wiredHeadsetAvailable) {
@@ -275,7 +281,13 @@ class AudioDeviceSelector {
         selectedDevice = if (userSelectedDevice != null && userSelectedDevicePresent(mutableAudioDevices)) {
             userSelectedDevice
         } else if (mutableAudioDevices.size > 0) {
-            mutableAudioDevices[0]
+            val firstAudioDevice = mutableAudioDevices[0]
+            if (firstAudioDevice is BluetoothHeadset &&
+                    headsetState.state == HeadsetState.State.ActivationError) {
+                mutableAudioDevices[1]
+            } else {
+                firstAudioDevice
+            }
         } else {
             null
         }

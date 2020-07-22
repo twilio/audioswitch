@@ -18,13 +18,12 @@ internal class BluetoothHeadsetManager(
 
     override fun onServiceConnected(profile: Int, bluetoothProfile: BluetoothProfile) {
         headsetProxy = bluetoothProfile as BluetoothHeadset
-        bluetoothProfile.connectedDevices.let { deviceList ->
-            deviceList.forEach { device ->
-                logger.d(TAG, "Bluetooth " + device.name + " connected")
-
-                headsetState.state = HeadsetState.State.Connected
-                headsetListener?.onBluetoothHeadsetStateChanged()
-            }
+        bluetoothProfile.connectedDevices.forEach { device ->
+            logger.d(TAG, "Bluetooth " + device.name + " connected")
+        }
+        if (hasConnectedDevice()) {
+            headsetState.state = HeadsetState.State.Connected
+            headsetListener?.onBluetoothHeadsetStateChanged()
         }
     }
 
@@ -38,4 +37,18 @@ internal class BluetoothHeadsetManager(
         headsetListener = null
         bluetoothAdapter.closeProfileProxy(BluetoothProfile.HEADSET, headsetProxy)
     }
+
+    fun hasConnectedDevice() =
+        headsetProxy?.let { proxy ->
+            proxy.connectedDevices?.let { devices ->
+                devices.isNotEmpty()
+            }
+        } ?: false
+
+    fun hasActiveDevice() =
+        headsetProxy?.let { proxy ->
+            proxy.connectedDevices?.let { devices ->
+                devices.any { proxy.isAudioConnected(it) }
+            }
+        } ?: false
 }
