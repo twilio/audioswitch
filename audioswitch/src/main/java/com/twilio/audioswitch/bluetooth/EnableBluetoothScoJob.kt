@@ -5,8 +5,6 @@ import android.os.Looper
 import com.twilio.audioswitch.android.LogWrapper
 import com.twilio.audioswitch.android.SystemClockWrapper
 import com.twilio.audioswitch.bluetooth.HeadsetState.State.Activating
-import com.twilio.audioswitch.bluetooth.HeadsetState.State.Connected
-import com.twilio.audioswitch.bluetooth.HeadsetState.State.Disconnected
 import com.twilio.audioswitch.selection.AudioDevice
 import com.twilio.audioswitch.selection.AudioDeviceManager
 
@@ -15,7 +13,6 @@ private const val TAG = "EnableBluetoothScoJob"
 internal class EnableBluetoothScoJob(
     private val logger: LogWrapper,
     private val audioDeviceManager: AudioDeviceManager,
-    private val headsetCache: BluetoothHeadsetCacheManager,
     private val headsetState: HeadsetState,
     bluetoothScoHandler: Handler = Handler(Looper.getMainLooper()),
     systemClockWrapper: SystemClockWrapper = SystemClockWrapper()
@@ -36,14 +33,13 @@ internal class EnableBluetoothScoJob(
     }
 
     override fun scoTimeOutAction() {
-        headset?.let { headset ->
-            headsetCache.remove(headset)
-            headsetState.state = if (headsetCache.cachedHeadsets.isEmpty()) {
-                Disconnected
-            } else {
-                Connected
-            }
-            deviceListener?.onBluetoothHeadsetStateChanged()
-        }
+//        headset?.let { headset ->
+//            headsetState.state = if (headsetCache.cachedHeadsets.isEmpty()) {
+//                Disconnected
+//            } else {
+//                Connected
+//            }
+//            deviceListener?.onBluetoothHeadsetStateChanged()
+//        }
     }
 }

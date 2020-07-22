@@ -28,9 +28,9 @@ internal class BluetoothHeadsetReceiver(
     private val logger: LogWrapper,
     private val bluetoothIntentProcessor: BluetoothIntentProcessor,
     audioDeviceManager: AudioDeviceManager,
-    private val headsetCache: BluetoothHeadsetCacheManager,
     private val headsetState: HeadsetState,
-    private val enableBluetoothScoJob: EnableBluetoothScoJob = EnableBluetoothScoJob(logger, audioDeviceManager, headsetCache, headsetState),
+    private val headsetManager: BluetoothHeadsetManager,
+    private val enableBluetoothScoJob: EnableBluetoothScoJob = EnableBluetoothScoJob(logger, audioDeviceManager, headsetState),
     private val disableBluetoothScoJob: DisableBluetoothScoJob = DisableBluetoothScoJob(logger, audioDeviceManager, headsetState),
     var headsetListener: BluetoothHeadsetConnectionListener? = null
 ) : BroadcastReceiver() {
@@ -45,7 +45,6 @@ internal class BluetoothHeadsetReceiver(
                                 "Bluetooth ACL device " +
                                         bluetoothDevice.name +
                                         " connected")
-                        headsetCache.add(BluetoothHeadset(bluetoothDevice.name))
                         headsetState.state = HeadsetState.State.Connected
                         headsetListener?.onBluetoothHeadsetStateChanged()
                     }
@@ -58,18 +57,12 @@ internal class BluetoothHeadsetReceiver(
                                         bluetoothDevice.name +
                                         " disconnected")
 
-                        var state = when (bluetoothDevice.name) {
-                            headsetCache.activeHeadset?.name -> {
-                                HeadsetState.State.Connected
-                            }
-                            else -> HeadsetState.State.Activated
-                        }
-                        headsetCache.remove(BluetoothHeadset(bluetoothDevice.name))
-                        if (headsetCache.cachedHeadsets.isEmpty()) {
-                            state = HeadsetState.State.Disconnected
+                        headsetState.state = if (hasConnectedAndActiveDevice()) {
+                            HeadsetState.State.Connected
+                        } else {
+                            HeadsetState.State.Disconnected
                         }
 
-                        headsetState.state = state
                         headsetListener?.onBluetoothHeadsetStateChanged()
                     }
                 }
@@ -99,6 +92,13 @@ internal class BluetoothHeadsetReceiver(
             }
         }
     }
+
+    private fun hasConnectedAndActiveDevice() =
+            headsetManager.headsetProxy?.let { proxy ->
+                proxy.connectedDevices?.let { devices ->
+                    devices.isNotEmpty() && devices.any { proxy.isAudioConnected(it) }
+                }
+            } ?: false
 
     fun enableBluetoothSco(enable: Boolean, headset: BluetoothHeadset? = null) {
         if (enable) {
