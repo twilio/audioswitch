@@ -51,6 +51,7 @@ class AudioDeviceSelector {
         this.headsetState = HeadsetState(logger)
         this.bluetoothController = BluetoothAdapter.getDefaultAdapter()?.let { bluetoothAdapter ->
             val headsetManager = BluetoothHeadsetManager(logger, bluetoothAdapter, headsetState)
+            this.headsetManager = headsetManager
             BluetoothController(context,
                     bluetoothAdapter,
                     headsetManager,
@@ -87,14 +88,15 @@ class AudioDeviceSelector {
     private var wiredHeadsetAvailable = false
     private val mutableAudioDevices = ArrayList<AudioDevice>()
     private val headsetState: HeadsetState
+    private var headsetManager: BluetoothHeadsetManager? = null
 
     internal var state: State = STOPPED
     internal enum class State {
         STARTED, ACTIVATED, STOPPED
     }
     internal val bluetoothDeviceConnectionListener = object : BluetoothHeadsetConnectionListener {
-        override fun onBluetoothHeadsetStateChanged() {
-            enumerateDevices()
+        override fun onBluetoothHeadsetStateChanged(headsetName: String?) {
+            enumerateDevices(headsetName)
         }
 
         override fun onBluetoothHeadsetActivationError() {
@@ -189,7 +191,7 @@ class AudioDeviceSelector {
                 audioDeviceManager.enableSpeakerphone(false)
                 if (headsetState.state == HeadsetState.State.Connected ||
                         headsetState.state == HeadsetState.State.ActivationError) {
-                    bluetoothController?.activate(audioDevice)
+                    bluetoothController?.activate()
                 }
             }
             is Earpiece, is WiredHeadset -> {
@@ -255,10 +257,12 @@ class AudioDeviceSelector {
      */
     val availableAudioDevices: List<AudioDevice> = mutableAudioDevices
 
-    private fun enumerateDevices() {
+    private fun enumerateDevices(bluetoothHeadsetName: String? = null) {
         mutableAudioDevices.clear()
         if (headsetState.state != HeadsetState.State.Disconnected) {
-            mutableAudioDevices.add(BluetoothHeadset())
+            mutableAudioDevices.add(
+                    BluetoothHeadset(bluetoothHeadsetName ?: headsetManager?.getHeadsetName()
+                    ?: "Bluetooth"))
         }
         if (wiredHeadsetAvailable) {
             mutableAudioDevices.add(WiredHeadset())

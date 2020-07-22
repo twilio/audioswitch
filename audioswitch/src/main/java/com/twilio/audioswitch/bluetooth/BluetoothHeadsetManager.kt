@@ -23,7 +23,7 @@ internal class BluetoothHeadsetManager(
         }
         if (hasConnectedDevice()) {
             headsetState.state = HeadsetState.State.Connected
-            headsetListener?.onBluetoothHeadsetStateChanged()
+            headsetListener?.onBluetoothHeadsetStateChanged(getHeadsetName())
         }
     }
 
@@ -39,16 +39,38 @@ internal class BluetoothHeadsetManager(
     }
 
     fun hasConnectedDevice() =
-        headsetProxy?.let { proxy ->
-            proxy.connectedDevices?.let { devices ->
-                devices.isNotEmpty()
-            }
-        } ?: false
+            headsetProxy?.let { proxy ->
+                proxy.connectedDevices?.let { devices ->
+                    devices.isNotEmpty()
+                }
+            } ?: false
 
     fun hasActiveDevice() =
-        headsetProxy?.let { proxy ->
-            proxy.connectedDevices?.let { devices ->
-                devices.any { proxy.isAudioConnected(it) }
+            headsetProxy?.let { proxy ->
+                proxy.connectedDevices?.let { devices ->
+                    devices.any { proxy.isAudioConnected(it) }
+                }
+            } ?: false
+
+    fun getHeadsetName(): String? =
+            headsetProxy?.let { proxy ->
+                proxy.connectedDevices?.let { devices ->
+                    when {
+                        devices.size > 1 && hasActiveDevice() -> {
+                            val device = devices.find { proxy.isAudioConnected(it) }?.name
+                            logger.d(TAG, "Device size > 1 with device name: $device")
+                            device
+                        }
+                        devices.size == 1 -> {
+                            val device = devices.first().name
+                            logger.d(TAG, "Device size 1 with device name: $device")
+                            device
+                        }
+                        else -> {
+                            logger.d(TAG, "Device size 0")
+                            null
+                        }
+                    }
+                }
             }
-        } ?: false
 }

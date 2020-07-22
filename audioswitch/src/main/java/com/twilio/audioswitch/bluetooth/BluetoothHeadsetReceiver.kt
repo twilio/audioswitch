@@ -18,7 +18,6 @@ import android.media.AudioManager.SCO_AUDIO_STATE_ERROR
 import com.twilio.audioswitch.android.BluetoothDeviceWrapper
 import com.twilio.audioswitch.android.BluetoothIntentProcessor
 import com.twilio.audioswitch.android.LogWrapper
-import com.twilio.audioswitch.selection.AudioDevice.BluetoothHeadset
 import com.twilio.audioswitch.selection.AudioDeviceManager
 
 private const val TAG = "BluetoothDeviceReceiver"
@@ -48,7 +47,7 @@ internal class BluetoothHeadsetReceiver(
                         if (headsetState.state != HeadsetState.State.Activating) {
                             headsetState.state = HeadsetState.State.Connected
                         }
-                        headsetListener?.onBluetoothHeadsetStateChanged()
+                        headsetListener?.onBluetoothHeadsetStateChanged(bluetoothDevice.name)
                     }
                 }
                 ACTION_ACL_DISCONNECTED -> {
@@ -80,6 +79,7 @@ internal class BluetoothHeadsetReceiver(
                             SCO_AUDIO_STATE_CONNECTED -> {
                                 logger.d(TAG, "Bluetooth SCO Audio connected")
                                 headsetState.state = HeadsetState.State.Activated
+                                headsetListener?.onBluetoothHeadsetStateChanged()
                                 enableBluetoothScoJob.cancelBluetoothScoJob()
                             }
                             SCO_AUDIO_STATE_DISCONNECTED -> {
@@ -90,6 +90,7 @@ internal class BluetoothHeadsetReceiver(
                                     logger.d(TAG, "Active Bluetooth headset changed")
                                     enableBluetoothSco(true)
                                 }
+                                headsetListener?.onBluetoothHeadsetStateChanged()
                                 disableBluetoothScoJob.cancelBluetoothScoJob()
                             }
                             SCO_AUDIO_STATE_ERROR -> {
@@ -103,9 +104,9 @@ internal class BluetoothHeadsetReceiver(
         }
     }
 
-    fun enableBluetoothSco(enable: Boolean, headset: BluetoothHeadset? = null) {
+    fun enableBluetoothSco(enable: Boolean) {
         if (enable) {
-            enableBluetoothScoJob.executeBluetoothScoJob(headset)
+            enableBluetoothScoJob.executeBluetoothScoJob()
         } else {
             disableBluetoothScoJob.executeBluetoothScoJob()
         }
