@@ -4,16 +4,14 @@ import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothHeadset
 import android.bluetooth.BluetoothProfile
 import com.twilio.audioswitch.android.LogWrapper
-import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager.HeadsetEvent.AudioActivated
 import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager.HeadsetEvent.Connect
 import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager.HeadsetEvent.Disconnect
 import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager.HeadsetEvent.StartAudioActivation
 import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager.HeadsetEvent.StartAudioDeactivation
-import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager.State.Activated
-import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager.State.Activating
-import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager.State.ActivationError
-import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager.State.Connected
-import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager.State.Disconnected
+import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager.HeadsetState.AudioActivating
+import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager.HeadsetState.AudioActivationError
+import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager.HeadsetState.Connected
+import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager.HeadsetState.Disconnected
 import com.twilio.audioswitch.selection.AudioDevice
 
 private const val TAG = "BluetoothHeadsetManager"
@@ -25,7 +23,7 @@ internal class BluetoothHeadsetManager(
 ) : BluetoothProfile.ServiceListener {
 
     private var headsetProxy: BluetoothHeadset? = null
-    private var state: State = Disconnected
+    private var headsetState: HeadsetState = Disconnected
         set(value) {
             if (field != value) {
                 field = value
@@ -46,7 +44,7 @@ internal class BluetoothHeadsetManager(
 
     override fun onServiceDisconnected(profile: Int) {
         logger.d(TAG, "Bluetooth disconnected")
-        state = Disconnected
+        headsetState = Disconnected
         headsetListener?.onBluetoothHeadsetStateChanged()
     }
 
@@ -61,20 +59,20 @@ internal class BluetoothHeadsetManager(
             Disconnect -> disconnect()
             is StartAudioActivation -> startAudioActivation(headsetEvent.error)
             is StartAudioDeactivation -> startAudioDeactivation(headsetEvent.error)
-            AudioActivated -> audioActivated()
+            HeadsetEvent.AudioActivated -> audioActivated()
         }
     }
 
     private fun connect() {
-        if (state != Activating) {
-            state = Connected
+        if (headsetState != AudioActivating) {
+            headsetState = Connected
         }
     }
 
     private fun disconnect() {
-        state = when {
+        headsetState = when {
             hasActiveHeadset() -> {
-                Activated
+                HeadsetState.AudioActivated
             }
             hasConnectedDevice() -> {
                 Connected
@@ -86,27 +84,27 @@ internal class BluetoothHeadsetManager(
     }
 
     private fun startAudioActivation(error: Boolean = false) {
-        state = if (!error) Activating else ActivationError
+        headsetState = if (!error) AudioActivating else AudioActivationError
     }
 
     private fun startAudioDeactivation(error: Boolean = false) {
-        state = if (!error) Connected else Activated
+        headsetState = if (!error) Connected else HeadsetState.AudioActivated
     }
 
     private fun audioActivated() {
-        state = Activated
+        headsetState = HeadsetState.AudioActivated
     }
 
-    fun hasActiveHeadsetChanged() = state == Activated && hasConnectedDevice() && hasActiveHeadset()
+    fun hasActiveHeadsetChanged() = headsetState == HeadsetState.AudioActivated && hasConnectedDevice() && hasActiveHeadset()
 
-    fun canActivate() = state == Connected || state == ActivationError
+    fun canActivate() = headsetState == Connected || headsetState == AudioActivationError
 
-    fun canDeactivate() = state == Activated
+    fun canDeactivate() = headsetState == HeadsetState.AudioActivated
 
-    fun hasActivationError() = state == ActivationError
+    fun hasActivationError() = headsetState == AudioActivationError
 
     fun getHeadset(bluetoothHeadsetName: String?) =
-            if (state != Disconnected) {
+            if (headsetState != Disconnected) {
                 AudioDevice.BluetoothHeadset(bluetoothHeadsetName ?: getHeadsetName()
                 ?: "Bluetooth")
             } else null
@@ -155,11 +153,11 @@ internal class BluetoothHeadsetManager(
         object AudioActivated : HeadsetEvent()
     }
 
-    private sealed class State {
-        object Disconnected : State()
-        object Connected : State()
-        object Activating : State()
-        object ActivationError : State()
-        object Activated : State()
+    private sealed class HeadsetState {
+        object Disconnected : HeadsetState()
+        object Connected : HeadsetState()
+        object AudioActivating : HeadsetState()
+        object AudioActivationError : HeadsetState()
+        object AudioActivated : HeadsetState()
     }
 }
