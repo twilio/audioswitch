@@ -40,10 +40,12 @@ internal class BluetoothController internal constructor(
     }
 
     fun activate() {
-        bluetoothHeadsetReceiver.enableBluetoothSco(true)
+        if (bluetoothHeadsetManager.canActivate())
+            bluetoothHeadsetReceiver.enableBluetoothSco(true)
     }
 
     fun deactivate() {
-        bluetoothHeadsetReceiver.enableBluetoothSco(false)
+        if (bluetoothHeadsetManager.canDeactivate())
+            bluetoothHeadsetReceiver.enableBluetoothSco(false)
     }
 }

@@ -4,8 +4,7 @@ import android.os.Handler
 import android.os.Looper
 import com.twilio.audioswitch.android.LogWrapper
 import com.twilio.audioswitch.android.SystemClockWrapper
-import com.twilio.audioswitch.bluetooth.BluetoothHeadsetState.State.Activated
-import com.twilio.audioswitch.bluetooth.BluetoothHeadsetState.State.Connected
+import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager.HeadsetEvent.StartAudioDeactivation
 import com.twilio.audioswitch.selection.AudioDeviceManager
 
 private const val TAG = "DisableBluetoothScoJob"
@@ -13,7 +12,7 @@ private const val TAG = "DisableBluetoothScoJob"
 internal class DisableBluetoothScoJob(
     private val logger: LogWrapper,
     private val audioDeviceManager: AudioDeviceManager,
-    private val bluetoothHeadsetState: BluetoothHeadsetState,
+    private val headsetManager: BluetoothHeadsetManager,
     bluetoothScoHandler: Handler = Handler(Looper.getMainLooper()),
     systemClockWrapper: SystemClockWrapper = SystemClockWrapper()
 ) : BluetoothScoJob(logger, bluetoothScoHandler, systemClockWrapper) {
@@ -21,10 +20,10 @@ internal class DisableBluetoothScoJob(
     override fun scoAction() {
         logger.d(TAG, "Attempting to disable bluetooth SCO")
         audioDeviceManager.enableBluetoothSco(false)
-        bluetoothHeadsetState.state = Connected
+        headsetManager.updateState(StartAudioDeactivation())
     }
 
     override fun scoTimeOutAction() {
-        bluetoothHeadsetState.state = Activated
+        headsetManager.updateState(StartAudioDeactivation(true))
     }
 }
