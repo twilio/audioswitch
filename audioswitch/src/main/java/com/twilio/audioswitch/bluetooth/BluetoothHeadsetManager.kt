@@ -10,7 +10,7 @@ private const val TAG = "BluetoothHeadsetManager"
 internal class BluetoothHeadsetManager(
     private val logger: LogWrapper,
     private val bluetoothAdapter: BluetoothAdapter,
-    private val headsetState: HeadsetState,
+    private val bluetoothHeadsetState: BluetoothHeadsetState,
     var headsetListener: BluetoothHeadsetConnectionListener? = null
 ) : BluetoothProfile.ServiceListener {
 
@@ -22,14 +22,14 @@ internal class BluetoothHeadsetManager(
             logger.d(TAG, "Bluetooth " + device.name + " connected")
         }
         if (hasConnectedDevice()) {
-            headsetState.state = HeadsetState.State.Connected
+            bluetoothHeadsetState.state = BluetoothHeadsetState.State.Connected
             headsetListener?.onBluetoothHeadsetStateChanged(getHeadsetName())
         }
     }
 
     override fun onServiceDisconnected(profile: Int) {
         logger.d(TAG, "Bluetooth disconnected")
-        headsetState.state = HeadsetState.State.Disconnected
+        bluetoothHeadsetState.state = BluetoothHeadsetState.State.Disconnected
         headsetListener?.onBluetoothHeadsetStateChanged()
     }
 

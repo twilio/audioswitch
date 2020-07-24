@@ -21,7 +21,7 @@ open class BaseTest {
     internal val audioManager = setupAudioManagerMock()
     internal val bluetoothAdapter = mock<BluetoothAdapter>()
     internal val audioDeviceChangeListener = mock<AudioDeviceChangeListener>()
-    internal val headsetState = HeadsetState(logger)
+    internal val headsetState = BluetoothHeadsetState(logger)
     internal var headsetManager = BluetoothHeadsetManager(logger, bluetoothAdapter,
             headsetState)
     internal val wiredHeadsetReceiver = WiredHeadsetReceiver(context, logger)
