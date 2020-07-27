@@ -51,11 +51,13 @@ class AudioDeviceSelector {
     internal constructor(
         logger: LogWrapper,
         audioDeviceManager: AudioDeviceManager,
-        wiredHeadsetReceiver: WiredHeadsetReceiver
+        wiredHeadsetReceiver: WiredHeadsetReceiver,
+        headsetManager: BluetoothHeadsetManager?
     ) {
         this.logger = logger
         this.audioDeviceManager = audioDeviceManager
         this.wiredHeadsetReceiver = wiredHeadsetReceiver
+        this.bluetoothHeadsetManager = headsetManager
     }
 
     private var logger: LogWrapper = LogWrapper()

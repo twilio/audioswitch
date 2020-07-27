@@ -14,12 +14,16 @@ import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.verifyZeroInteractions
 import com.nhaarman.mockitokotlin2.whenever
+import com.twilio.audioswitch.DEVICE_NAME
+import com.twilio.audioswitch.assertBluetoothHeadsetSetup
+import com.twilio.audioswitch.assertBluetoothHeadsetTeardown
 import com.twilio.audioswitch.bluetooth.BaseTest
 import com.twilio.audioswitch.selection.AudioDevice.Earpiece
 import com.twilio.audioswitch.selection.AudioDevice.Speakerphone
 import com.twilio.audioswitch.selection.AudioDeviceSelector.State.ACTIVATED
 import com.twilio.audioswitch.selection.AudioDeviceSelector.State.STARTED
 import com.twilio.audioswitch.selection.AudioDeviceSelector.State.STOPPED
+import com.twilio.audioswitch.simulateNewBluetoothHeadsetConnection
 import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.CoreMatchers.nullValue
@@ -28,8 +32,6 @@ import org.junit.Assert.fail
 import org.junit.Before
 import org.junit.Ignore
 import org.junit.Test
-
-private const val DEVICE_NAME = "Bluetooth"
 
 class AudioDeviceSelectorTest : BaseTest() {
 
@@ -46,12 +48,7 @@ class AudioDeviceSelectorTest : BaseTest() {
     fun `start should start the bluetooth and wired headset listeners`() {
         audioDeviceSelector.start(audioDeviceChangeListener)
 
-        bluetoothControllerAssertions.assertStart(
-                context,
-                headsetManager,
-                bluetoothHeadsetReceiver,
-                audioDeviceSelector.bluetoothDeviceConnectionListener,
-                bluetoothAdapter)
+        assertBluetoothHeadsetSetup()
 
         assertThat(wiredHeadsetReceiver.deviceListener, equalTo(audioDeviceSelector.wiredDeviceConnectionListener))
         verify(context).registerReceiver(eq(wiredHeadsetReceiver), isA())
@@ -86,22 +83,22 @@ class AudioDeviceSelectorTest : BaseTest() {
     }
 
     @Test
-    fun `start should not start the BluetoothController if it is null`() {
+    fun `start should not start the HeadsetManager if it is null`() {
         audioDeviceSelector = AudioDeviceSelector(
                 logger,
                 audioDeviceManager,
                 wiredHeadsetReceiver,
-                null,
-                headsetState
+                null
         )
 
         audioDeviceSelector.start(audioDeviceChangeListener)
 
-        bluetoothControllerAssertions.assertNotStarted(
+        verify(bluetoothAdapter, times(0)).getProfileProxy(
                 context,
                 headsetManager,
-                bluetoothHeadsetReceiver,
-                bluetoothAdapter)
+                BluetoothProfile.HEADSET
+        )
+        verify(context, times(0)).registerReceiver(eq(headsetManager), isA())
     }
 
     @Test
@@ -138,15 +135,13 @@ class AudioDeviceSelectorTest : BaseTest() {
 
     @Test
     fun `stop should stop the bluetooth and wired headset listeners if the current state is started`() {
-        val bluetoothProfile = mock<BluetoothHeadset>()
-        headsetManager.onServiceConnected(0, bluetoothProfile)
+        headsetManager.onServiceConnected(0, headsetProxy)
 
         audioDeviceSelector.start(audioDeviceChangeListener)
         audioDeviceSelector.stop()
 
         // Verify bluetooth behavior
-        verify(bluetoothAdapter).closeProfileProxy(BluetoothProfile.HEADSET, bluetoothProfile)
-        verify(context).unregisterReceiver(bluetoothHeadsetReceiver)
+        assertBluetoothHeadsetTeardown()
 
         // Verify wired headset behavior
         assertThat(wiredHeadsetReceiver.deviceListener, `is`(nullValue()))
@@ -192,36 +187,34 @@ class AudioDeviceSelectorTest : BaseTest() {
     }
 
     @Test
-    fun `stop should not stop the BluetoothController if it is null and if transitioning from the started state`() {
+    fun `stop should not stop the BluetoothHeadsetManager if it is null and if transitioning from the started state`() {
         audioDeviceSelector = AudioDeviceSelector(
                 logger,
                 audioDeviceManager,
                 wiredHeadsetReceiver,
-                null,
-                headsetState
+                null
         )
         audioDeviceSelector.start(audioDeviceChangeListener)
         audioDeviceSelector.stop()
 
         verifyZeroInteractions(bluetoothAdapter)
-        verify(context, times(0)).unregisterReceiver(bluetoothHeadsetReceiver)
+        verify(context, times(0)).unregisterReceiver(headsetManager)
     }
 
     @Test
-    fun `stop should not stop the BluetoothController if it is null and if transitioning from the activated state`() {
+    fun `stop should not stop the BluetoothHeadsetManager if it is null and if transitioning from the activated state`() {
         audioDeviceSelector = AudioDeviceSelector(
                 logger,
                 audioDeviceManager,
                 wiredHeadsetReceiver,
-                null,
-                headsetState
+                null
         )
         audioDeviceSelector.start(audioDeviceChangeListener)
         audioDeviceSelector.activate()
         audioDeviceSelector.stop()
 
         verifyZeroInteractions(bluetoothAdapter)
-        verify(context, times(0)).unregisterReceiver(bluetoothHeadsetReceiver)
+        verify(context, times(0)).unregisterReceiver(headsetManager)
     }
 
     @Test
@@ -304,10 +297,11 @@ class AudioDeviceSelectorTest : BaseTest() {
     @Test
     fun `activate should enable audio routing to the earpiece`() {
         audioDeviceSelector.start(audioDeviceChangeListener)
+        val earpiece = audioDeviceSelector.availableAudioDevices.find { it.name == "Earpiece" }
+        audioDeviceSelector.selectDevice(earpiece)
         audioDeviceSelector.activate()
 
         verify(audioManager).isSpeakerphoneOn = false
-        verify(audioManager).stopBluetoothSco()
     }
 
     @Test
@@ -317,12 +311,12 @@ class AudioDeviceSelectorTest : BaseTest() {
         audioDeviceSelector.activate()
 
         verify(audioManager).isSpeakerphoneOn = true
-        verify(audioManager).stopBluetoothSco()
     }
 
     @Test
     fun `activate should enable audio routing to the bluetooth device`() {
         audioDeviceSelector.start(audioDeviceChangeListener)
+        simulateNewBluetoothHeadsetConnection()
         audioDeviceSelector.activate()
 
         verify(audioManager).isSpeakerphoneOn = false
@@ -336,7 +330,12 @@ class AudioDeviceSelectorTest : BaseTest() {
         audioDeviceSelector.activate()
 
         verify(audioManager).isSpeakerphoneOn = false
-        verify(audioManager).stopBluetoothSco()
+    }
+
+    @Ignore("Finish as part of https://issues.corp.twilio.com/browse/AHOYAPPS-588")
+    @Test
+    fun `test stopBluetooth sco scenarios when activating other audio devices`() {
+        TODO("Not yet implemented")
     }
 
     @Ignore("Finish as part of https://issues.corp.twilio.com/browse/AHOYAPPS-588")
@@ -390,6 +389,7 @@ class AudioDeviceSelectorTest : BaseTest() {
     @Test
     fun `onBluetoothDeviceStateChanged should enumerate devices`() {
         audioDeviceSelector.start(audioDeviceChangeListener)
+        simulateNewBluetoothHeadsetConnection()
         audioDeviceSelector.activate()
 
         audioDeviceSelector.bluetoothDeviceConnectionListener.onBluetoothHeadsetStateChanged()
@@ -401,6 +401,7 @@ class AudioDeviceSelectorTest : BaseTest() {
     @Test
     fun `selectDevice should not re activate the bluetooth device if the same device has been selected`() {
         audioDeviceSelector.start(audioDeviceChangeListener)
+        simulateNewBluetoothHeadsetConnection()
         audioDeviceSelector.activate()
 
         audioDeviceSelector.selectDevice(AudioDevice.BluetoothHeadset(DEVICE_NAME))

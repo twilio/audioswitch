@@ -11,17 +11,13 @@ import com.twilio.audioswitch.android.DEVICE_NAME
 import com.twilio.audioswitch.android.FakeBluetoothIntentProcessor
 import com.twilio.audioswitch.android.HEADSET_NAME
 import com.twilio.audioswitch.android.LogWrapper
-import com.twilio.audioswitch.bluetooth.BluetoothController
-import com.twilio.audioswitch.bluetooth.BluetoothHeadsetCacheManager
 import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager
-import com.twilio.audioswitch.bluetooth.BluetoothHeadsetReceiver
-import com.twilio.audioswitch.bluetooth.BluetoothHeadsetState
 import com.twilio.audioswitch.selection.AudioDeviceManager
 import com.twilio.audioswitch.selection.AudioDeviceSelector
 import com.twilio.audioswitch.selection.AudioFocusRequestWrapper
 import com.twilio.audioswitch.wired.WiredHeadsetReceiver
 
-val TAG = "TestUtil"
+private const val TAG = "TestUtil"
 
 internal fun setupFakeAudioDeviceSelector(context: Context):
         Pair<AudioDeviceSelector, BluetoothHeadsetReceiver> {

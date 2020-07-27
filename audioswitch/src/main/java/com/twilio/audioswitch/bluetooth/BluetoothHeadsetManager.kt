@@ -36,23 +36,29 @@ internal constructor(
     private val logger: LogWrapper,
     private val bluetoothAdapter: BluetoothAdapter,
     audioDeviceManager: AudioDeviceManager,
+    var headsetListener: BluetoothHeadsetConnectionListener? = null,
+    bluetoothScoHandler: Handler = Handler(Looper.getMainLooper()),
+    systemClockWrapper: SystemClockWrapper = SystemClockWrapper(),
     private val bluetoothIntentProcessor: BluetoothIntentProcessor =
             BluetoothIntentProcessorImpl(),
-    var headsetListener: BluetoothHeadsetConnectionListener? = null
+    private var headsetProxy: BluetoothHeadset? = null
 ) : BluetoothProfile.ServiceListener, BroadcastReceiver() {
 
-    private var headsetProxy: BluetoothHeadset? = null
-    private var headsetState: HeadsetState = Disconnected
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    internal var headsetState: HeadsetState = Disconnected
         set(value) {
             if (field != value) {
                 field = value
                 logger.d(TAG, "Headset state changed to $field")
             }
         }
-    private val enableBluetoothScoJob: EnableBluetoothScoJob = EnableBluetoothScoJob(logger,
-            audioDeviceManager)
-    private val disableBluetoothScoJob: DisableBluetoothScoJob = DisableBluetoothScoJob(logger,
-            audioDeviceManager)
+
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    internal val enableBluetoothScoJob: EnableBluetoothScoJob = EnableBluetoothScoJob(logger,
+            audioDeviceManager, bluetoothScoHandler, systemClockWrapper)
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    internal val disableBluetoothScoJob: DisableBluetoothScoJob = DisableBluetoothScoJob(logger,
+            audioDeviceManager, bluetoothScoHandler, systemClockWrapper)
 
     companion object {
         internal fun newInstance(
@@ -147,7 +153,6 @@ internal constructor(
 
     fun start(headsetListener: BluetoothHeadsetConnectionListener) {
         this.headsetListener = headsetListener
-        enableBluetoothScoJob.deviceListener = headsetListener
 
         bluetoothAdapter.getProfileProxy(
                 context,
@@ -166,7 +171,6 @@ internal constructor(
     fun stop() {
         headsetListener = null
         bluetoothAdapter.closeProfileProxy(BluetoothProfile.HEADSET, headsetProxy)
-        enableBluetoothScoJob.deviceListener = null
         context.unregisterReceiver(this)
     }
 
@@ -266,7 +270,8 @@ internal constructor(
                         deviceClass == BluetoothClass.Device.Major.UNCATEGORIZED
             } ?: false
 
-    private sealed class HeadsetState {
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    internal sealed class HeadsetState {
         object Disconnected : HeadsetState()
         object Connected : HeadsetState()
         object AudioActivating : HeadsetState()
@@ -274,14 +279,13 @@ internal constructor(
         object AudioActivated : HeadsetState()
     }
 
-    private inner class EnableBluetoothScoJob(
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    internal inner class EnableBluetoothScoJob(
         private val logger: LogWrapper,
         private val audioDeviceManager: AudioDeviceManager,
-        bluetoothScoHandler: Handler = Handler(Looper.getMainLooper()),
-        systemClockWrapper: SystemClockWrapper = SystemClockWrapper()
+        bluetoothScoHandler: Handler,
+        systemClockWrapper: SystemClockWrapper
     ) : BluetoothScoJob(logger, bluetoothScoHandler, systemClockWrapper) {
-
-        var deviceListener: BluetoothHeadsetConnectionListener? = null
 
         override fun scoAction() {
             logger.d(TAG, "Attempting to enable bluetooth SCO")
@@ -291,15 +295,16 @@ internal constructor(
 
         override fun scoTimeOutAction() {
             headsetState = AudioActivationError
-            deviceListener?.onBluetoothHeadsetActivationError()
+            headsetListener?.onBluetoothHeadsetActivationError()
         }
     }
 
-    private inner class DisableBluetoothScoJob(
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    internal inner class DisableBluetoothScoJob(
         private val logger: LogWrapper,
         private val audioDeviceManager: AudioDeviceManager,
-        bluetoothScoHandler: Handler = Handler(Looper.getMainLooper()),
-        systemClockWrapper: SystemClockWrapper = SystemClockWrapper()
+        bluetoothScoHandler: Handler,
+        systemClockWrapper: SystemClockWrapper
     ) : BluetoothScoJob(logger, bluetoothScoHandler, systemClockWrapper) {
 
         override fun scoAction() {
