@@ -123,9 +123,14 @@ internal constructor(
                             }
                             AudioManager.SCO_AUDIO_STATE_DISCONNECTED -> {
                                 logger.d(TAG, "Bluetooth SCO Audio disconnected")
+                                /*
+                                 * This block is needed to restart bluetooth SCO in the event that
+                                 * the active bluetooth headset has changed.
+                                 */
                                 if (hasActiveHeadsetChanged()) {
                                     enableBluetoothScoJob.executeBluetoothScoJob()
                                 }
+
                                 headsetListener?.onBluetoothHeadsetStateChanged()
                                 disableBluetoothScoJob.cancelBluetoothScoJob()
                             }

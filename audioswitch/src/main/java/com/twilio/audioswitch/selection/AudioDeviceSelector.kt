@@ -228,6 +228,12 @@ class AudioDeviceSelector {
 
     private fun enumerateDevices(bluetoothHeadsetName: String? = null) {
         mutableAudioDevices.clear()
+        /*
+         * Since the there is a delay between receiving the ACTION_ACL_CONNECTED event and receiving
+         * the name of the connected device from querying the BluetoothHeadset proxy class, the
+         * headset name received from the ACTION_ACL_CONNECTED intent needs to be passed into this
+         * function.
+         */
         bluetoothHeadsetManager?.getHeadset(bluetoothHeadsetName)?.let {
             mutableAudioDevices.add(it)
         }
@@ -253,6 +259,10 @@ class AudioDeviceSelector {
             userSelectedDevice
         } else if (mutableAudioDevices.size > 0) {
             val firstAudioDevice = mutableAudioDevices[0]
+            /*
+             * If there was an error starting bluetooth sco, then the selected AudioDevice should
+             * be the next valid device in the list.
+             */
             if (firstAudioDevice is BluetoothHeadset &&
                     bluetoothHeadsetManager?.hasActivationError() == true) {
                 mutableAudioDevices[1]
