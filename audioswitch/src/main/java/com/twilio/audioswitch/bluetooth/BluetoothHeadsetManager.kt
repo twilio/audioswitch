@@ -178,7 +178,7 @@ internal constructor(
         if (headsetState == Connected || headsetState == AudioActivationError)
             enableBluetoothScoJob.executeBluetoothScoJob()
         else {
-            logger.d(TAG, "Cannot activate when in the $headsetState state")
+            logger.w(TAG, "Cannot activate when in the $headsetState state")
         }
     }
 
@@ -186,7 +186,7 @@ internal constructor(
         if (headsetState == AudioActivated) {
             disableBluetoothScoJob.executeBluetoothScoJob()
         } else {
-            logger.d(TAG, "Cannot deactivate when in the $headsetState state")
+            logger.w(TAG, "Cannot deactivate when in the $headsetState state")
         }
     }
 
