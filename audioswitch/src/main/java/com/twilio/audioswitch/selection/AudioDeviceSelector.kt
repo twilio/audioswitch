@@ -3,13 +3,10 @@ package com.twilio.audioswitch.selection
 import android.bluetooth.BluetoothAdapter
 import android.content.Context
 import android.media.AudioManager
-import com.twilio.audioswitch.android.BluetoothIntentProcessorImpl
 import com.twilio.audioswitch.android.BuildWrapper
 import com.twilio.audioswitch.android.LogWrapper
-import com.twilio.audioswitch.bluetooth.BluetoothController
 import com.twilio.audioswitch.bluetooth.BluetoothHeadsetConnectionListener
 import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager
-import com.twilio.audioswitch.bluetooth.BluetoothHeadsetReceiver
 import com.twilio.audioswitch.selection.AudioDevice.BluetoothHeadset
 import com.twilio.audioswitch.selection.AudioDevice.Earpiece
 import com.twilio.audioswitch.selection.AudioDevice.Speakerphone
@@ -47,37 +44,25 @@ class AudioDeviceSelector {
         this.logger = logger
         this.audioDeviceManager = audioDeviceManager
         this.wiredHeadsetReceiver = WiredHeadsetReceiver(context, logger)
-        this.bluetoothController = BluetoothAdapter.getDefaultAdapter()?.let { bluetoothAdapter ->
-            val headsetManager = BluetoothHeadsetManager(logger, bluetoothAdapter)
-            this.bluetoothHeadsetManager = headsetManager
-            BluetoothController(context,
-                    bluetoothAdapter,
-                    headsetManager,
-                    BluetoothHeadsetReceiver(context, logger, BluetoothIntentProcessorImpl(),
-                            audioDeviceManager, headsetManager)
-            )
-        } ?: run {
-            logger.d(TAG, "Bluetooth is not supported on this device")
-            null
-        }
+        this.bluetoothHeadsetManager = BluetoothHeadsetManager.newInstance(context, logger,
+                BluetoothAdapter.getDefaultAdapter(), audioDeviceManager)
     }
 
     internal constructor(
         logger: LogWrapper,
         audioDeviceManager: AudioDeviceManager,
         wiredHeadsetReceiver: WiredHeadsetReceiver,
-        bluetoothController: BluetoothController?
+        headsetManager: BluetoothHeadsetManager?
     ) {
         this.logger = logger
         this.audioDeviceManager = audioDeviceManager
         this.wiredHeadsetReceiver = wiredHeadsetReceiver
-        this.bluetoothController = bluetoothController
+        this.bluetoothHeadsetManager = headsetManager
     }
 
     private var logger: LogWrapper = LogWrapper()
     private val audioDeviceManager: AudioDeviceManager
     private val wiredHeadsetReceiver: WiredHeadsetReceiver
-    internal val bluetoothController: BluetoothController?
     internal var audioDeviceChangeListener: AudioDeviceChangeListener? = null
     private var selectedDevice: AudioDevice? = null
     private var userSelectedDevice: AudioDevice? = null
@@ -127,7 +112,7 @@ class AudioDeviceSelector {
         audioDeviceChangeListener = listener
         when (state) {
             STOPPED -> {
-                bluetoothController?.start(bluetoothDeviceConnectionListener)
+                bluetoothHeadsetManager?.start(bluetoothDeviceConnectionListener)
                 wiredHeadsetReceiver.start(wiredDeviceConnectionListener)
                 enumerateDevices()
                 state = STARTED
@@ -184,15 +169,15 @@ class AudioDeviceSelector {
         when (audioDevice) {
             is BluetoothHeadset -> {
                 audioDeviceManager.enableSpeakerphone(false)
-                bluetoothController?.activate()
+                bluetoothHeadsetManager?.activate()
             }
             is Earpiece, is WiredHeadset -> {
                 audioDeviceManager.enableSpeakerphone(false)
-                bluetoothController?.deactivate()
+                bluetoothHeadsetManager?.deactivate()
             }
             is Speakerphone -> {
                 audioDeviceManager.enableSpeakerphone(true)
-                bluetoothController?.deactivate()
+                bluetoothHeadsetManager?.deactivate()
             }
         }
     }
@@ -204,7 +189,7 @@ class AudioDeviceSelector {
     fun deactivate() {
         when (state) {
             ACTIVATED -> {
-                bluetoothController?.deactivate()
+                bluetoothHeadsetManager?.deactivate()
 
                 // Restore stored audio state
                 audioDeviceManager.restoreAudioState()
@@ -245,6 +230,12 @@ class AudioDeviceSelector {
 
     private fun enumerateDevices(bluetoothHeadsetName: String? = null) {
         mutableAudioDevices.clear()
+        /*
+         * Since the there is a delay between receiving the ACTION_ACL_CONNECTED event and receiving
+         * the name of the connected device from querying the BluetoothHeadset proxy class, the
+         * headset name received from the ACTION_ACL_CONNECTED intent needs to be passed into this
+         * function.
+         */
         bluetoothHeadsetManager?.getHeadset(bluetoothHeadsetName)?.let {
             mutableAudioDevices.add(it)
         }
@@ -270,6 +261,10 @@ class AudioDeviceSelector {
             userSelectedDevice
         } else if (mutableAudioDevices.size > 0) {
             val firstAudioDevice = mutableAudioDevices[0]
+            /*
+             * If there was an error starting bluetooth sco, then the selected AudioDevice should
+             * be the next valid device in the list.
+             */
             if (firstAudioDevice is BluetoothHeadset &&
                     bluetoothHeadsetManager?.hasActivationError() == true) {
                 mutableAudioDevices[1]
@@ -305,7 +300,7 @@ class AudioDeviceSelector {
     }
 
     private fun closeListeners() {
-        bluetoothController?.stop()
+        bluetoothHeadsetManager?.stop()
         wiredHeadsetReceiver.stop()
         audioDeviceChangeListener = null
         state = STOPPED

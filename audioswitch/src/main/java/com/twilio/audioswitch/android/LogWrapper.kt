@@ -8,6 +8,10 @@ internal class LogWrapper {
         Log.d(tag, message)
     }
 
+    fun w(tag: String, message: String) {
+        Log.w(tag, message)
+    }
+
     fun e(tag: String, message: String) {
         Log.e(tag, message)
     }
