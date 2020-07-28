@@ -87,6 +87,15 @@ audioDeviceSelector.deactivate()
 ```
 **Note:** The `stop()` function will call `deactivate()` before closing AudioDeviceSelector resources.
 
+## Bluetooth Support
+
+Multiple connected bluetooth headsets are supported.
+  - The library will accurately display the up to date active bluetooth headset within the `AudiodDeviceSelector` `availableAudioDevices` and `selectedAudioDevice` functions.
+    - Other connected headsets are not stored by the library at this moment.
+  - In the event of a failure to connecting audio to a bluetooth headset, the library will revert the selected audio device (this is usually the Earpiece on a phone).
+  - If a user would like to switch between multiple Bluetooth headsets, then they need to switch the active bluetooth headset from the system Bluetooth settings.
+    - The newly activated headset will be propagated to the `AudiodDeviceSelector` `availableAudioDevices` and `selectedAudioDevice` functions.
+
 ## Usage Examples
 
 * [Twilio Video Android App](https://github.com/twilio/twilio-video-app-android)

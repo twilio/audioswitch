@@ -21,6 +21,8 @@ internal abstract class BluetoothScoJob(
 
     protected abstract fun scoAction()
 
+    open fun scoTimeOutAction() {}
+
     fun executeBluetoothScoJob() {
         bluetoothScoRunnable = BluetoothScoRunnable()
         bluetoothScoHandler.post(bluetoothScoRunnable)
@@ -47,6 +49,7 @@ internal abstract class BluetoothScoJob(
                 bluetoothScoHandler.postDelayed(this, 500)
             } else {
                 logger.e(TAG, "Bluetooth sco job timed out", TimeoutException())
+                scoTimeOutAction()
                 cancelBluetoothScoJob()
             }
         }
