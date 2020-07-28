@@ -1,6 +1,11 @@
 # Changelog
 
-### 0.1.6
+### 0.2.0
+
+Enhancements
+- Added support for multiple connected bluetooth headsets.
+  - The library will now accurately display the up to date active bluetooth headset within the `AudiodDeviceSelector` `availableAudioDevices` and `selectedAudioDevice` functions.
+  - In the event of a failure to connecting audio to a bluetooth headset, the library will revert the selected audio device (this is usually the Earpiece on a phone).
 
 Bug Fixes
 
