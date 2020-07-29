@@ -17,7 +17,9 @@ internal class AudioDeviceManager(
     private val logger: LogWrapper,
     private val audioManager: AudioManager,
     private val build: BuildWrapper,
-    private val audioFocusRequest: AudioFocusRequestWrapper
+    private val audioFocusRequest: AudioFocusRequestWrapper,
+    private val audioFocusChangeListener: AudioManager.OnAudioFocusChangeListener =
+            AudioManager.OnAudioFocusChangeListener { }
 ) {
 
     private var savedAudioMode = 0
@@ -60,7 +62,7 @@ internal class AudioDeviceManager(
             audioRequest?.let { audioManager.requestAudioFocus(it) }
         } else {
             audioManager.requestAudioFocus(
-                    {},
+                    audioFocusChangeListener,
                     AudioManager.STREAM_VOICE_CALL,
                     AudioManager.AUDIOFOCUS_GAIN_TRANSIENT)
         }
@@ -100,7 +102,7 @@ internal class AudioDeviceManager(
         if (build.getVersion() >= Build.VERSION_CODES.O) {
             audioRequest?.let { audioManager.abandonAudioFocusRequest(it) }
         } else {
-            audioManager.abandonAudioFocus { }
+            audioManager.abandonAudioFocus(audioFocusChangeListener)
         }
     }
 }

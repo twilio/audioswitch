@@ -254,9 +254,9 @@ class AudioDeviceSelectorTest : BaseTest() {
         audioDeviceSelector.activate()
 
         verify(audioManager).requestAudioFocus(
-                isA(),
-                eq(AudioManager.STREAM_VOICE_CALL),
-                eq(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT)
+                audioFocusChangeListener,
+                AudioManager.STREAM_VOICE_CALL,
+                AudioManager.AUDIOFOCUS_GAIN_TRANSIENT
         )
     }
 
@@ -291,7 +291,7 @@ class AudioDeviceSelectorTest : BaseTest() {
         audioDeviceSelector.activate()
         audioDeviceSelector.stop()
 
-        verify(audioManager).abandonAudioFocus(isA())
+        verify(audioManager).abandonAudioFocus(audioFocusChangeListener)
     }
 
     @Test
