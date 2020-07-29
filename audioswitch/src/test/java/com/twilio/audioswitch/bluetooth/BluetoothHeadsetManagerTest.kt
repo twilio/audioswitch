@@ -13,6 +13,7 @@ import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.verifyZeroInteractions
 import com.nhaarman.mockitokotlin2.whenever
+import com.twilio.audioswitch.BaseTest
 import com.twilio.audioswitch.DEVICE_NAME
 import com.twilio.audioswitch.assertBluetoothHeadsetSetup
 import com.twilio.audioswitch.assertBluetoothHeadsetTeardown

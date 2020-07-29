@@ -1,4 +1,4 @@
-package com.twilio.audioswitch.bluetooth
+package com.twilio.audioswitch
 
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothClass
@@ -8,16 +8,13 @@ import android.content.Context
 import android.media.AudioManager
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.whenever
-import com.twilio.audioswitch.DEVICE_NAME
 import com.twilio.audioswitch.android.BuildWrapper
 import com.twilio.audioswitch.android.LogWrapper
+import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager
 import com.twilio.audioswitch.selection.AudioDeviceChangeListener
 import com.twilio.audioswitch.selection.AudioDeviceManager
 import com.twilio.audioswitch.selection.AudioDeviceSelector
 import com.twilio.audioswitch.selection.AudioFocusRequestWrapper
-import com.twilio.audioswitch.setupAudioManagerMock
-import com.twilio.audioswitch.setupScoHandlerMock
-import com.twilio.audioswitch.setupSystemClockMock
 import com.twilio.audioswitch.wired.WiredHeadsetReceiver
 
 open class BaseTest {
@@ -42,9 +39,12 @@ open class BaseTest {
     internal var handler = setupScoHandlerMock()
     internal var systemClockWrapper = setupSystemClockMock()
     internal val headsetProxy = mock<BluetoothHeadset>()
-    internal var headsetManager = BluetoothHeadsetManager(context, logger, bluetoothAdapter,
+    internal var headsetManager =
+        BluetoothHeadsetManager(
+            context, logger, bluetoothAdapter,
             audioDeviceManager, bluetoothScoHandler = handler,
-            systemClockWrapper = systemClockWrapper, headsetProxy = headsetProxy)
+            systemClockWrapper = systemClockWrapper, headsetProxy = headsetProxy
+        )
     internal var audioDeviceSelector = AudioDeviceSelector(logger, audioDeviceManager,
             wiredHeadsetReceiver, headsetManager)
 }
