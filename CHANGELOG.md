@@ -1,5 +1,11 @@
 # Changelog
 
+### 0.2.1
+
+Bug Fixes
+
+- Fixed a bug where the audio focus wasn't being returned to the previous audio focus owner on pre Oreo devices.
+
 ### 0.2.0
 
 Enhancements
@@ -13,7 +19,6 @@ Enhancements
 Bug Fixes
 
 - Improved the accuracy of the `BluetoothHeadset` within the `availableAudioDevices` returned from the `AudioDeviceSelector` when multiple Bluetooth Headsets are connected.
-- Fixed a bug where the audio focus wasn't being returned to the previous audio focus owner on pre Oreo devices.
 
 ### 0.1.5
 
