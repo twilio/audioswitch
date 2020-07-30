@@ -13,6 +13,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import java.util.List;
 
 import kotlin.Unit;
+import kotlin.jvm.functions.Function2;
 
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertFalse;
@@ -42,7 +43,13 @@ public class AudioDeviceSelectorJavaTest extends BaseTest {
 
     @Test
     public void shouldAllowStart() {
-        startAudioDeviceSelector();
+        Function2<List<? extends AudioDevice>, AudioDevice, Unit> audioDeviceListener = (audioDevices, audioDevice) -> {
+            assertFalse(audioDevices.isEmpty());
+            assertNotNull(audioDevice);
+            return Unit.INSTANCE;
+        };
+
+        javaAudioDeviceSelector.start(audioDeviceListener);
     }
 
     @Test
@@ -87,6 +94,11 @@ public class AudioDeviceSelectorJavaTest extends BaseTest {
     }
 
     private void startAudioDeviceSelector() {
+        Function2<List<? extends AudioDevice>, AudioDevice, Unit> audioDeviceListener = (audioDevices, audioDevice) -> {
+            assertFalse(audioDevices.isEmpty());
+            assertNotNull(audioDevice);
+            return Unit.INSTANCE;
+        };
         javaAudioDeviceSelector.start((audioDevices, audioDevice) -> {
             assertFalse(audioDevices.isEmpty());
             assertNotNull(audioDevice);
