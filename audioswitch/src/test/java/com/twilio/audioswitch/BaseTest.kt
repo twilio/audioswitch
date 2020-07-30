@@ -17,7 +17,7 @@ import com.twilio.audioswitch.selection.AudioDeviceSelector
 import com.twilio.audioswitch.selection.AudioFocusRequestWrapper
 import com.twilio.audioswitch.wired.WiredHeadsetReceiver
 
-open class BaseTest {
+open class BaseTest() {
     private val bluetoothClass = mock<BluetoothClass> {
         whenever(mock.deviceClass).thenReturn(BluetoothClass.Device.AUDIO_VIDEO_HANDSFREE)
     }
