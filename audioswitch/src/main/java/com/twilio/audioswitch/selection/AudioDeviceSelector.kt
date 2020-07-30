@@ -7,6 +7,7 @@ import com.twilio.audioswitch.android.BuildWrapper
 import com.twilio.audioswitch.android.LogWrapper
 import com.twilio.audioswitch.bluetooth.BluetoothHeadsetConnectionListener
 import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager
+import com.twilio.audioswitch.proximity.ProximitySensor
 import com.twilio.audioswitch.selection.AudioDevice.BluetoothHeadset
 import com.twilio.audioswitch.selection.AudioDevice.Earpiece
 import com.twilio.audioswitch.selection.AudioDevice.Speakerphone
@@ -46,18 +47,21 @@ class AudioDeviceSelector {
         this.wiredHeadsetReceiver = WiredHeadsetReceiver(context, logger)
         this.bluetoothHeadsetManager = BluetoothHeadsetManager.newInstance(context, logger,
                 BluetoothAdapter.getDefaultAdapter(), audioDeviceManager)
+        this.proximitySensor = ProximitySensor.newInstance(context, logger)
     }
 
     internal constructor(
         logger: LogWrapper,
         audioDeviceManager: AudioDeviceManager,
         wiredHeadsetReceiver: WiredHeadsetReceiver,
-        headsetManager: BluetoothHeadsetManager?
+        headsetManager: BluetoothHeadsetManager?,
+        proximitySensor: ProximitySensor?
     ) {
         this.logger = logger
         this.audioDeviceManager = audioDeviceManager
         this.wiredHeadsetReceiver = wiredHeadsetReceiver
         this.bluetoothHeadsetManager = headsetManager
+        this.proximitySensor = proximitySensor
     }
 
     private var logger: LogWrapper = LogWrapper()
@@ -69,6 +73,7 @@ class AudioDeviceSelector {
     private var wiredHeadsetAvailable = false
     private val mutableAudioDevices = ArrayList<AudioDevice>()
     private var bluetoothHeadsetManager: BluetoothHeadsetManager? = null
+    private var proximitySensor: ProximitySensor? = null
 
     internal var state: State = STOPPED
     internal enum class State {
@@ -152,6 +157,7 @@ class AudioDeviceSelector {
     fun activate() {
         when (state) {
             STARTED -> {
+                proximitySensor?.activate()
                 audioDeviceManager.cacheAudioState()
 
                 // Always set mute to false for WebRTC
@@ -189,6 +195,7 @@ class AudioDeviceSelector {
     fun deactivate() {
         when (state) {
             ACTIVATED -> {
+                proximitySensor?.deactivate()
                 bluetoothHeadsetManager?.deactivate()
 
                 // Restore stored audio state
