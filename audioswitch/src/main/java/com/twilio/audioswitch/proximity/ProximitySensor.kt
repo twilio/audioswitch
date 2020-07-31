@@ -17,27 +17,35 @@ internal class ProximitySensor(
         fun newInstance(context: Context, logger: LogWrapper): ProximitySensor? {
             return (context.applicationContext
                     .getSystemService(Context.POWER_SERVICE) as PowerManager?)?.let { powerManager ->
+                val proximityWakeLock =
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    val proximityWakeLock =
                         powerManager.newWakeLock(
                                 PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK, "$TAG:wakelock")
-                        ProximitySensor(logger, proximityWakeLock)
-                    } else {
-                    logger.d(TAG, "Proximity sensor is not available on API version < " +
-                            "${Build.VERSION_CODES.LOLLIPOP}")
-                    null
+                } else {
+                    try {
+                        powerManager.newWakeLock(
+                                32, "$TAG:wakelock")
+                    } catch (e: Exception) {
+                        logger.e(TAG, "Could not get proximity wake lock")
+                        null
+                    }
                 }
+                proximityWakeLock?.let { ProximitySensor(logger, proximityWakeLock) }
             }
         }
     }
 
     fun activate() {
-        proximityWakeLock.acquire()
+        if(!proximityWakeLock.isHeld) {
+            proximityWakeLock.acquire()
+        }
         logger.d(TAG, "Acquired proximity sensor wake lock")
     }
 
     fun deactivate() {
-        proximityWakeLock.release()
+        if(proximityWakeLock.isHeld) {
+            proximityWakeLock.release()
+        }
         logger.d(TAG, "Released proximity sensor wake lock")
     }
 }
