@@ -1,25 +1,21 @@
 package com.twilio.audioswitch.selection;
 
-import android.content.pm.PackageManager;
-
-import com.twilio.audioswitch.BaseTest;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
-
-import java.util.List;
-
-import kotlin.Unit;
-import kotlin.jvm.functions.Function2;
-
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+
+import android.content.pm.PackageManager;
+import com.twilio.audioswitch.BaseTest;
+import java.util.List;
+import kotlin.Unit;
+import kotlin.jvm.functions.Function2;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class AudioDeviceSelectorJavaTest extends BaseTest {
@@ -30,10 +26,12 @@ public class AudioDeviceSelectorJavaTest extends BaseTest {
     public void setUp() {
         when(packageManager.hasSystemFeature(any())).thenReturn(true);
         when(getContext$audioswitch_debug().getPackageManager()).thenReturn(packageManager);
-        javaAudioDeviceSelector = new AudioDeviceSelector(getLogger$audioswitch_debug(),
-                getAudioDeviceManager$audioswitch_debug(),
-                getWiredHeadsetReceiver$audioswitch_debug(),
-                getHeadsetManager$audioswitch_debug());
+        javaAudioDeviceSelector =
+                new AudioDeviceSelector(
+                        getLogger$audioswitch_debug(),
+                        getAudioDeviceManager$audioswitch_debug(),
+                        getWiredHeadsetReceiver$audioswitch_debug(),
+                        getHeadsetManager$audioswitch_debug());
     }
 
     @Test
@@ -43,11 +41,12 @@ public class AudioDeviceSelectorJavaTest extends BaseTest {
 
     @Test
     public void shouldAllowStart() {
-        Function2<List<? extends AudioDevice>, AudioDevice, Unit> audioDeviceListener = (audioDevices, audioDevice) -> {
-            assertFalse(audioDevices.isEmpty());
-            assertNotNull(audioDevice);
-            return Unit.INSTANCE;
-        };
+        Function2<List<? extends AudioDevice>, AudioDevice, Unit> audioDeviceListener =
+                (audioDevices, audioDevice) -> {
+                    assertFalse(audioDevices.isEmpty());
+                    assertNotNull(audioDevice);
+                    return Unit.INSTANCE;
+                };
 
         javaAudioDeviceSelector.start(audioDeviceListener);
     }
@@ -94,15 +93,17 @@ public class AudioDeviceSelectorJavaTest extends BaseTest {
     }
 
     private void startAudioDeviceSelector() {
-        Function2<List<? extends AudioDevice>, AudioDevice, Unit> audioDeviceListener = (audioDevices, audioDevice) -> {
-            assertFalse(audioDevices.isEmpty());
-            assertNotNull(audioDevice);
-            return Unit.INSTANCE;
-        };
-        javaAudioDeviceSelector.start((audioDevices, audioDevice) -> {
-            assertFalse(audioDevices.isEmpty());
-            assertNotNull(audioDevice);
-            return Unit.INSTANCE;
-        });
+        Function2<List<? extends AudioDevice>, AudioDevice, Unit> audioDeviceListener =
+                (audioDevices, audioDevice) -> {
+                    assertFalse(audioDevices.isEmpty());
+                    assertNotNull(audioDevice);
+                    return Unit.INSTANCE;
+                };
+        javaAudioDeviceSelector.start(
+                (audioDevices, audioDevice) -> {
+                    assertFalse(audioDevices.isEmpty());
+                    assertNotNull(audioDevice);
+                    return Unit.INSTANCE;
+                });
     }
 }
