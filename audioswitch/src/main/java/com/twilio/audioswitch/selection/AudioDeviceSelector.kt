@@ -157,7 +157,6 @@ class AudioDeviceSelector {
     fun activate() {
         when (state) {
             STARTED -> {
-                proximitySensor?.activate()
                 audioDeviceManager.cacheAudioState()
 
                 // Always set mute to false for WebRTC
@@ -174,14 +173,22 @@ class AudioDeviceSelector {
     private fun activate(audioDevice: AudioDevice) {
         when (audioDevice) {
             is BluetoothHeadset -> {
+                proximitySensor?.deactivate()
                 audioDeviceManager.enableSpeakerphone(false)
                 bluetoothHeadsetManager?.activate()
             }
-            is Earpiece, is WiredHeadset -> {
+            is Earpiece -> {
+                proximitySensor?.activate()
+                audioDeviceManager.enableSpeakerphone(false)
+                bluetoothHeadsetManager?.deactivate()
+            }
+            is WiredHeadset -> {
+                proximitySensor?.deactivate()
                 audioDeviceManager.enableSpeakerphone(false)
                 bluetoothHeadsetManager?.deactivate()
             }
             is Speakerphone -> {
+                proximitySensor?.deactivate()
                 audioDeviceManager.enableSpeakerphone(true)
                 bluetoothHeadsetManager?.deactivate()
             }
