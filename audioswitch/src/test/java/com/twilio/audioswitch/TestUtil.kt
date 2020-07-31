@@ -13,7 +13,6 @@ import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import com.twilio.audioswitch.android.SystemClockWrapper
-import com.twilio.audioswitch.bluetooth.BaseTest
 import com.twilio.audioswitch.bluetooth.BluetoothScoJob
 import com.twilio.audioswitch.selection.AudioDevice
 import org.hamcrest.CoreMatchers.`is`
