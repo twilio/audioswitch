@@ -59,6 +59,17 @@ class BluetoothHeadsetManagerTest : BaseTest() {
     }
 
     @Test
+    fun `onServiceConnected should not set the headset state to Connected if there are connected devices but the state is not Disconnected`() {
+        val bluetoothProfile = mock<BluetoothHeadset> {
+            whenever(mock.connectedDevices).thenReturn(bluetoothDevices)
+        }
+        headsetManager.headsetState = AudioActivated
+        headsetManager.onServiceConnected(0, bluetoothProfile)
+
+        assertThat(headsetManager.headsetState is Connected, equalTo(false))
+    }
+
+    @Test
     fun `onServiceConnected should not notify the deviceListener if the deviceListener is null`() {
         headsetManager.headsetListener = null
         setupConnectedState()
