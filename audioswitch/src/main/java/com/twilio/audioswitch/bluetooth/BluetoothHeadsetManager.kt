@@ -82,7 +82,9 @@ internal constructor(
             logger.d(TAG, "Bluetooth " + device.name + " connected")
         }
         if (hasConnectedDevice()) {
-            connect()
+            if (headsetState == Disconnected) {
+                headsetState = Connected
+            }
             headsetListener?.onBluetoothHeadsetStateChanged(getHeadsetName())
         }
     }
@@ -103,7 +105,9 @@ internal constructor(
                                 "Bluetooth ACL device " +
                                         bluetoothDevice.name +
                                         " connected")
-                        connect()
+                        if (headsetState != AudioActivating) {
+                            headsetState = Connected
+                        }
                         headsetListener?.onBluetoothHeadsetStateChanged(bluetoothDevice.name)
                     }
                 }
@@ -197,12 +201,6 @@ internal constructor(
                 AudioDevice.BluetoothHeadset(bluetoothHeadsetName ?: getHeadsetName()
                 ?: "Bluetooth")
             } else null
-
-    private fun connect() {
-        if (headsetState != AudioActivating) {
-            headsetState = Connected
-        }
-    }
 
     private fun disconnect() {
         headsetState = when {
