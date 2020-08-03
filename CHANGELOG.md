@@ -1,5 +1,11 @@
 # Changelog
 
+### 0.2.2
+
+Bug Fixes
+
+- Fixed issue [#47](https://github.com/twilio/audioswitch/issues/47), where the BluetoothHeadsetState gets in an invalid state when calling `activate()` on a selected Bluetooth Headset immediately after invoking `start()` in the `AudioDeviceSelector`.
+
 ### 0.2.1
 
 Bug Fixes
