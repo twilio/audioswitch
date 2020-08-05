@@ -14,6 +14,8 @@ import android.os.Handler
 import android.os.Looper
 import androidx.annotation.VisibleForTesting
 import com.twilio.audioswitch.Logger
+import com.twilio.audioswitch.Logger.Level.ERROR
+import com.twilio.audioswitch.Logger.Level.WARN
 import com.twilio.audioswitch.android.BluetoothDeviceWrapper
 import com.twilio.audioswitch.android.BluetoothIntentProcessor
 import com.twilio.audioswitch.android.BluetoothIntentProcessorImpl
@@ -49,7 +51,7 @@ internal constructor(
         set(value) {
             if (field != value) {
                 field = value
-                logger.d(TAG, "Headset state changed to $field")
+                logger.log(TAG, "Headset state changed to $field")
             }
         }
 
@@ -70,7 +72,7 @@ internal constructor(
             return bluetoothAdapter?.let { adapter ->
                 BluetoothHeadsetManager(context, logger, adapter, audioDeviceManager)
             } ?: run {
-                logger.d(TAG, "Bluetooth is not supported on this device")
+                logger.log(TAG, "Bluetooth is not supported on this device")
                 null
             }
         }
@@ -79,7 +81,7 @@ internal constructor(
     override fun onServiceConnected(profile: Int, bluetoothProfile: BluetoothProfile) {
         headsetProxy = bluetoothProfile as BluetoothHeadset
         bluetoothProfile.connectedDevices.forEach { device ->
-            logger.d(TAG, "Bluetooth " + device.name + " connected")
+            logger.log(TAG, "Bluetooth " + device.name + " connected")
         }
         if (hasConnectedDevice()) {
             connect()
@@ -88,7 +90,7 @@ internal constructor(
     }
 
     override fun onServiceDisconnected(profile: Int) {
-        logger.d(TAG, "Bluetooth disconnected")
+        logger.log(TAG, "Bluetooth disconnected")
         headsetState = Disconnected
         headsetListener?.onBluetoothHeadsetStateChanged()
     }
@@ -98,7 +100,7 @@ internal constructor(
             when (action) {
                 BluetoothDevice.ACTION_ACL_CONNECTED -> {
                     intent.getHeadsetDevice()?.let { bluetoothDevice ->
-                        logger.d(
+                        logger.log(
                                 TAG,
                                 "Bluetooth ACL device " +
                                         bluetoothDevice.name +
@@ -109,7 +111,7 @@ internal constructor(
                 }
                 BluetoothDevice.ACTION_ACL_DISCONNECTED -> {
                     intent.getHeadsetDevice()?.let { bluetoothDevice ->
-                        logger.d(
+                        logger.log(
                                 TAG,
                                 "Bluetooth ACL device " +
                                         bluetoothDevice.name +
@@ -122,13 +124,13 @@ internal constructor(
                     intent.getIntExtra(AudioManager.EXTRA_SCO_AUDIO_STATE, AudioManager.SCO_AUDIO_STATE_ERROR).let { state ->
                         when (state) {
                             AudioManager.SCO_AUDIO_STATE_CONNECTED -> {
-                                logger.d(TAG, "Bluetooth SCO Audio connected")
+                                logger.log(TAG, "Bluetooth SCO Audio connected")
                                 headsetState = AudioActivated
                                 headsetListener?.onBluetoothHeadsetStateChanged()
                                 enableBluetoothScoJob.cancelBluetoothScoJob()
                             }
                             AudioManager.SCO_AUDIO_STATE_DISCONNECTED -> {
-                                logger.d(TAG, "Bluetooth SCO Audio disconnected")
+                                logger.log(TAG, "Bluetooth SCO Audio disconnected")
                                 /*
                                  * This block is needed to restart bluetooth SCO in the event that
                                  * the active bluetooth headset has changed.
@@ -141,7 +143,7 @@ internal constructor(
                                 disableBluetoothScoJob.cancelBluetoothScoJob()
                             }
                             AudioManager.SCO_AUDIO_STATE_ERROR -> {
-                                logger.e(TAG, "Error retrieving Bluetooth SCO Audio state")
+                                logger.log(TAG, "Error retrieving Bluetooth SCO Audio state", ERROR())
                             }
                         }
                     }
@@ -178,7 +180,7 @@ internal constructor(
         if (headsetState == Connected || headsetState == AudioActivationError)
             enableBluetoothScoJob.executeBluetoothScoJob()
         else {
-            logger.w(TAG, "Cannot activate when in the $headsetState state")
+            logger.log(TAG, "Cannot activate when in the $headsetState state", WARN)
         }
     }
 
@@ -186,7 +188,7 @@ internal constructor(
         if (headsetState == AudioActivated) {
             disableBluetoothScoJob.executeBluetoothScoJob()
         } else {
-            logger.w(TAG, "Cannot deactivate when in the $headsetState state")
+            logger.log(TAG, "Cannot deactivate when in the $headsetState state", WARN)
         }
     }
 
@@ -226,16 +228,16 @@ internal constructor(
                     when {
                         devices.size > 1 && hasActiveHeadset() -> {
                             val device = devices.find { proxy.isAudioConnected(it) }?.name
-                            logger.d(TAG, "Device size > 1 with device name: $device")
+                            logger.log(TAG, "Device size > 1 with device name: $device")
                             device
                         }
                         devices.size == 1 -> {
                             val device = devices.first().name
-                            logger.d(TAG, "Device size 1 with device name: $device")
+                            logger.log(TAG, "Device size 1 with device name: $device")
                             device
                         }
                         else -> {
-                            logger.d(TAG, "Device size 0")
+                            logger.log(TAG, "Device size 0")
                             null
                         }
                     }
@@ -288,7 +290,7 @@ internal constructor(
     ) : BluetoothScoJob(logger, bluetoothScoHandler, systemClockWrapper) {
 
         override fun scoAction() {
-            logger.d(TAG, "Attempting to enable bluetooth SCO")
+            logger.log(TAG, "Attempting to enable bluetooth SCO")
             audioDeviceManager.enableBluetoothSco(true)
             headsetState = AudioActivating
         }
@@ -308,7 +310,7 @@ internal constructor(
     ) : BluetoothScoJob(logger, bluetoothScoHandler, systemClockWrapper) {
 
         override fun scoAction() {
-            logger.d(TAG, "Attempting to disable bluetooth SCO")
+            logger.log(TAG, "Attempting to disable bluetooth SCO")
             audioDeviceManager.enableBluetoothSco(false)
             headsetState = Connected
         }

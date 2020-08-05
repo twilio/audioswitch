@@ -227,7 +227,7 @@ class AudioDeviceSelectorTest : BaseTest() {
 
     @Test
     fun `activate should set audio focus using Android O method if api version is 26`() {
-        whenever(buildWrapper.getVersion()).thenReturn(Build.VERSION_CODES.O)
+        whenever(buildWrapper.version).thenReturn(Build.VERSION_CODES.O)
         val audioFocusRequest = mock<AudioFocusRequest>()
         whenever(this.audioFocusRequest.buildRequest()).thenReturn(audioFocusRequest)
         audioDeviceSelector.start(audioDeviceChangeListener)
@@ -238,7 +238,7 @@ class AudioDeviceSelectorTest : BaseTest() {
 
     @Test
     fun `activate should set audio focus using Android O method if api version is 27`() {
-        whenever(buildWrapper.getVersion()).thenReturn(Build.VERSION_CODES.O_MR1)
+        whenever(buildWrapper.version).thenReturn(Build.VERSION_CODES.O_MR1)
         val audioFocusRequest = mock<AudioFocusRequest>()
         whenever(this.audioFocusRequest.buildRequest()).thenReturn(audioFocusRequest)
         audioDeviceSelector.start(audioDeviceChangeListener)
@@ -249,7 +249,7 @@ class AudioDeviceSelectorTest : BaseTest() {
 
     @Test
     fun `activate should set audio focus using pre Android O method if api version is 25`() {
-        whenever(buildWrapper.getVersion()).thenReturn(Build.VERSION_CODES.N_MR1)
+        whenever(buildWrapper.version).thenReturn(Build.VERSION_CODES.N_MR1)
         audioDeviceSelector.start(audioDeviceChangeListener)
         audioDeviceSelector.activate()
 
@@ -262,7 +262,7 @@ class AudioDeviceSelectorTest : BaseTest() {
 
     @Test
     fun `deactivate should abandon audio focus using pre Android O method if api version is 26`() {
-        whenever(buildWrapper.getVersion()).thenReturn(Build.VERSION_CODES.O)
+        whenever(buildWrapper.version).thenReturn(Build.VERSION_CODES.O)
         val audioFocusRequest = mock<AudioFocusRequest>()
         whenever(this.audioFocusRequest.buildRequest()).thenReturn(audioFocusRequest)
         audioDeviceSelector.start(audioDeviceChangeListener)
@@ -274,7 +274,7 @@ class AudioDeviceSelectorTest : BaseTest() {
 
     @Test
     fun `deactivate should abandon audio focus using pre Android O method if api version is 27`() {
-        whenever(buildWrapper.getVersion()).thenReturn(Build.VERSION_CODES.O_MR1)
+        whenever(buildWrapper.version).thenReturn(Build.VERSION_CODES.O_MR1)
         val audioFocusRequest = mock<AudioFocusRequest>()
         whenever(this.audioFocusRequest.buildRequest()).thenReturn(audioFocusRequest)
         audioDeviceSelector.start(audioDeviceChangeListener)
@@ -286,7 +286,7 @@ class AudioDeviceSelectorTest : BaseTest() {
 
     @Test
     fun `deactivate should abandon audio focus using pre Android O method if api version is 25`() {
-        whenever(buildWrapper.getVersion()).thenReturn(Build.VERSION_CODES.N_MR1)
+        whenever(buildWrapper.version).thenReturn(Build.VERSION_CODES.N_MR1)
         audioDeviceSelector.start(audioDeviceChangeListener)
         audioDeviceSelector.activate()
         audioDeviceSelector.stop()

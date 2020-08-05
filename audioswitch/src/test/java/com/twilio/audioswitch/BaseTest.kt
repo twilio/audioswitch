@@ -9,6 +9,7 @@ import android.media.AudioManager
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.whenever
 import com.twilio.audioswitch.android.BuildWrapper
+import com.twilio.audioswitch.android.LogWrapper
 import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager
 import com.twilio.audioswitch.selection.AudioDeviceChangeListener
 import com.twilio.audioswitch.selection.AudioDeviceManager
@@ -25,11 +26,12 @@ open class BaseTest {
         whenever(mock.bluetoothClass).thenReturn(bluetoothClass)
     }
     internal val context = mock<Context>()
-    internal val logger = mock<Logger>()
+    internal val logWrapper = mock<LogWrapper>()
     internal val audioManager = setupAudioManagerMock()
     internal val bluetoothAdapter = mock<BluetoothAdapter>()
     internal val audioDeviceChangeListener = mock<AudioDeviceChangeListener>()
-    internal val buildWrapper = mock<BuildWrapper>()
+    internal var buildWrapper = mock<BuildWrapper>()
+    internal val logger = Logger(true, logWrapper, buildWrapper)
     internal val audioFocusRequest = mock<AudioFocusRequestWrapper>()
     internal val audioFocusChangeListener = mock<AudioManager.OnAudioFocusChangeListener>()
     internal val audioDeviceManager = AudioDeviceManager(context, logger, audioManager, buildWrapper,

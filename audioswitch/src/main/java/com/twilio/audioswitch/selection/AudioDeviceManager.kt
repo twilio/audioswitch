@@ -30,26 +30,26 @@ internal class AudioDeviceManager(
     fun hasEarpiece(): Boolean {
         val hasEarpiece = context.packageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY)
         if (hasEarpiece) {
-            logger.d(TAG, "Earpiece available")
+            logger.log(TAG, "Earpiece available")
         }
         return hasEarpiece
     }
 
     @SuppressLint("NewApi")
     fun hasSpeakerphone(): Boolean {
-        return if (build.getVersion() >= Build.VERSION_CODES.M &&
+        return if (build.version >= Build.VERSION_CODES.M &&
                 context.packageManager
                         .hasSystemFeature(PackageManager.FEATURE_AUDIO_OUTPUT)) {
             val devices = audioManager.getDevices(AudioManager.GET_DEVICES_OUTPUTS)
             for (device in devices) {
                 if (device.type == AudioDeviceInfo.TYPE_BUILTIN_SPEAKER) {
-                    logger.d(TAG, "Speakerphone available")
+                    logger.log(TAG, "Speakerphone available")
                     return true
                 }
             }
             false
         } else {
-            logger.d(TAG, "Speakerphone available")
+            logger.log(TAG, "Speakerphone available")
             true
         }
     }
@@ -57,7 +57,7 @@ internal class AudioDeviceManager(
     @SuppressLint("NewApi")
     fun setAudioFocus() {
         // Request audio focus before making any device switch.
-        if (build.getVersion() >= Build.VERSION_CODES.O) {
+        if (build.version >= Build.VERSION_CODES.O) {
             audioRequest = audioFocusRequest.buildRequest()
             audioRequest?.let { audioManager.requestAudioFocus(it) }
         } else {
@@ -99,7 +99,7 @@ internal class AudioDeviceManager(
         audioManager.mode = savedAudioMode
         mute(savedIsMicrophoneMuted)
         enableSpeakerphone(savedSpeakerphoneEnabled)
-        if (build.getVersion() >= Build.VERSION_CODES.O) {
+        if (build.version >= Build.VERSION_CODES.O) {
             audioRequest?.let { audioManager.abandonAudioFocusRequest(it) }
         } else {
             audioManager.abandonAudioFocus(audioFocusChangeListener)

@@ -1,8 +1,11 @@
 package com.twilio.audioswitch.android
 
 import android.os.Build
+import com.twilio.audioswitch.BuildConfig
 
 internal class BuildWrapper {
 
-    fun getVersion(): Int = Build.VERSION.SDK_INT
+    val version = Build.VERSION.SDK_INT
+
+    val buildType = BuildConfig.BUILD_TYPE
 }

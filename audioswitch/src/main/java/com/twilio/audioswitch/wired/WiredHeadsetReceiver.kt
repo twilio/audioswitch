@@ -21,12 +21,12 @@ internal class WiredHeadsetReceiver(
         intent.getIntExtra("state", STATE_UNPLUGGED).let { state ->
             if (state == STATE_PLUGGED) {
                 intent.getStringExtra("name").let { name ->
-                    logger.d(TAG, "Wired headset device ${name ?: ""} connected")
+                    logger.log(TAG, "Wired headset device ${name ?: ""} connected")
                 }
                 deviceListener?.onDeviceConnected()
             } else {
                 intent.getStringExtra("name").let { name ->
-                    logger.d(TAG, "Wired headset device ${name ?: ""} disconnected")
+                    logger.log(TAG, "Wired headset device ${name ?: ""} disconnected")
                 }
                 deviceListener?.onDeviceDisconnected()
             }

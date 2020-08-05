@@ -4,6 +4,7 @@ import android.os.Handler
 import androidx.annotation.VisibleForTesting
 import androidx.annotation.VisibleForTesting.PRIVATE
 import com.twilio.audioswitch.Logger
+import com.twilio.audioswitch.Logger.Level.ERROR
 import com.twilio.audioswitch.android.SystemClockWrapper
 import java.util.concurrent.TimeoutException
 
@@ -26,14 +27,14 @@ internal abstract class BluetoothScoJob(
     fun executeBluetoothScoJob() {
         bluetoothScoRunnable = BluetoothScoRunnable()
         bluetoothScoHandler.post(bluetoothScoRunnable)
-        logger.d(TAG, "Scheduled bluetooth sco job")
+        logger.log(TAG, "Scheduled bluetooth sco job")
     }
 
     fun cancelBluetoothScoJob() {
         bluetoothScoRunnable?.let {
             bluetoothScoHandler.removeCallbacks(bluetoothScoRunnable)
             bluetoothScoRunnable = null
-            logger.d(TAG, "Canceled bluetooth sco job")
+            logger.log(TAG, "Canceled bluetooth sco job")
         }
     }
 
@@ -48,7 +49,7 @@ internal abstract class BluetoothScoJob(
                 elapsedTime = systemClockWrapper.elapsedRealtime() - startTime
                 bluetoothScoHandler.postDelayed(this, 500)
             } else {
-                logger.e(TAG, "Bluetooth sco job timed out", TimeoutException())
+                logger.log(TAG, "Bluetooth sco job timed out", ERROR(TimeoutException()))
                 scoTimeOutAction()
                 cancelBluetoothScoJob()
             }

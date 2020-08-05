@@ -31,10 +31,12 @@ class AudioDeviceSelector {
      * Constructs a new AudioDeviceSelector instance.
      *
      * @param context the application context
+     * @param isLoggingEnabled whether or not to enable logging
      */
-    constructor(context: Context) {
+    @JvmOverloads
+    constructor(context: Context, isLoggingEnabled: Boolean = false) {
         val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
-        val logger = Logger()
+        val logger = Logger(isLoggingEnabled)
         val audioDeviceManager =
                 AudioDeviceManager(context,
                         logger,
@@ -60,7 +62,7 @@ class AudioDeviceSelector {
         this.bluetoothHeadsetManager = headsetManager
     }
 
-    private var logger: Logger = Logger()
+    private val logger: Logger
     private val audioDeviceManager: AudioDeviceManager
     private val wiredHeadsetReceiver: WiredHeadsetReceiver
     internal var audioDeviceChangeListener: AudioDeviceChangeListener? = null
@@ -88,7 +90,6 @@ class AudioDeviceSelector {
     internal val wiredDeviceConnectionListener = object : WiredDeviceConnectionListener {
         override fun onDeviceConnected() {
             wiredHeadsetAvailable = true
-            logger.d(TAG, "Wired Headset available")
             if (this@AudioDeviceSelector.state == ACTIVATED) {
                 userSelectedDevice = WiredHeadset()
             }
@@ -118,7 +119,7 @@ class AudioDeviceSelector {
                 state = STARTED
             }
             else -> {
-                logger.d(TAG, "Redundant start() invocation while already in the started or activated state")
+                logger.log(TAG, "Redundant start() invocation while already in the started or activated state")
             }
         }
     }
@@ -138,7 +139,7 @@ class AudioDeviceSelector {
                 closeListeners()
             }
             STOPPED -> {
-                logger.d(TAG, "Redundant stop() invocation while already in the stopped state")
+                logger.log(TAG, "Redundant stop() invocation while already in the stopped state")
             }
         }
     }
@@ -249,7 +250,7 @@ class AudioDeviceSelector {
             mutableAudioDevices.add(Speakerphone())
         }
 
-        logger.d(TAG, "Available AudioDevice list updated: $availableAudioDevices")
+        logger.log(TAG, "Available AudioDevice list updated: $availableAudioDevices")
 
         // Check whether the user selected device is still present
         if (!userSelectedDevicePresent(mutableAudioDevices)) {
