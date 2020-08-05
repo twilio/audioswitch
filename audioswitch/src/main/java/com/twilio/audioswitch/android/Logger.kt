@@ -2,7 +2,7 @@ package com.twilio.audioswitch.android
 
 import android.util.Log
 
-internal class LogWrapper {
+internal class Logger {
 
     fun d(tag: String, message: String) {
         Log.d(tag, message)
