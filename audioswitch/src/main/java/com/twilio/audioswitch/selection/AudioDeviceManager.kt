@@ -7,8 +7,8 @@ import android.media.AudioDeviceInfo
 import android.media.AudioFocusRequest
 import android.media.AudioManager
 import android.os.Build
+import com.twilio.audioswitch.Logger
 import com.twilio.audioswitch.android.BuildWrapper
-import com.twilio.audioswitch.android.Logger
 
 private const val TAG = "AudioDeviceManager"
 
@@ -19,7 +19,7 @@ internal class AudioDeviceManager(
     private val build: BuildWrapper,
     private val audioFocusRequest: AudioFocusRequestWrapper,
     private val audioFocusChangeListener: AudioManager.OnAudioFocusChangeListener =
-        AudioManager.OnAudioFocusChangeListener { }
+    AudioManager.OnAudioFocusChangeListener { }
 ) {
 
     private var savedAudioMode = 0

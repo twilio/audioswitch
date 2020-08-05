@@ -4,7 +4,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import com.twilio.audioswitch.android.Logger
+import com.twilio.audioswitch.Logger
 
 private const val TAG = "WiredHeadsetReceiver"
 internal const val STATE_UNPLUGGED = 0

@@ -1,4 +1,4 @@
-package com.twilio.audioswitch.android
+package com.twilio.audioswitch
 
 import android.util.Log
 

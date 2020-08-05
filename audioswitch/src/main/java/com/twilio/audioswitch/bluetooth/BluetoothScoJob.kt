@@ -3,7 +3,7 @@ package com.twilio.audioswitch.bluetooth
 import android.os.Handler
 import androidx.annotation.VisibleForTesting
 import androidx.annotation.VisibleForTesting.PRIVATE
-import com.twilio.audioswitch.android.Logger
+import com.twilio.audioswitch.Logger
 import com.twilio.audioswitch.android.SystemClockWrapper
 import java.util.concurrent.TimeoutException
 

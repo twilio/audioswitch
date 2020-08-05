@@ -9,7 +9,6 @@ import android.media.AudioManager
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.whenever
 import com.twilio.audioswitch.android.BuildWrapper
-import com.twilio.audioswitch.android.Logger
 import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager
 import com.twilio.audioswitch.selection.AudioDeviceChangeListener
 import com.twilio.audioswitch.selection.AudioDeviceManager

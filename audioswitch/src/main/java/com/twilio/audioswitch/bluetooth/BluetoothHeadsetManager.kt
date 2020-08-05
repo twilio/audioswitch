@@ -13,10 +13,10 @@ import android.media.AudioManager
 import android.os.Handler
 import android.os.Looper
 import androidx.annotation.VisibleForTesting
+import com.twilio.audioswitch.Logger
 import com.twilio.audioswitch.android.BluetoothDeviceWrapper
 import com.twilio.audioswitch.android.BluetoothIntentProcessor
 import com.twilio.audioswitch.android.BluetoothIntentProcessorImpl
-import com.twilio.audioswitch.android.Logger
 import com.twilio.audioswitch.android.SystemClockWrapper
 import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager.HeadsetState.AudioActivated
 import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager.HeadsetState.AudioActivating
@@ -40,7 +40,7 @@ internal constructor(
     bluetoothScoHandler: Handler = Handler(Looper.getMainLooper()),
     systemClockWrapper: SystemClockWrapper = SystemClockWrapper(),
     private val bluetoothIntentProcessor: BluetoothIntentProcessor =
-        BluetoothIntentProcessorImpl(),
+    BluetoothIntentProcessorImpl(),
     private var headsetProxy: BluetoothHeadset? = null
 ) : BluetoothProfile.ServiceListener, BroadcastReceiver() {
 
