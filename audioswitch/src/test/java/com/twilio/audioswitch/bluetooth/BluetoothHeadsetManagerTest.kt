@@ -5,6 +5,7 @@ import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothHeadset
 import android.content.Intent
 import android.media.AudioManager
+import android.media.AudioManager.SCO_AUDIO_STATE_CONNECTED
 import android.os.Handler
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.isA
@@ -64,7 +65,7 @@ class BluetoothHeadsetManagerTest : BaseTest() {
         val bluetoothProfile = mock<BluetoothHeadset> {
             whenever(mock.connectedDevices).thenReturn(bluetoothDevices)
         }
-        headsetManager.headsetState = AudioActivated
+        setupActivatedState()
         headsetManager.onServiceConnected(0, bluetoothProfile)
 
         assertThat(headsetManager.headsetState is Connected, equalTo(false))
@@ -179,8 +180,18 @@ class BluetoothHeadsetManagerTest : BaseTest() {
     }
 
     @Test
+    fun `deactivate should not stop bluetooth device audio routing if no headsets have audio routed`() {
+        setupActivatedState()
+
+        headsetManager.deactivate()
+
+        verify(audioManager, never()).stopBluetoothSco()
+    }
+
+    @Test
     fun `deactivate should stop bluetooth device audio routing`() {
-        headsetManager.headsetState = AudioActivated
+        whenever(headsetProxy.isAudioConnected(expectedBluetoothDevice)).thenReturn(true)
+        setupActivatedState()
 
         headsetManager.deactivate()
 
@@ -324,7 +335,7 @@ class BluetoothHeadsetManagerTest : BaseTest() {
 
     @Test
     fun `SCO_AUDIO_STATE_DISCONNECTED should cancel a running disableBluetoothScoJob`() {
-        headsetManager.headsetState = AudioActivated
+        setupActivatedState()
         headsetManager.deactivate()
         val intent = mock<Intent> {
             whenever(mock.action).thenReturn(AudioManager.ACTION_SCO_AUDIO_STATE_UPDATED)
@@ -450,6 +461,17 @@ class BluetoothHeadsetManagerTest : BaseTest() {
     private fun setupConnectedState() {
         whenever(headsetProxy.connectedDevices).thenReturn(bluetoothDevices)
         headsetManager.onServiceConnected(0, headsetProxy)
+    }
+
+    private fun setupActivatedState() {
+        setupConnectedState()
+        headsetManager.activate()
+        val intent = mock<Intent> {
+            whenever(mock.action).thenReturn(AudioManager.ACTION_SCO_AUDIO_STATE_UPDATED)
+            whenever(mock.getIntExtra(AudioManager.EXTRA_SCO_AUDIO_STATE,
+                    AudioManager.SCO_AUDIO_STATE_ERROR)).thenReturn(SCO_AUDIO_STATE_CONNECTED)
+        }
+        headsetManager.onReceive(context, intent)
     }
 
     private fun assertScoJobIsCanceled(handler: Handler, scoJob: BluetoothScoJob) {

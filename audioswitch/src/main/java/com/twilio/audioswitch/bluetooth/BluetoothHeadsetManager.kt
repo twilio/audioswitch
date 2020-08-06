@@ -192,10 +192,14 @@ internal constructor(
     }
 
     fun deactivate() {
-        if (headsetState == AudioActivated) {
-            disableBluetoothScoJob.executeBluetoothScoJob()
+        if (hasActiveHeadset()) {
+            if (headsetState == AudioActivated) {
+                disableBluetoothScoJob.executeBluetoothScoJob()
+            } else {
+                logger.w(TAG, "Cannot deactivate when in the $headsetState state")
+            }
         } else {
-            logger.w(TAG, "Cannot deactivate when in the $headsetState state")
+            logger.d(TAG, "Bluetooth SCO is not connected, unable to stop SCO")
         }
     }
 
