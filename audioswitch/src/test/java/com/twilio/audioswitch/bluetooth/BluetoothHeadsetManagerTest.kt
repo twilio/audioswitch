@@ -9,6 +9,7 @@ import android.os.Handler
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.isA
 import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.never
 import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.verifyZeroInteractions
@@ -127,6 +128,24 @@ class BluetoothHeadsetManagerTest : BaseTest() {
     }
 
     @Test
+    fun `activate should not start bluetooth device audio routing if a headset already has audio routed`() {
+        setupConnectedState()
+        whenever(headsetProxy.isAudioConnected(expectedBluetoothDevice)).thenReturn(true)
+        headsetManager.activate()
+
+        verify(audioManager, never()).startBluetoothSco()
+    }
+
+    @Test
+    fun `activate should set state to Activated if a headset already has audio routed`() {
+        setupConnectedState()
+        whenever(headsetProxy.isAudioConnected(expectedBluetoothDevice)).thenReturn(true)
+        headsetManager.activate()
+
+        assertThat(headsetManager.headsetState is AudioActivated, equalTo(true))
+    }
+
+    @Test
     fun `activate should start bluetooth device audio routing if state is Connected`() {
         headsetManager.headsetState = Connected
         headsetManager.activate()
@@ -145,11 +164,18 @@ class BluetoothHeadsetManagerTest : BaseTest() {
 
     @Test
     fun `activate should not start bluetooth device audio routing if state is Disconnected`() {
-        headsetManager.headsetState = Disconnected
+        headsetManager.activate()
+
+        verify(audioManager, never()).startBluetoothSco()
+    }
+
+    @Test
+    fun `activate should not start bluetooth device audio routing if sco is already active and state is Disconnected`() {
+        whenever(headsetProxy.isAudioConnected(expectedBluetoothDevice)).thenReturn(true)
 
         headsetManager.activate()
 
-        verifyZeroInteractions(audioManager)
+        verify(audioManager, never()).startBluetoothSco()
     }
 
     @Test
@@ -422,10 +448,8 @@ class BluetoothHeadsetManagerTest : BaseTest() {
             }
 
     private fun setupConnectedState() {
-        val bluetoothProfile = mock<BluetoothHeadset> {
-            whenever(mock.connectedDevices).thenReturn(bluetoothDevices)
-        }
-        headsetManager.onServiceConnected(0, bluetoothProfile)
+        whenever(headsetProxy.connectedDevices).thenReturn(bluetoothDevices)
+        headsetManager.onServiceConnected(0, headsetProxy)
     }
 
     private fun assertScoJobIsCanceled(handler: Handler, scoJob: BluetoothScoJob) {

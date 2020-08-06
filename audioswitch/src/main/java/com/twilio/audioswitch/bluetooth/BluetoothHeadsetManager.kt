@@ -179,10 +179,15 @@ internal constructor(
     }
 
     fun activate() {
-        if (headsetState == Connected || headsetState == AudioActivationError)
-            enableBluetoothScoJob.executeBluetoothScoJob()
-        else {
-            logger.w(TAG, "Cannot activate when in the $headsetState state")
+        if (!hasActiveHeadset()) {
+            if ((headsetState == Connected || headsetState == AudioActivationError))
+                enableBluetoothScoJob.executeBluetoothScoJob()
+            else {
+                logger.w(TAG, "Cannot activate when in the $headsetState state")
+            }
+        } else {
+            logger.d(TAG, "Bluetooth SCO is already connected, setting state to AudioActivated")
+            headsetState = AudioActivated
         }
     }
 
