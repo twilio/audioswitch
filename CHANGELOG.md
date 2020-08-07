@@ -4,7 +4,16 @@
 
 Enhancements
 
-- Added `AudioDeviceSelector.VERSION` constant so developers can access the version of AudioSwitch at runtime.
+ - Added `AudioDeviceSelector.VERSION` constant so developers can access the version of AudioSwitch at runtime.
+ - Added `AudioDeviceSelector.loggingEnabled` property so developers can configure AudioSwitch logging behavior at runtime. By default, AudioSwitch logging is disabled. Reference the following snippet to enable AudioSwitch logging:
+
+ ```kotlin
+val audioDeviceSelector = AudioDeviceSelector(context)
+
+audioDeviceSelector.loggingEnabled = true
+
+audioDeviceSelector.start { _, _ -> }
+```
 
 ### 0.2.1
 

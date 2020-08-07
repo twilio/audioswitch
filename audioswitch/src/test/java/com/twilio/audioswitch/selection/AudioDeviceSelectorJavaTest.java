@@ -94,6 +94,16 @@ public class AudioDeviceSelectorJavaTest extends BaseTest {
     }
 
     @Test
+    public void shouldDisableLoggingByDefault() {
+        assertFalse(javaAudioDeviceSelector.getLoggingEnabled());
+    }
+
+    @Test
+    public void shouldAllowEnablingLogging() {
+        javaAudioDeviceSelector.setLoggingEnabled(true);
+    }
+
+    @Test
     public void getVersion_shouldReturnValidSemverFormattedVersion() {
         String semVerRegex =
                 "^([0-9]+)\\.([0-9]+)\\.([0-9]+)(?:-([0-9A-"

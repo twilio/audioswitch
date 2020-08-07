@@ -8,13 +8,13 @@ import android.media.AudioFocusRequest
 import android.media.AudioManager
 import android.os.Build
 import com.twilio.audioswitch.android.BuildWrapper
-import com.twilio.audioswitch.android.LogWrapper
+import com.twilio.audioswitch.android.Logger
 
 private const val TAG = "AudioDeviceManager"
 
 internal class AudioDeviceManager(
     private val context: Context,
-    private val logger: LogWrapper,
+    private val logger: Logger,
     private val audioManager: AudioManager,
     private val build: BuildWrapper,
     private val audioFocusRequest: AudioFocusRequestWrapper,

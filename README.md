@@ -100,6 +100,19 @@ Multiple connected bluetooth headsets are supported.
 
 Audioswitch is compatible with apps written in Java that [target Java 8](https://developer.android.com/studio/write/java8-support), and follows the recommendations provided in the [Kotlin for Java consumption guide](https://developer.android.com/kotlin/interop#kotlin_for_java_consumption). The project includes [Java specific unit tests](https://github.com/twilio/audioswitch/tree/master/audioswitch/src/test/java/com/twilio/audioswitch) that demonstrate how to use Audioswitch from a Java based application. If you have any Java compatibility questions please [open an issue](https://github.com/twilio/audioswitch/issues).
 
+## Logging
+
+By default, AudioSwitch logging is disabled. Reference the following snippet to enable AudioSwitch logging:
+
+  ```kotlin
+ val audioDeviceSelector = AudioDeviceSelector(context)
+
+ audioDeviceSelector.loggingEnabled = true
+
+ audioDeviceSelector.start { _, _ -> }
+ ```
+
+
 ## Usage Examples
 
 * [Twilio Video Android App](https://github.com/twilio/twilio-video-app-android)
