@@ -1,5 +1,11 @@
 # Changelog
 
+### 0.3.0
+
+Enhancements
+
+- Added `AudioDeviceSelector.VERSION` constant so developers can access the version of AudioSwitch at runtime.
+
 ### 0.2.1
 
 Bug Fixes

@@ -28,6 +28,8 @@ import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.CoreMatchers.nullValue
 import org.hamcrest.MatcherAssert.assertThat
+import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertTrue
 import org.junit.Assert.fail
 import org.junit.Before
 import org.junit.Ignore
@@ -408,5 +410,13 @@ class AudioDeviceSelectorTest : BaseTest() {
 
         verify(audioManager).isSpeakerphoneOn = false
         verify(audioManager).startBluetoothSco()
+    }
+
+    @Test
+    fun `getVersion should return valid semver formatted version`() {
+        val semVerRegex = Regex("^([0-9]+)\\.([0-9]+)\\.([0-9]+)(?:-([0-9A-" +
+                "Za-z-]+(?:\\.[0-9A-Za-z-]+)*))?(?:\\+[0-9A-Za-z-]+)?$")
+        assertNotNull(AudioDeviceSelector.VERSION)
+        assertTrue(AudioDeviceSelector.VERSION.matches(semVerRegex))
     }
 }
