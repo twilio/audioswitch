@@ -55,4 +55,14 @@ class AudioDeviceSelectorTest {
         audioDeviceSelector.start { _, _ -> }
         audioDeviceSelector.stop()
     }
+
+    @Test
+    @UiThreadTest
+    fun `it_should_return_valid_semver_formatted_version`() {
+        val semVerRegex = Regex("^([0-9]+)\\.([0-9]+)\\.([0-9]+)(?:-([0-9A-" +
+                "Za-z-]+(?:\\.[0-9A-Za-z-]+)*))?(?:\\+[0-9A-Za-z-]+)?$")
+        val version: String = AudioDeviceSelector.VERSION
+        assertNotNull(version)
+        assertTrue(version.matches(semVerRegex))
+    }
 }

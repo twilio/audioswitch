@@ -11,7 +11,7 @@ android {
     defaultConfig {
         minSdkVersion 16
         targetSdkVersion 29
-        versionName getVersionName()
+        versionName audioSwitchVersion
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         testInstrumentationRunnerArguments clearPackageData: 'true'
@@ -80,7 +80,7 @@ publishing {
 
             groupId = audioSwitchGroupId
             artifactId = audioSwitchArtifactId
-            version = getVersionName()
+            version = audioSwitchVersion
 
             pom.withXml {
                 def root = asNode()
@@ -120,7 +120,7 @@ uploadArchives {
                         password: mavenPassword
                 )
             }
-            pom.version = getVersionName()
+            pom.version = audioSwitchVersion
             pom.groupId = audioSwitchGroupId
             pom.artifactId = audioSwitchArtifactId
             pom.packaging = 'aar'

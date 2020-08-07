@@ -3,6 +3,7 @@ package com.twilio.audioswitch.selection
 import android.bluetooth.BluetoothAdapter
 import android.content.Context
 import android.media.AudioManager
+import com.twilio.audioswitch.BuildConfig
 import com.twilio.audioswitch.android.BuildWrapper
 import com.twilio.audioswitch.android.Logger
 import com.twilio.audioswitch.bluetooth.BluetoothHeadsetConnectionListener
@@ -26,6 +27,13 @@ private const val TAG = "AudioDeviceSelector"
  * synchronization problems.
  */
 class AudioDeviceSelector {
+
+    companion object {
+        /**
+         * The version of the AudioSwitch library.
+         */
+        const val VERSION = BuildConfig.VERSION_NAME
+    }
 
     /**
      * Constructs a new AudioDeviceSelector instance.
