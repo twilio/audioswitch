@@ -9,4 +9,4 @@ integration-tests:
     - {model: c5proltechn, version: 26}
     - {model: crownqlteue, version: 27}
     - {model: crownlteks, version: 28}
-    - {model: blueline, version: 29}
+    - {model: flame, version: 29}
