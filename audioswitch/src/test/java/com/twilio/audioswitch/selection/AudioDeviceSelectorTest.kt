@@ -24,6 +24,7 @@ import com.twilio.audioswitch.selection.AudioDeviceSelector.State.ACTIVATED
 import com.twilio.audioswitch.selection.AudioDeviceSelector.State.STARTED
 import com.twilio.audioswitch.selection.AudioDeviceSelector.State.STOPPED
 import com.twilio.audioswitch.simulateNewBluetoothHeadsetConnection
+import junit.framework.TestCase
 import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.CoreMatchers.nullValue
@@ -408,5 +409,13 @@ class AudioDeviceSelectorTest : BaseTest() {
 
         verify(audioManager).isSpeakerphoneOn = false
         verify(audioManager).startBluetoothSco()
+    }
+
+    @Test
+    fun `getVersion should return valid semver formatted version`() {
+        val semVerRegex = Regex("^([0-9]+)\\.([0-9]+)\\.([0-9]+)(?:-([0-9A-"
+                + "Za-z-]+(?:\\.[0-9A-Za-z-]+)*))?(?:\\+[0-9A-Za-z-]+)?$")
+        TestCase.assertNotNull(AudioDeviceSelector.VERSION)
+        TestCase.assertTrue(AudioDeviceSelector.VERSION.matches(semVerRegex))
     }
 }
