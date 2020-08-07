@@ -11,8 +11,8 @@ import org.junit.runner.RunWith
 class AudioDeviceSelectorTest {
     @Test
     fun `it_should_return_valid_semver_formatted_version`() {
-        val semVerRegex = Regex("^([0-9]+)\\.([0-9]+)\\.([0-9]+)(?:-([0-9A-"
-                + "Za-z-]+(?:\\.[0-9A-Za-z-]+)*))?(?:\\+[0-9A-Za-z-]+)?$")
+        val semVerRegex = Regex("^([0-9]+)\\.([0-9]+)\\.([0-9]+)(?:-([0-9A-" +
+                "Za-z-]+(?:\\.[0-9A-Za-z-]+)*))?(?:\\+[0-9A-Za-z-]+)?$")
         val version: String = AudioDeviceSelector.VERSION
         assertNotNull(version)
         assertTrue(version.matches(semVerRegex))

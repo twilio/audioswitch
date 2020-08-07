@@ -103,7 +103,6 @@ public class AudioDeviceSelectorJavaTest extends BaseTest {
         assertTrue(AudioDeviceSelector.VERSION.matches(semVerRegex));
     }
 
-
     private void startAudioDeviceSelector() {
         Function2<List<? extends AudioDevice>, AudioDevice, Unit> audioDeviceListener =
                 (audioDevices, audioDevice) -> {
