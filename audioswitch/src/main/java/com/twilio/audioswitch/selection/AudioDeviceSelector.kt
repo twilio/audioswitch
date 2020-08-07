@@ -4,7 +4,7 @@ import android.bluetooth.BluetoothAdapter
 import android.content.Context
 import android.media.AudioManager
 import com.twilio.audioswitch.android.BuildWrapper
-import com.twilio.audioswitch.android.LogWrapper
+import com.twilio.audioswitch.android.Logger
 import com.twilio.audioswitch.bluetooth.BluetoothHeadsetConnectionListener
 import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager
 import com.twilio.audioswitch.selection.AudioDevice.BluetoothHeadset
@@ -34,7 +34,7 @@ class AudioDeviceSelector {
      */
     constructor(context: Context) {
         val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
-        val logger = LogWrapper()
+        val logger = Logger()
         val audioDeviceManager =
                 AudioDeviceManager(context,
                         logger,
@@ -49,7 +49,7 @@ class AudioDeviceSelector {
     }
 
     internal constructor(
-        logger: LogWrapper,
+        logger: Logger,
         audioDeviceManager: AudioDeviceManager,
         wiredHeadsetReceiver: WiredHeadsetReceiver,
         headsetManager: BluetoothHeadsetManager?
@@ -60,7 +60,7 @@ class AudioDeviceSelector {
         this.bluetoothHeadsetManager = headsetManager
     }
 
-    private var logger: LogWrapper = LogWrapper()
+    private var logger: Logger = Logger()
     private val audioDeviceManager: AudioDeviceManager
     private val wiredHeadsetReceiver: WiredHeadsetReceiver
     internal var audioDeviceChangeListener: AudioDeviceChangeListener? = null

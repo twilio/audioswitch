@@ -16,7 +16,7 @@ import androidx.annotation.VisibleForTesting
 import com.twilio.audioswitch.android.BluetoothDeviceWrapper
 import com.twilio.audioswitch.android.BluetoothIntentProcessor
 import com.twilio.audioswitch.android.BluetoothIntentProcessorImpl
-import com.twilio.audioswitch.android.LogWrapper
+import com.twilio.audioswitch.android.Logger
 import com.twilio.audioswitch.android.SystemClockWrapper
 import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager.HeadsetState.AudioActivated
 import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager.HeadsetState.AudioActivating
@@ -33,7 +33,7 @@ internal class BluetoothHeadsetManager
 @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
 internal constructor(
     private val context: Context,
-    private val logger: LogWrapper,
+    private val logger: Logger,
     private val bluetoothAdapter: BluetoothAdapter,
     audioDeviceManager: AudioDeviceManager,
     var headsetListener: BluetoothHeadsetConnectionListener? = null,
@@ -63,7 +63,7 @@ internal constructor(
     companion object {
         internal fun newInstance(
             context: Context,
-            logger: LogWrapper,
+            logger: Logger,
             bluetoothAdapter: BluetoothAdapter?,
             audioDeviceManager: AudioDeviceManager
         ): BluetoothHeadsetManager? {
@@ -281,7 +281,7 @@ internal constructor(
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     internal inner class EnableBluetoothScoJob(
-        private val logger: LogWrapper,
+        private val logger: Logger,
         private val audioDeviceManager: AudioDeviceManager,
         bluetoothScoHandler: Handler,
         systemClockWrapper: SystemClockWrapper
@@ -301,7 +301,7 @@ internal constructor(
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     internal inner class DisableBluetoothScoJob(
-        private val logger: LogWrapper,
+        private val logger: Logger,
         private val audioDeviceManager: AudioDeviceManager,
         bluetoothScoHandler: Handler,
         systemClockWrapper: SystemClockWrapper
