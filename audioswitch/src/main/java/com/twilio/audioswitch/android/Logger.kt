@@ -1,9 +1,8 @@
 package com.twilio.audioswitch.android
 
 import android.util.Log
-import com.twilio.audioswitch.BuildConfig
 
-internal class Logger(var loggingEnabled: Boolean = BuildConfig.DEBUG) {
+internal class Logger(var loggingEnabled: Boolean = false) {
 
     fun d(tag: String, message: String) {
         if (loggingEnabled) {
