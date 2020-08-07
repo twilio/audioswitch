@@ -92,6 +92,16 @@ public class AudioDeviceSelectorJavaTest extends BaseTest {
         assertEquals(earpiece, javaAudioDeviceSelector.getSelectedAudioDevice());
     }
 
+    @Test
+    public void shouldDisableLoggingByDefault() {
+        assertFalse(javaAudioDeviceSelector.getLoggingEnabled());
+    }
+
+    @Test
+    public void shouldAllowEnablingLogging() {
+        javaAudioDeviceSelector.setLoggingEnabled(true);
+    }
+
     private void startAudioDeviceSelector() {
         Function2<List<? extends AudioDevice>, AudioDevice, Unit> audioDeviceListener =
                 (audioDevices, audioDevice) -> {
