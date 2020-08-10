@@ -179,6 +179,7 @@ workflows:
             branches:
               only:
                 - "master"
+                - "bug/AHOYAPPS-812"
           requires:
             - unit-tests
             - integration-tests
