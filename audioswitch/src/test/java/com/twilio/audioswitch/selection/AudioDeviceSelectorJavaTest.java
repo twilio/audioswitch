@@ -3,6 +3,7 @@ package com.twilio.audioswitch.selection;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -90,6 +91,26 @@ public class AudioDeviceSelectorJavaTest extends BaseTest {
         javaAudioDeviceSelector.selectDevice(earpiece);
 
         assertEquals(earpiece, javaAudioDeviceSelector.getSelectedAudioDevice());
+    }
+
+    @Test
+    public void shouldDisableLoggingByDefault() {
+        assertFalse(javaAudioDeviceSelector.getLoggingEnabled());
+    }
+
+    @Test
+    public void shouldAllowEnablingLogging() {
+        javaAudioDeviceSelector.setLoggingEnabled(true);
+    }
+
+    @Test
+    public void getVersion_shouldReturnValidSemverFormattedVersion() {
+        String semVerRegex =
+                "^([0-9]+)\\.([0-9]+)\\.([0-9]+)(?:-([0-9A-"
+                        + "Za-z-]+(?:\\.[0-9A-Za-z-]+)*))?(?:\\+[0-9A-Za-z-]+)?$";
+
+        assertNotNull(AudioDeviceSelector.VERSION);
+        assertTrue(AudioDeviceSelector.VERSION.matches(semVerRegex));
     }
 
     private void startAudioDeviceSelector() {

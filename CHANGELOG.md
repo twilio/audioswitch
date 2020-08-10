@@ -1,10 +1,23 @@
 # Changelog
 
-### 0.2.2
+### 0.3.0
 
+Enhancements
+
+ - Added `AudioDeviceSelector.VERSION` constant so developers can access the version of AudioSwitch at runtime.
+ - Added `AudioDeviceSelector.loggingEnabled` property so developers can configure AudioSwitch logging behavior at runtime. By default, AudioSwitch logging is disabled. Reference the following snippet to enable AudioSwitch logging:
+ 
 Bug Fixes
+ 
+ - Fixed issue [#47](https://github.com/twilio/audioswitch/issues/47), where the BluetoothHeadsetState gets in an invalid state when calling `activate()` on a selected Bluetooth Headset immediately after invoking `start()` in the `AudioDeviceSelector`.
 
-- Fixed issue [#47](https://github.com/twilio/audioswitch/issues/47), where the BluetoothHeadsetState gets in an invalid state when calling `activate()` on a selected Bluetooth Headset immediately after invoking `start()` in the `AudioDeviceSelector`.
+ ```kotlin
+val audioDeviceSelector = AudioDeviceSelector(context)
+
+audioDeviceSelector.loggingEnabled = true
+
+audioDeviceSelector.start { _, _ -> }
+```
 
 ### 0.2.1
 
