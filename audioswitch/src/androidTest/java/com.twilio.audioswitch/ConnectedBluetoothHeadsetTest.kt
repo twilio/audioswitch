@@ -47,6 +47,7 @@ class ConnectedBluetoothHeadsetTest {
         addAction(BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED)
     }
     private val bluetoothStateConnected = CountDownLatch(1)
+    private val bluetoothStateDisconnected = CountDownLatch(1)
     private val bluetoothAudioStateConnected = CountDownLatch(1)
     private val bluetoothReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -54,6 +55,9 @@ class ConnectedBluetoothHeadsetTest {
                 when (state) {
                     BluetoothHeadset.STATE_CONNECTED -> {
                         bluetoothStateConnected.countDown()
+                    }
+                    BluetoothHeadset.STATE_DISCONNECTED -> {
+                        bluetoothStateDisconnected.countDown()
                     }
                     BluetoothHeadset.STATE_AUDIO_CONNECTED -> {
                         bluetoothAudioStateConnected.countDown()
@@ -155,7 +159,7 @@ class ConnectedBluetoothHeadsetTest {
     }
 
     @Test
-    fun it_should_allow_selecting_another_audio_device_with_bluetooth_device_connected() {
+    fun it_should_select_another_audio_device_with_bluetooth_device_connected() {
         val bluetoothDeviceConnected = CountDownLatch(1)
         val deviceListenerCallbacks = CountDownLatch(3)
 
@@ -200,6 +204,70 @@ class ConnectedBluetoothHeadsetTest {
         }
         assertFalse(isSpeakerPhoneOn())
         assertTrue(bluetoothAudioStateConnected.await(10, TimeUnit.SECONDS))
+        assertTrue(bluetoothHeadset.isAudioConnected(bluetoothHeadset.connectedDevices.first()))
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            assertEquals(expectedBluetoothDevice, audioDeviceSelector.selectedAudioDevice)
+        }
+    }
+
+    @Test
+    fun it_should_activate_another_audio_device_with_bluetooth_device_connected() {
+        val bluetoothDeviceConnected = CountDownLatch(1)
+        val deviceListenerCallbacks = CountDownLatch(3)
+
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            audioDeviceSelector.start { _, audioDevice ->
+                deviceListenerCallbacks.countDown()
+                if (audioDevice is AudioDevice.BluetoothHeadset) {
+                    bluetoothDeviceConnected.countDown()
+                }
+            }
+        }
+
+        assertTrue(bluetoothDeviceConnected.await(5, TimeUnit.SECONDS))
+
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            val expectedAudioDevice = audioDeviceSelector.availableAudioDevices.find { it !is AudioDevice.BluetoothHeadset }
+            audioDeviceSelector.selectDevice(expectedAudioDevice)
+            assertEquals(expectedAudioDevice, audioDeviceSelector.selectedAudioDevice)
+        }
+
+        assertTrue(bluetoothAudioStateConnected.count > 0)
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            audioDeviceSelector.activate()
+        }
+        assertFalse(bluetoothAudioStateConnected.await(5, TimeUnit.SECONDS))
+        assertFalse(bluetoothHeadset.isAudioConnected(bluetoothHeadset.connectedDevices.first()))
+
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            assertTrue(audioDeviceSelector.selectedAudioDevice !is AudioDevice.BluetoothHeadset)
+        }
+    }
+
+    @Test
+    fun it_should_automatically_activate_bluetooth_device_if_no_device_selected() {
+        bluetoothAdapter.disable()
+        retryAssertion { assertFalse(bluetoothAdapter.isEnabled) }
+        val bluetoothDeviceConnected = CountDownLatch(1)
+        lateinit var actualBluetoothDevice: AudioDevice
+
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            audioDeviceSelector.start { _, audioDevice ->
+                if (audioDevice is AudioDevice.BluetoothHeadset) {
+                    actualBluetoothDevice = audioDevice
+                    bluetoothDeviceConnected.countDown()
+                }
+            }
+            audioDeviceSelector.activate()
+            assertTrue(audioDeviceSelector.selectedAudioDevice !is AudioDevice.BluetoothHeadset)
+        }
+        assertTrue(bluetoothAudioStateConnected.count > 0)
+        assertFalse(bluetoothAudioStateConnected.await(5, TimeUnit.SECONDS))
+        assertTrue(bluetoothHeadset.connectedDevices.isEmpty())
+        bluetoothAdapter.enable()
+        assertTrue(bluetoothDeviceConnected.await(5, TimeUnit.SECONDS))
+        assertEquals(expectedBluetoothDevice, actualBluetoothDevice)
+        assertTrue(bluetoothAudioStateConnected.await(5, TimeUnit.SECONDS))
         assertTrue(bluetoothHeadset.isAudioConnected(bluetoothHeadset.connectedDevices.first()))
     }
 }
