@@ -17,6 +17,7 @@ import com.twilio.audioswitch.selection.AudioDeviceManager
 import com.twilio.audioswitch.selection.AudioDeviceSelector
 import com.twilio.audioswitch.selection.AudioFocusRequestWrapper
 import com.twilio.audioswitch.wired.WiredHeadsetReceiver
+import java.util.concurrent.TimeoutException
 
 internal fun setupFakeAudioDeviceSelector(context: Context):
         Pair<AudioDeviceSelector, BluetoothHeadsetManager> {
@@ -64,3 +65,21 @@ fun isSpeakerPhoneOn() =
         (getTargetContext().getSystemService(Context.AUDIO_SERVICE) as AudioManager?)?.let {
             it.isSpeakerphoneOn
         } ?: false
+
+fun retryAssertion(
+    timeoutInMilliseconds: Long = 10000L,
+    assertionAction: () -> Unit
+) {
+    val startTime = System.currentTimeMillis()
+    var currentTime = 0L
+    while (currentTime <= timeoutInMilliseconds) {
+        try {
+            assertionAction()
+            return
+        } catch (error: AssertionError) {
+            currentTime = System.currentTimeMillis() - startTime
+            Thread.sleep(10)
+        }
+    }
+    throw TimeoutException("Assertion timeout occurred")
+}

@@ -98,6 +98,7 @@ internal constructor(
     }
 
     fun start(headsetListener: BluetoothHeadsetConnectionListener) {
+        logger.d(TAG, "start")
         this.headsetListener = headsetListener
 
         bluetoothAdapter.getProfileProxy(
@@ -114,12 +115,14 @@ internal constructor(
     }
 
     fun stop() {
+        logger.d(TAG, "stop")
         headsetListener = null
         bluetoothAdapter.closeProfileProxy(BluetoothProfile.HEADSET, headsetProxy)
         context.unregisterReceiver(this)
     }
 
     fun activate() {
+        logger.d(TAG, "activate")
         if (headsetState == Connected || headsetState == AudioActivationError)
             enableBluetoothScoJob.executeBluetoothScoJob()
         else {
@@ -128,6 +131,7 @@ internal constructor(
     }
 
     fun deactivate() {
+        logger.d(TAG, "deactivate")
         if (headsetState == AudioActivated) {
             disableBluetoothScoJob.executeBluetoothScoJob()
         } else {
