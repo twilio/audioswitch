@@ -18,8 +18,7 @@ internal class AudioDeviceManager(
     private val audioManager: AudioManager,
     private val build: BuildWrapper,
     private val audioFocusRequest: AudioFocusRequestWrapper,
-    private val audioFocusChangeListener: AudioManager.OnAudioFocusChangeListener =
-            AudioManager.OnAudioFocusChangeListener { }
+    private val audioFocusChangeListener: AudioManager.OnAudioFocusChangeListener
 ) {
 
     private var savedAudioMode = 0
@@ -58,7 +57,7 @@ internal class AudioDeviceManager(
     fun setAudioFocus() {
         // Request audio focus before making any device switch.
         if (build.getVersion() >= Build.VERSION_CODES.O) {
-            audioRequest = audioFocusRequest.buildRequest()
+            audioRequest = audioFocusRequest.buildRequest(audioFocusChangeListener)
             audioRequest?.let { audioManager.requestAudioFocus(it) }
         } else {
             audioManager.requestAudioFocus(
