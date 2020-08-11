@@ -1,7 +1,6 @@
 package com.twilio.audioswitch
 
 import android.bluetooth.BluetoothAdapter
-import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothHeadset
 import android.content.Context
 import android.content.Intent

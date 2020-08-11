@@ -2,14 +2,12 @@ package com.twilio.audioswitch.bluetooth
 
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothClass
-import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothHeadset
 import android.bluetooth.BluetoothProfile
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.media.AudioManager
 import android.os.Handler
 import android.os.Looper
 import androidx.annotation.VisibleForTesting
@@ -168,7 +166,7 @@ internal constructor(
     }
 
     private fun handleBluetoothIntent(intent: Intent?) {
-        intent?.getIntExtra(BluetoothHeadset.EXTRA_STATE, BluetoothHeadset.STATE_DISCONNECTED).let {state ->
+        intent?.getIntExtra(BluetoothHeadset.EXTRA_STATE, BluetoothHeadset.STATE_DISCONNECTED).let { state ->
             when (state) {
                 BluetoothHeadset.STATE_CONNECTING -> {
                     // TODO
