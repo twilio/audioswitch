@@ -124,8 +124,11 @@ class ConnectedBluetoothHeadsetTest {
 
         bluetoothAdapter.disable()
         assertTrue(deviceListenerCallbacks.await(5, TimeUnit.SECONDS))
-        assertNull(audioDeviceSelector.availableAudioDevices.find { it is AudioDevice.BluetoothHeadset })
-        assertFalse(audioDeviceSelector.selectedAudioDevice is AudioDevice.BluetoothHeadset)
+
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            assertNull(audioDeviceSelector.availableAudioDevices.find { it is AudioDevice.BluetoothHeadset })
+            assertFalse(audioDeviceSelector.selectedAudioDevice is AudioDevice.BluetoothHeadset)
+        }
     }
 
     @Test
