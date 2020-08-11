@@ -16,6 +16,7 @@ import junit.framework.TestCase.assertFalse
 import junit.framework.TestCase.assertNull
 import junit.framework.TestCase.assertTrue
 import org.junit.After
+import org.junit.Assume.assumeNotNull
 import org.junit.Assume.assumeTrue
 import org.junit.Before
 import org.junit.Test
@@ -69,6 +70,7 @@ class ConnectedBluetoothHeadsetTest {
 
     @Before
     fun setup() {
+        assumeNotNull(bluetoothAdapter)
         context.registerReceiver(bluetoothReceiver, bluetoothHeadsetFilter)
         if (!previousBluetoothEnabled) {
             bluetoothAdapter.enable()
