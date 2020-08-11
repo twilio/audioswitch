@@ -94,61 +94,7 @@ internal constructor(
     }
 
     override fun onReceive(context: Context, intent: Intent) {
-        intent.action?.let { action ->
-            when (action) {
-                BluetoothDevice.ACTION_ACL_CONNECTED -> {
-                    intent.getHeadsetDevice()?.let { bluetoothDevice ->
-                        logger.d(
-                                TAG,
-                                "Bluetooth ACL device " +
-                                        bluetoothDevice.name +
-                                        " connected")
-                        connect()
-                        headsetListener?.onBluetoothHeadsetStateChanged(bluetoothDevice.name)
-                    }
-                }
-                BluetoothDevice.ACTION_ACL_DISCONNECTED -> {
-                    intent.getHeadsetDevice()?.let { bluetoothDevice ->
-                        logger.d(
-                                TAG,
-                                "Bluetooth ACL device " +
-                                        bluetoothDevice.name +
-                                        " disconnected")
-                        disconnect()
-                        headsetListener?.onBluetoothHeadsetStateChanged()
-                    }
-                }
-                AudioManager.ACTION_SCO_AUDIO_STATE_UPDATED -> {
-                    intent.getIntExtra(AudioManager.EXTRA_SCO_AUDIO_STATE, AudioManager.SCO_AUDIO_STATE_ERROR).let { state ->
-                        when (state) {
-                            AudioManager.SCO_AUDIO_STATE_CONNECTED -> {
-                                logger.d(TAG, "Bluetooth SCO Audio connected")
-                                headsetState = AudioActivated
-                                headsetListener?.onBluetoothHeadsetStateChanged()
-                                enableBluetoothScoJob.cancelBluetoothScoJob()
-                            }
-                            AudioManager.SCO_AUDIO_STATE_DISCONNECTED -> {
-                                logger.d(TAG, "Bluetooth SCO Audio disconnected")
-                                /*
-                                 * This block is needed to restart bluetooth SCO in the event that
-                                 * the active bluetooth headset has changed.
-                                 */
-                                if (hasActiveHeadsetChanged()) {
-                                    enableBluetoothScoJob.executeBluetoothScoJob()
-                                }
-
-                                headsetListener?.onBluetoothHeadsetStateChanged()
-                                disableBluetoothScoJob.cancelBluetoothScoJob()
-                            }
-                            AudioManager.SCO_AUDIO_STATE_ERROR -> {
-                                logger.e(TAG, "Error retrieving Bluetooth SCO Audio state")
-                            }
-                        }
-                    }
-                }
-                else -> {}
-            }
-        }
+        handleBluetoothIntent(intent)
     }
 
     fun start(headsetListener: BluetoothHeadsetConnectionListener) {
@@ -159,13 +105,12 @@ internal constructor(
                 this,
                 BluetoothProfile.HEADSET)
 
-        context.registerReceiver(
-                this, IntentFilter(BluetoothDevice.ACTION_ACL_CONNECTED))
-        context.registerReceiver(
-                this, IntentFilter(BluetoothDevice.ACTION_ACL_DISCONNECTED))
-        context.registerReceiver(
-                this,
-                IntentFilter(AudioManager.ACTION_SCO_AUDIO_STATE_UPDATED))
+        val bluetoothHeadsetFilter = IntentFilter().apply {
+            addAction(BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED)
+            addAction(BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED)
+        }
+        val intent = context.registerReceiver(this, bluetoothHeadsetFilter)
+        handleBluetoothIntent(intent)
     }
 
     fun stop() {
@@ -214,6 +159,66 @@ internal constructor(
             }
             else -> {
                 Disconnected
+            }
+        }
+    }
+
+    private fun handleBluetoothIntent(intent: Intent?) {
+        intent?.getIntExtra(BluetoothHeadset.EXTRA_STATE, BluetoothHeadset.STATE_DISCONNECTED).let {state ->
+            when (state) {
+                BluetoothHeadset.STATE_CONNECTING -> {
+                    // TODO
+                }
+                BluetoothHeadset.STATE_CONNECTED -> {
+                    intent?.getHeadsetDevice()?.let { bluetoothDevice ->
+                        logger.d(
+                            TAG,
+                            "Bluetooth device " +
+                                    bluetoothDevice.name +
+                                    " connected")
+                        connect()
+                        headsetListener?.onBluetoothHeadsetStateChanged(bluetoothDevice.name)
+                    }
+                }
+                BluetoothHeadset.STATE_DISCONNECTING -> {
+                    // TODO
+                }
+                BluetoothHeadset.STATE_DISCONNECTED -> {
+                    intent?.getHeadsetDevice()?.let { bluetoothDevice ->
+                        logger.d(
+                            TAG,
+                            "Bluetooth device " +
+                                    bluetoothDevice.name +
+                                    " disconnected")
+                        disconnect()
+                        headsetListener?.onBluetoothHeadsetStateChanged()
+                    }
+                }
+                BluetoothHeadset.STATE_AUDIO_CONNECTING -> {
+                    // TODO
+                }
+                BluetoothHeadset.STATE_AUDIO_CONNECTED -> {
+                    logger.d(TAG, "Bluetooth SCO Audio connected")
+                    headsetState = AudioActivated
+                    headsetListener?.onBluetoothHeadsetStateChanged()
+                    enableBluetoothScoJob.cancelBluetoothScoJob()
+                }
+                BluetoothHeadset.STATE_AUDIO_DISCONNECTED -> {
+                    logger.d(TAG, "Bluetooth SCO Audio disconnected")
+                    /*
+                     * This block is needed to restart bluetooth SCO in the event that
+                     * the active bluetooth headset has changed.
+                     */
+                    if (hasActiveHeadsetChanged()) {
+                        enableBluetoothScoJob.executeBluetoothScoJob()
+                    }
+
+                    headsetListener?.onBluetoothHeadsetStateChanged()
+                    disableBluetoothScoJob.cancelBluetoothScoJob()
+                }
+                else -> {
+                    // TODO
+                }
             }
         }
     }
