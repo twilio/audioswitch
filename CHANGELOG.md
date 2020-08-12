@@ -1,18 +1,20 @@
 # Changelog
 
-### 0.3.0
+### 1.0.0
 
 Enhancements
 
- - Added `AudioDeviceSelector.VERSION` constant so developers can access the version of AudioSwitch at runtime.
- - Added `AudioDeviceSelector.loggingEnabled` property so developers can configure AudioSwitch logging behavior at runtime. By default, AudioSwitch logging is disabled. Reference the following snippet to enable AudioSwitch logging:
+ - Changed the name of the `AudioDeviceSelector` class to `AudioSwitch`.
+ - Added the [MODIFY_AUDIO_SETTINGS](https://developer.android.com/reference/android/Manifest.permission#MODIFY_AUDIO_SETTINGS) to the library manifest so it can be automatically consumed by applications.
+ - Added `AudioSwitch.VERSION` constant so developers can access the version of AudioSwitch at runtime.
+ - Added `AudioSwitch.loggingEnabled` property so developers can configure AudioSwitch logging behavior at runtime. By default, AudioSwitch logging is disabled. Reference the following snippet to enable AudioSwitch logging:
 
  ```kotlin
-val audioDeviceSelector = AudioDeviceSelector(context)
+val audioSwitch = AudioSwitch(context)
 
-audioDeviceSelector.loggingEnabled = true
+audioSwitch.loggingEnabled = true
 
-audioDeviceSelector.start { _, _ -> }
+audioSwitch.start { _, _ -> }
 ```
 
 ### 0.2.1
