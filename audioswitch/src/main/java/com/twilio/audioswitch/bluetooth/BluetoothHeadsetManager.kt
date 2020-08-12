@@ -11,6 +11,8 @@ import android.content.IntentFilter
 import android.os.Handler
 import android.os.Looper
 import androidx.annotation.VisibleForTesting
+import com.twilio.audioswitch.AudioDevice
+import com.twilio.audioswitch.AudioDeviceManager
 import com.twilio.audioswitch.android.BluetoothDeviceWrapper
 import com.twilio.audioswitch.android.BluetoothIntentProcessor
 import com.twilio.audioswitch.android.BluetoothIntentProcessorImpl
@@ -21,8 +23,6 @@ import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager.HeadsetState.Aud
 import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager.HeadsetState.AudioActivationError
 import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager.HeadsetState.Connected
 import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager.HeadsetState.Disconnected
-import com.twilio.audioswitch.selection.AudioDevice
-import com.twilio.audioswitch.selection.AudioDeviceManager
 
 private const val TAG = "BluetoothHeadsetManager"
 
