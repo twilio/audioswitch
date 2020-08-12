@@ -114,7 +114,7 @@ class ConnectedBluetoothHeadsetTest {
     fun it_should_remove_bluetooth_device_after_disconnected() {
         val bluetoothDeviceConnected = CountDownLatch(1)
         lateinit var actualBluetoothDevice: AudioDevice
-        var noBluetoothDeviceAvailable : CountDownLatch? = null
+        var noBluetoothDeviceAvailable: CountDownLatch? = null
 
         InstrumentationRegistry.getInstrumentation().runOnMainSync {
             audioSwitch.start { audioDevices, audioDevice ->
