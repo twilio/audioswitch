@@ -1,4 +1,4 @@
-package com.twilio.audioswitch.selection;
+package com.twilio.audioswitch;
 
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertFalse;
@@ -8,7 +8,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import android.content.pm.PackageManager;
-import com.twilio.audioswitch.BaseTest;
 import java.util.List;
 import kotlin.Unit;
 import kotlin.jvm.functions.Function2;
@@ -19,16 +18,16 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
-public class AudioDeviceSelectorJavaTest extends BaseTest {
-    private AudioDeviceSelector javaAudioDeviceSelector;
+public class AudioSwitchJavaTest extends BaseTest {
+    private AudioSwitch javaAudioSwitch;
     @Mock PackageManager packageManager;
 
     @Before
     public void setUp() {
         when(packageManager.hasSystemFeature(any())).thenReturn(true);
         when(getContext$audioswitch_debug().getPackageManager()).thenReturn(packageManager);
-        javaAudioDeviceSelector =
-                new AudioDeviceSelector(
+        javaAudioSwitch =
+                new AudioSwitch(
                         getLogger$audioswitch_debug(),
                         getAudioDeviceManager$audioswitch_debug(),
                         getWiredHeadsetReceiver$audioswitch_debug(),
@@ -37,7 +36,7 @@ public class AudioDeviceSelectorJavaTest extends BaseTest {
 
     @Test
     public void shouldAllowConstruction() {
-        assertNotNull(javaAudioDeviceSelector);
+        assertNotNull(javaAudioSwitch);
     }
 
     @Test
@@ -49,38 +48,38 @@ public class AudioDeviceSelectorJavaTest extends BaseTest {
                     return Unit.INSTANCE;
                 };
 
-        javaAudioDeviceSelector.start(audioDeviceListener);
+        javaAudioSwitch.start(audioDeviceListener);
     }
 
     @Test
     public void shouldAllowActivate() {
-        startAudioDeviceSelector();
+        startAudioSwitch();
 
-        javaAudioDeviceSelector.activate();
+        javaAudioSwitch.activate();
     }
 
     @Test
     public void shouldAllowDeactivate() {
-        javaAudioDeviceSelector.deactivate();
+        javaAudioSwitch.deactivate();
     }
 
     @Test
     public void shouldAllowStop() {
-        javaAudioDeviceSelector.stop();
+        javaAudioSwitch.stop();
     }
 
     @Test
     public void shouldAllowGettingAvailableDevices() {
-        startAudioDeviceSelector();
-        List<AudioDevice> availableDevices = javaAudioDeviceSelector.getAvailableAudioDevices();
+        startAudioSwitch();
+        List<AudioDevice> availableDevices = javaAudioSwitch.getAvailableAudioDevices();
 
         assertFalse(availableDevices.isEmpty());
     }
 
     @Test
     public void shouldAllowGettingSelectedAudioDevice() {
-        startAudioDeviceSelector();
-        AudioDevice audioDevice = javaAudioDeviceSelector.getSelectedAudioDevice();
+        startAudioSwitch();
+        AudioDevice audioDevice = javaAudioSwitch.getSelectedAudioDevice();
 
         assertNotNull(audioDevice);
     }
@@ -88,19 +87,19 @@ public class AudioDeviceSelectorJavaTest extends BaseTest {
     @Test
     public void shouldAllowSelectingAudioDevice() {
         AudioDevice.Earpiece earpiece = new AudioDevice.Earpiece();
-        javaAudioDeviceSelector.selectDevice(earpiece);
+        javaAudioSwitch.selectDevice(earpiece);
 
-        assertEquals(earpiece, javaAudioDeviceSelector.getSelectedAudioDevice());
+        assertEquals(earpiece, javaAudioSwitch.getSelectedAudioDevice());
     }
 
     @Test
     public void shouldDisableLoggingByDefault() {
-        assertFalse(javaAudioDeviceSelector.getLoggingEnabled());
+        assertFalse(javaAudioSwitch.getLoggingEnabled());
     }
 
     @Test
     public void shouldAllowEnablingLogging() {
-        javaAudioDeviceSelector.setLoggingEnabled(true);
+        javaAudioSwitch.setLoggingEnabled(true);
     }
 
     @Test
@@ -109,18 +108,18 @@ public class AudioDeviceSelectorJavaTest extends BaseTest {
                 "^([0-9]+)\\.([0-9]+)\\.([0-9]+)(?:-([0-9A-"
                         + "Za-z-]+(?:\\.[0-9A-Za-z-]+)*))?(?:\\+[0-9A-Za-z-]+)?$";
 
-        assertNotNull(AudioDeviceSelector.VERSION);
-        assertTrue(AudioDeviceSelector.VERSION.matches(semVerRegex));
+        assertNotNull(AudioSwitch.VERSION);
+        assertTrue(AudioSwitch.VERSION.matches(semVerRegex));
     }
 
-    private void startAudioDeviceSelector() {
+    private void startAudioSwitch() {
         Function2<List<? extends AudioDevice>, AudioDevice, Unit> audioDeviceListener =
                 (audioDevices, audioDevice) -> {
                     assertFalse(audioDevices.isEmpty());
                     assertNotNull(audioDevice);
                     return Unit.INSTANCE;
                 };
-        javaAudioDeviceSelector.start(
+        javaAudioSwitch.start(
                 (audioDevices, audioDevice) -> {
                     assertFalse(audioDevices.isEmpty());
                     assertNotNull(audioDevice);

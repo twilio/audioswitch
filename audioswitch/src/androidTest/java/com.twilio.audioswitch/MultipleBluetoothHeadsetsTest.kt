@@ -19,16 +19,16 @@ class MultipleBluetoothHeadsetsTest {
     @UiThreadTest
     @Test
     fun `it_should_assert_the_second_bluetooth_headset_when_two_are_connected`() {
-        val (audioDeviceSelector, bluetoothHeadsetReceiver) = setupFakeAudioDeviceSelector(getInstrumentationContext())
+        val (audioSwitch, bluetoothHeadsetReceiver) = setupFakeAudioSwitch(getInstrumentationContext())
 
-        audioDeviceSelector.start { _, _ -> }
-        audioDeviceSelector.activate()
+        audioSwitch.start { _, _ -> }
+        audioSwitch.activate()
         simulateBluetoothSystemIntent(getInstrumentationContext(), bluetoothHeadsetReceiver)
         simulateBluetoothSystemIntent(getInstrumentationContext(), bluetoothHeadsetReceiver, HEADSET_2_NAME)
 
-        assertThat(audioDeviceSelector.selectedAudioDevice!!.name, equalTo(HEADSET_2_NAME))
-        assertThat(audioDeviceSelector.availableAudioDevices.first().name, equalTo(HEADSET_2_NAME))
-        assertThat(audioDeviceSelector.availableAudioDevices.find { it.name == HEADSET_NAME },
+        assertThat(audioSwitch.selectedAudioDevice!!.name, equalTo(HEADSET_2_NAME))
+        assertThat(audioSwitch.availableAudioDevices.first().name, equalTo(HEADSET_2_NAME))
+        assertThat(audioSwitch.availableAudioDevices.find { it.name == HEADSET_NAME },
                 `is`(nullValue()))
         assertThat(isSpeakerPhoneOn(), equalTo(false)) // Best we can do for asserting if a fake BT headset is activated
     }
