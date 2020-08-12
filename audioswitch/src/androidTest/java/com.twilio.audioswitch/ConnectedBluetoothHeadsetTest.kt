@@ -10,8 +10,6 @@ import android.content.IntentFilter
 import android.media.AudioManager
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import com.twilio.audioswitch.selection.AudioDevice
-import com.twilio.audioswitch.selection.AudioDeviceSelector
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import junit.framework.TestCase.assertEquals
@@ -31,7 +29,7 @@ class ConnectedBluetoothHeadsetTest {
     private val bluetoothAdapter by lazy { BluetoothAdapter.getDefaultAdapter() }
     private val previousBluetoothEnabled by lazy { bluetoothAdapter.isEnabled }
     private val context by lazy { getInstrumentationContext() }
-    private val audioDeviceSelector by lazy { AudioDeviceSelector(context) }
+    private val audioSwitch by lazy { AudioSwitch(context) }
     private lateinit var bluetoothHeadset: BluetoothHeadset
     private lateinit var expectedBluetoothDevice: AudioDevice.BluetoothHeadset
     private val bluetoothServiceConnected = CountDownLatch(1)
@@ -95,8 +93,8 @@ class ConnectedBluetoothHeadsetTest {
 
     @After
     fun teardown() {
-        audioDeviceSelector.deactivate()
-        audioDeviceSelector.stop()
+        audioSwitch.deactivate()
+        audioSwitch.stop()
         if (previousBluetoothEnabled) {
             bluetoothAdapter.enable()
         } else {
@@ -119,7 +117,7 @@ class ConnectedBluetoothHeadsetTest {
         var noBluetoothDeviceAvailable : CountDownLatch? = null
 
         InstrumentationRegistry.getInstrumentation().runOnMainSync {
-            audioDeviceSelector.start { audioDevices, audioDevice ->
+            audioSwitch.start { audioDevices, audioDevice ->
                 audioDevices.find { it is AudioDevice.BluetoothHeadset }
                     ?: noBluetoothDeviceAvailable?.countDown()
 
@@ -138,8 +136,8 @@ class ConnectedBluetoothHeadsetTest {
         retryAssertion { assertFalse(bluetoothAdapter.isEnabled) }
         assertTrue(noBluetoothDeviceAvailable.await(5, TimeUnit.SECONDS))
         InstrumentationRegistry.getInstrumentation().runOnMainSync {
-            assertNull(audioDeviceSelector.availableAudioDevices.find { it is AudioDevice.BluetoothHeadset })
-            assertFalse(audioDeviceSelector.selectedAudioDevice is AudioDevice.BluetoothHeadset)
+            assertNull(audioSwitch.availableAudioDevices.find { it is AudioDevice.BluetoothHeadset })
+            assertFalse(audioSwitch.selectedAudioDevice is AudioDevice.BluetoothHeadset)
         }
     }
 
@@ -148,11 +146,11 @@ class ConnectedBluetoothHeadsetTest {
         startAndAwaitBluetoothDevice()
 
         InstrumentationRegistry.getInstrumentation().runOnMainSync {
-            audioDeviceSelector.selectDevice(
-                audioDeviceSelector.availableAudioDevices.find {
+            audioSwitch.selectDevice(
+                audioSwitch.availableAudioDevices.find {
                     it is AudioDevice.BluetoothHeadset
                 })
-            assertEquals(expectedBluetoothDevice, audioDeviceSelector.selectedAudioDevice)
+            assertEquals(expectedBluetoothDevice, audioSwitch.selectedAudioDevice)
         }
     }
 
@@ -160,11 +158,11 @@ class ConnectedBluetoothHeadsetTest {
     fun it_should_select_another_audio_device_with_bluetooth_device_connected() {
         startAndAwaitBluetoothDevice()
         InstrumentationRegistry.getInstrumentation().runOnMainSync {
-            val expectedAudioDevice = audioDeviceSelector.availableAudioDevices.find {
+            val expectedAudioDevice = audioSwitch.availableAudioDevices.find {
                 it !is AudioDevice.BluetoothHeadset
             }
-            audioDeviceSelector.selectDevice(expectedAudioDevice)
-            assertEquals(expectedAudioDevice, audioDeviceSelector.selectedAudioDevice)
+            audioSwitch.selectDevice(expectedAudioDevice)
+            assertEquals(expectedAudioDevice, audioSwitch.selectedAudioDevice)
         }
     }
 
@@ -173,21 +171,21 @@ class ConnectedBluetoothHeadsetTest {
         startAndAwaitBluetoothDevice()
 
         InstrumentationRegistry.getInstrumentation().runOnMainSync {
-            audioDeviceSelector.selectDevice(audioDeviceSelector.availableAudioDevices.find {
+            audioSwitch.selectDevice(audioSwitch.availableAudioDevices.find {
                 it is AudioDevice.BluetoothHeadset
             })
-            assertEquals(expectedBluetoothDevice, audioDeviceSelector.selectedAudioDevice)
+            assertEquals(expectedBluetoothDevice, audioSwitch.selectedAudioDevice)
         }
 
         assertTrue(bluetoothAudioStateConnected.count > 0)
         InstrumentationRegistry.getInstrumentation().runOnMainSync {
-            audioDeviceSelector.activate()
+            audioSwitch.activate()
         }
         assertFalse(isSpeakerPhoneOn())
         assertTrue(bluetoothAudioStateConnected.await(10, TimeUnit.SECONDS))
         assertTrue(bluetoothHeadset.isAudioConnected(bluetoothHeadset.connectedDevices.first()))
         InstrumentationRegistry.getInstrumentation().runOnMainSync {
-            assertEquals(expectedBluetoothDevice, audioDeviceSelector.selectedAudioDevice)
+            assertEquals(expectedBluetoothDevice, audioSwitch.selectedAudioDevice)
         }
     }
 
@@ -196,20 +194,20 @@ class ConnectedBluetoothHeadsetTest {
         startAndAwaitBluetoothDevice()
 
         InstrumentationRegistry.getInstrumentation().runOnMainSync {
-            val expectedAudioDevice = audioDeviceSelector.availableAudioDevices.find { it !is AudioDevice.BluetoothHeadset }
-            audioDeviceSelector.selectDevice(expectedAudioDevice)
-            assertEquals(expectedAudioDevice, audioDeviceSelector.selectedAudioDevice)
+            val expectedAudioDevice = audioSwitch.availableAudioDevices.find { it !is AudioDevice.BluetoothHeadset }
+            audioSwitch.selectDevice(expectedAudioDevice)
+            assertEquals(expectedAudioDevice, audioSwitch.selectedAudioDevice)
         }
 
         assertTrue(bluetoothAudioStateConnected.count > 0)
         InstrumentationRegistry.getInstrumentation().runOnMainSync {
-            audioDeviceSelector.activate()
+            audioSwitch.activate()
         }
         assertFalse(bluetoothAudioStateConnected.await(5, TimeUnit.SECONDS))
         assertFalse(bluetoothHeadset.isAudioConnected(bluetoothHeadset.connectedDevices.first()))
 
         InstrumentationRegistry.getInstrumentation().runOnMainSync {
-            assertTrue(audioDeviceSelector.selectedAudioDevice !is AudioDevice.BluetoothHeadset)
+            assertTrue(audioSwitch.selectedAudioDevice !is AudioDevice.BluetoothHeadset)
         }
     }
 
@@ -221,14 +219,14 @@ class ConnectedBluetoothHeadsetTest {
         lateinit var actualBluetoothDevice: AudioDevice
 
         InstrumentationRegistry.getInstrumentation().runOnMainSync {
-            audioDeviceSelector.start { _, audioDevice ->
+            audioSwitch.start { _, audioDevice ->
                 if (audioDevice is AudioDevice.BluetoothHeadset) {
                     actualBluetoothDevice = audioDevice
                     bluetoothDeviceConnected.countDown()
                 }
             }
-            audioDeviceSelector.activate()
-            assertTrue(audioDeviceSelector.selectedAudioDevice !is AudioDevice.BluetoothHeadset)
+            audioSwitch.activate()
+            assertTrue(audioSwitch.selectedAudioDevice !is AudioDevice.BluetoothHeadset)
         }
         assertTrue(bluetoothAudioStateConnected.count > 0)
         assertFalse(bluetoothAudioStateConnected.await(5, TimeUnit.SECONDS))
@@ -244,7 +242,7 @@ class ConnectedBluetoothHeadsetTest {
         val bluetoothDeviceConnected = CountDownLatch(1)
         lateinit var actualBluetoothDevice: AudioDevice
         InstrumentationRegistry.getInstrumentation().runOnMainSync {
-            audioDeviceSelector.start { _, audioDevice ->
+            audioSwitch.start { _, audioDevice ->
                 if (audioDevice is AudioDevice.BluetoothHeadset) {
                     actualBluetoothDevice = audioDevice
                     bluetoothDeviceConnected.countDown()
