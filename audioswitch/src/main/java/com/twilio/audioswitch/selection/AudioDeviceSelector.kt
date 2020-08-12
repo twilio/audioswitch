@@ -339,6 +339,7 @@ class AudioDeviceSelector {
         bluetoothHeadsetManager?.stop()
         wiredHeadsetReceiver.stop()
         audioDeviceChangeListener = null
+        audioFocusChangeListener = null
         state = STOPPED
     }
 }
