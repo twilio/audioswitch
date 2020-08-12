@@ -1,4 +1,4 @@
-package com.twilio.audioswitch.selection
+package com.twilio.audioswitch
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -19,7 +19,7 @@ internal class AudioDeviceManager(
     private val build: BuildWrapper,
     private val audioFocusRequest: AudioFocusRequestWrapper,
     private val audioFocusChangeListener: AudioManager.OnAudioFocusChangeListener =
-            AudioManager.OnAudioFocusChangeListener { }
+        AudioManager.OnAudioFocusChangeListener { }
 ) {
 
     private var savedAudioMode = 0
