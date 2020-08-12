@@ -39,27 +39,21 @@ class AudioSwitch {
      *
      * @param context the application context
      */
-    constructor(context: Context) {
-        val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
-        val logger = Logger()
-        val audioDeviceManager =
-                AudioDeviceManager(context,
-                        logger,
-                        audioManager,
-                        BuildWrapper(),
-                        AudioFocusRequestWrapper())
-        this.logger = logger
-        this.audioDeviceManager = audioDeviceManager
-        this.wiredHeadsetReceiver = WiredHeadsetReceiver(context, logger)
-        this.bluetoothHeadsetManager = BluetoothHeadsetManager.newInstance(context, logger,
-                BluetoothAdapter.getDefaultAdapter(), audioDeviceManager)
-    }
+    constructor(context: Context) : this(context, Logger())
 
     internal constructor(
+        context: Context,
         logger: Logger,
-        audioDeviceManager: AudioDeviceManager,
-        wiredHeadsetReceiver: WiredHeadsetReceiver,
-        headsetManager: BluetoothHeadsetManager?
+        audioDeviceManager: AudioDeviceManager = AudioDeviceManager(context,
+            logger,
+            context.getSystemService(Context.AUDIO_SERVICE) as AudioManager,
+            BuildWrapper(),
+            AudioFocusRequestWrapper()),
+        wiredHeadsetReceiver: WiredHeadsetReceiver = WiredHeadsetReceiver(context, logger),
+        headsetManager: BluetoothHeadsetManager? = BluetoothHeadsetManager.newInstance(context,
+            logger,
+            BluetoothAdapter.getDefaultAdapter(),
+            audioDeviceManager)
     ) {
         this.logger = logger
         this.audioDeviceManager = audioDeviceManager

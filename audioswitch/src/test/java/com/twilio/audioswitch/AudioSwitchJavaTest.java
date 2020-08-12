@@ -28,6 +28,7 @@ public class AudioSwitchJavaTest extends BaseTest {
         when(getContext$audioswitch_debug().getPackageManager()).thenReturn(packageManager);
         javaAudioSwitch =
                 new AudioSwitch(
+                        getContext$audioswitch_debug(),
                         getLogger$audioswitch_debug(),
                         getAudioDeviceManager$audioswitch_debug(),
                         getWiredHeadsetReceiver$audioswitch_debug(),
