@@ -23,43 +23,43 @@ class UserDeviceSelectionTest {
     @UiThreadTest
     @Test
     fun `it_should_select_the_earpiece_audio_device_when_the_user_selects_it`() {
-        val audioDeviceSelector = AudioDeviceSelector(context)
-        audioDeviceSelector.start { _, _ -> }
-        val earpiece = audioDeviceSelector.availableAudioDevices
+        val audioSwitch = AudioSwitch(context)
+        audioSwitch.start { _, _ -> }
+        val earpiece = audioSwitch.availableAudioDevices
                 .find { it is Earpiece }
         assertThat(earpiece, `is`(notNullValue()))
 
-        audioDeviceSelector.selectDevice(earpiece!!)
+        audioSwitch.selectDevice(earpiece!!)
 
-        assertThat(audioDeviceSelector.selectedAudioDevice, equalTo(earpiece))
+        assertThat(audioSwitch.selectedAudioDevice, equalTo(earpiece))
     }
 
     @UiThreadTest
     @Test
     fun `it_should_select_the_speakerphone_audio_device_when_the_user_selects_it`() {
-        val audioDeviceSelector = AudioDeviceSelector(context)
-        audioDeviceSelector.start { _, _ -> }
-        val speakerphone = audioDeviceSelector.availableAudioDevices
+        val audioSwitch = AudioSwitch(context)
+        audioSwitch.start { _, _ -> }
+        val speakerphone = audioSwitch.availableAudioDevices
                 .find { it is Speakerphone }
         assertThat(speakerphone, `is`(notNullValue()))
 
-        audioDeviceSelector.selectDevice(speakerphone!!)
+        audioSwitch.selectDevice(speakerphone!!)
 
-        assertThat(audioDeviceSelector.selectedAudioDevice, equalTo(speakerphone))
+        assertThat(audioSwitch.selectedAudioDevice, equalTo(speakerphone))
     }
 
     @UiThreadTest
     @Test
     fun `it_should_select_the_bluetooth_audio_device_when_the_user_selects_it`() {
-        val (audioDeviceSelector, bluetoothHeadsetReceiver) = setupFakeAudioDeviceSelector(context)
-        audioDeviceSelector.start { _, _ -> }
+        val (audioSwitch, bluetoothHeadsetReceiver) = setupFakeAudioSwitch(context)
+        audioSwitch.start { _, _ -> }
         simulateBluetoothSystemIntent(context, bluetoothHeadsetReceiver)
-        val bluetoothDevice = audioDeviceSelector.availableAudioDevices
+        val bluetoothDevice = audioSwitch.availableAudioDevices
                 .find { it is BluetoothHeadset }
         assertThat(bluetoothDevice, `is`(notNullValue()))
 
-        audioDeviceSelector.selectDevice(bluetoothDevice!!)
+        audioSwitch.selectDevice(bluetoothDevice!!)
 
-        assertThat(audioDeviceSelector.selectedAudioDevice, equalTo(bluetoothDevice))
+        assertThat(audioSwitch.selectedAudioDevice, equalTo(bluetoothDevice))
     }
 }

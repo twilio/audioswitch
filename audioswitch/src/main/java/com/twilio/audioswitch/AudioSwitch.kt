@@ -7,9 +7,9 @@ import com.twilio.audioswitch.AudioDevice.BluetoothHeadset
 import com.twilio.audioswitch.AudioDevice.Earpiece
 import com.twilio.audioswitch.AudioDevice.Speakerphone
 import com.twilio.audioswitch.AudioDevice.WiredHeadset
-import com.twilio.audioswitch.AudioDeviceSelector.State.ACTIVATED
-import com.twilio.audioswitch.AudioDeviceSelector.State.STARTED
-import com.twilio.audioswitch.AudioDeviceSelector.State.STOPPED
+import com.twilio.audioswitch.AudioSwitch.State.ACTIVATED
+import com.twilio.audioswitch.AudioSwitch.State.STARTED
+import com.twilio.audioswitch.AudioSwitch.State.STOPPED
 import com.twilio.audioswitch.android.BuildWrapper
 import com.twilio.audioswitch.android.Logger
 import com.twilio.audioswitch.bluetooth.BluetoothHeadsetConnectionListener
@@ -17,7 +17,7 @@ import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager
 import com.twilio.audioswitch.wired.WiredDeviceConnectionListener
 import com.twilio.audioswitch.wired.WiredHeadsetReceiver
 
-private const val TAG = "AudioDeviceSelector"
+private const val TAG = "AudioSwitch"
 
 /**
  * This class enables developers to enumerate available audio devices and select which device audio
@@ -25,7 +25,7 @@ private const val TAG = "AudioDeviceSelector"
  * accessed from a single application thread. Accessing an instance from multiple threads may cause
  * synchronization problems.
  */
-class AudioDeviceSelector {
+class AudioSwitch {
 
     companion object {
         /**
@@ -35,7 +35,7 @@ class AudioDeviceSelector {
     }
 
     /**
-     * Constructs a new AudioDeviceSelector instance.
+     * Constructs a new AudioSwitch instance.
      *
      * @param context the application context
      */
@@ -96,7 +96,7 @@ class AudioDeviceSelector {
         override fun onDeviceConnected() {
             wiredHeadsetAvailable = true
             logger.d(TAG, "Wired Headset available")
-            if (this@AudioDeviceSelector.state == ACTIVATED) {
+            if (this@AudioSwitch.state == ACTIVATED) {
                 userSelectedDevice = WiredHeadset()
             }
             enumerateDevices()
@@ -110,7 +110,7 @@ class AudioDeviceSelector {
 
     /**
      * Starts listening for audio device changes. **Note:** When audio device listening is no
-     * longer needed, [AudioDeviceSelector.stop] should be called in order to prevent a
+     * longer needed, [AudioSwitch.stop] should be called in order to prevent a
      * memory leak.
      *
      * @param listener receives audio device change events
@@ -131,9 +131,9 @@ class AudioDeviceSelector {
     }
 
     /**
-     * Stops listening for audio device changes if [AudioDeviceSelector.start] has already been
-     * invoked. [AudioDeviceSelector.deactivate] will also get called if a device has been activated
-     * with [AudioDeviceSelector.activate].
+     * Stops listening for audio device changes if [AudioSwitch.start] has already been
+     * invoked. [AudioSwitch.deactivate] will also get called if a device has been activated
+     * with [AudioSwitch.activate].
      */
     fun stop() {
         when (state) {
@@ -152,8 +152,8 @@ class AudioDeviceSelector {
 
     /**
      * Performs audio routing and unmuting on the selected device from
-     * [AudioDeviceSelector.selectDevice]. Audio focus is also acquired for the client application.
-     * **Note:** [AudioDeviceSelector.deactivate] should be invoked to restore the prior audio
+     * [AudioSwitch.selectDevice]. Audio focus is also acquired for the client application.
+     * **Note:** [AudioSwitch.deactivate] should be invoked to restore the prior audio
      * state.
      */
     fun activate() {
@@ -190,7 +190,7 @@ class AudioDeviceSelector {
     }
 
     /**
-     * Restores the audio state prior to calling [AudioDeviceSelector.activate] and removes
+     * Restores the audio state prior to calling [AudioSwitch.activate] and removes
      * audio focus from the client application.
      */
     fun deactivate() {
@@ -239,7 +239,7 @@ class AudioDeviceSelector {
         }
 
     /**
-     * Retrieves the selected [AudioDevice] from [AudioDeviceSelector.selectDevice].
+     * Retrieves the selected [AudioDevice] from [AudioSwitch.selectDevice].
      *
      * @return the selected [AudioDevice]
      */

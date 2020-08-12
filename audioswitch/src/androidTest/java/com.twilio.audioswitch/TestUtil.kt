@@ -14,8 +14,8 @@ import com.twilio.audioswitch.android.Logger
 import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager
 import com.twilio.audioswitch.wired.WiredHeadsetReceiver
 
-internal fun setupFakeAudioDeviceSelector(context: Context):
-        Pair<AudioDeviceSelector, BluetoothHeadsetManager> {
+internal fun setupFakeAudioSwitch(context: Context):
+        Pair<AudioSwitch, BluetoothHeadsetManager> {
 
     val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
     val logger = Logger()
@@ -32,7 +32,7 @@ internal fun setupFakeAudioDeviceSelector(context: Context):
     } ?: run {
         null
     }
-    return Pair(AudioDeviceSelector(logger,
+    return Pair(AudioSwitch(logger,
             audioDeviceManager,
             wiredHeadsetReceiver,
             headsetManager),
