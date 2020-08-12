@@ -100,7 +100,9 @@ class ConnectedBluetoothHeadsetTest {
         } else {
             bluetoothAdapter.disable()
         }
-        bluetoothAdapter.closeProfileProxy(BluetoothProfile.HEADSET, bluetoothHeadset)
+        if (bluetoothServiceConnected.count == 0L) {
+            bluetoothAdapter.closeProfileProxy(BluetoothProfile.HEADSET, bluetoothHeadset)
+        }
         context.unregisterReceiver(bluetoothReceiver)
     }
 
