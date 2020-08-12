@@ -166,10 +166,21 @@ internal constructor(
     }
 
     private fun handleBluetoothIntent(intent: Intent?) {
+        intent?.action?.let { action ->
+            when (action) {
+                BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED, BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED -> {
+                    logger.d(TAG, "Handling $action")
+                }
+                else -> {
+                    logger.d(TAG, "Ignoring $action")
+                    return
+                }
+            }
+        }
         intent?.getIntExtra(BluetoothHeadset.EXTRA_STATE, BluetoothHeadset.STATE_DISCONNECTED).let { state ->
             when (state) {
                 BluetoothHeadset.STATE_CONNECTING -> {
-                    // TODO
+                    logger.d(TAG, "Bluetooth connecting")
                 }
                 BluetoothHeadset.STATE_CONNECTED -> {
                     intent?.getHeadsetDevice()?.let { bluetoothDevice ->
@@ -183,7 +194,7 @@ internal constructor(
                     }
                 }
                 BluetoothHeadset.STATE_DISCONNECTING -> {
-                    // TODO
+                    logger.d(TAG, "Bluetooth disconnecting")
                 }
                 BluetoothHeadset.STATE_DISCONNECTED -> {
                     intent?.getHeadsetDevice()?.let { bluetoothDevice ->
@@ -197,16 +208,16 @@ internal constructor(
                     }
                 }
                 BluetoothHeadset.STATE_AUDIO_CONNECTING -> {
-                    // TODO
+                    logger.d(TAG, "Bluetooth Audio connecting")
                 }
                 BluetoothHeadset.STATE_AUDIO_CONNECTED -> {
-                    logger.d(TAG, "Bluetooth SCO Audio connected")
+                    logger.d(TAG, "Bluetooth Audio connected")
                     headsetState = AudioActivated
                     headsetListener?.onBluetoothHeadsetStateChanged()
                     enableBluetoothScoJob.cancelBluetoothScoJob()
                 }
                 BluetoothHeadset.STATE_AUDIO_DISCONNECTED -> {
-                    logger.d(TAG, "Bluetooth SCO Audio disconnected")
+                    logger.d(TAG, "Bluetooth Audio disconnected")
                     /*
                      * This block is needed to restart bluetooth SCO in the event that
                      * the active bluetooth headset has changed.
@@ -219,7 +230,7 @@ internal constructor(
                     disableBluetoothScoJob.cancelBluetoothScoJob()
                 }
                 else -> {
-                    // TODO
+                    logger.d(TAG, "Unexpected BluetoothHeadset state received: $state")
                 }
             }
         }
