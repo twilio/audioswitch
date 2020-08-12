@@ -7,6 +7,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.media.AudioManager
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.twilio.audioswitch.selection.AudioDevice
@@ -21,7 +22,6 @@ import org.junit.After
 import org.junit.Assume.assumeNotNull
 import org.junit.Assume.assumeTrue
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -47,6 +47,7 @@ class ConnectedBluetoothHeadsetTest {
     private val bluetoothHeadsetFilter = IntentFilter().apply {
         addAction(BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED)
         addAction(BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED)
+        addAction(AudioManager.ACTION_SCO_AUDIO_STATE_UPDATED)
     }
     private val bluetoothStateConnected = CountDownLatch(1)
     private val bluetoothStateDisconnected = CountDownLatch(1)
@@ -62,6 +63,13 @@ class ConnectedBluetoothHeadsetTest {
                         bluetoothStateDisconnected.countDown()
                     }
                     BluetoothHeadset.STATE_AUDIO_CONNECTED -> {
+                        bluetoothAudioStateConnected.countDown()
+                    }
+                }
+            }
+            intent?.getIntExtra(AudioManager.EXTRA_SCO_AUDIO_STATE, AudioManager.SCO_AUDIO_STATE_ERROR).let { state ->
+                when (state) {
+                    AudioManager.SCO_AUDIO_STATE_CONNECTED -> {
                         bluetoothAudioStateConnected.countDown()
                     }
                 }
@@ -108,11 +116,13 @@ class ConnectedBluetoothHeadsetTest {
     fun it_should_remove_bluetooth_device_after_disconnected() {
         val bluetoothDeviceConnected = CountDownLatch(1)
         lateinit var actualBluetoothDevice: AudioDevice
-        val deviceListenerCallbacks = CountDownLatch(3)
+        var noBluetoothDeviceAvailable : CountDownLatch? = null
 
         InstrumentationRegistry.getInstrumentation().runOnMainSync {
-            audioDeviceSelector.start { _, audioDevice ->
-                deviceListenerCallbacks.countDown()
+            audioDeviceSelector.start { audioDevices, audioDevice ->
+                audioDevices.find { it is AudioDevice.BluetoothHeadset }
+                    ?: noBluetoothDeviceAvailable?.countDown()
+
                 if (audioDevice is AudioDevice.BluetoothHeadset) {
                     actualBluetoothDevice = audioDevice
                     bluetoothDeviceConnected.countDown()
@@ -123,8 +133,10 @@ class ConnectedBluetoothHeadsetTest {
         assertTrue(bluetoothDeviceConnected.await(5, TimeUnit.SECONDS))
         assertEquals(expectedBluetoothDevice, actualBluetoothDevice)
 
+        noBluetoothDeviceAvailable = CountDownLatch(1)
         bluetoothAdapter.disable()
-        assertTrue(deviceListenerCallbacks.await(5, TimeUnit.SECONDS))
+        retryAssertion { assertFalse(bluetoothAdapter.isEnabled) }
+        assertTrue(noBluetoothDeviceAvailable.await(5, TimeUnit.SECONDS))
         InstrumentationRegistry.getInstrumentation().runOnMainSync {
             assertNull(audioDeviceSelector.availableAudioDevices.find { it is AudioDevice.BluetoothHeadset })
             assertFalse(audioDeviceSelector.selectedAudioDevice is AudioDevice.BluetoothHeadset)
@@ -224,8 +236,8 @@ class ConnectedBluetoothHeadsetTest {
         bluetoothAdapter.enable()
         assertTrue(bluetoothDeviceConnected.await(5, TimeUnit.SECONDS))
         assertEquals(expectedBluetoothDevice, actualBluetoothDevice)
-//        assertTrue(bluetoothAudioStateConnected.await(5, TimeUnit.SECONDS))
-//        assertTrue(bluetoothHeadset.isAudioConnected(bluetoothHeadset.connectedDevices.first()))
+        assertTrue(bluetoothAudioStateConnected.await(5, TimeUnit.SECONDS))
+        assertTrue(bluetoothHeadset.isAudioConnected(bluetoothHeadset.connectedDevices.first()))
     }
 
     private fun startAndAwaitBluetoothDevice(): AudioDevice {
