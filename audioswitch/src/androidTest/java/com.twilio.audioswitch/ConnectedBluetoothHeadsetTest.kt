@@ -226,6 +226,7 @@ class ConnectedBluetoothHeadsetTest {
         assertFalse(bluetoothAudioStateConnected.await(5, TimeUnit.SECONDS))
         assertTrue(bluetoothHeadset.connectedDevices.isEmpty())
         bluetoothAdapter.enable()
+        retryAssertion { assertTrue(bluetoothAdapter.isEnabled) }
         assertTrue(bluetoothDeviceConnected.await(5, TimeUnit.SECONDS))
         assertEquals(expectedBluetoothDevice, actualBluetoothDevice)
         assertTrue(bluetoothAudioStateConnected.await(5, TimeUnit.SECONDS))
