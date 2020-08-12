@@ -4,10 +4,9 @@ import androidx.test.annotation.UiThreadTest
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
 import androidx.test.platform.app.InstrumentationRegistry
-import com.twilio.audioswitch.selection.AudioDevice.BluetoothHeadset
-import com.twilio.audioswitch.selection.AudioDevice.Earpiece
-import com.twilio.audioswitch.selection.AudioDevice.Speakerphone
-import com.twilio.audioswitch.selection.AudioDeviceSelector
+import com.twilio.audioswitch.AudioDevice.BluetoothHeadset
+import com.twilio.audioswitch.AudioDevice.Earpiece
+import com.twilio.audioswitch.AudioDevice.Speakerphone
 import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.CoreMatchers.notNullValue

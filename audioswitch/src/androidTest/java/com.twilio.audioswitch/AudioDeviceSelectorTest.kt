@@ -3,8 +3,6 @@ package com.twilio.audioswitch
 import androidx.test.annotation.UiThreadTest
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import com.twilio.audioswitch.selection.AudioDevice
-import com.twilio.audioswitch.selection.AudioDeviceSelector
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertFalse
 import junit.framework.TestCase.assertNotNull

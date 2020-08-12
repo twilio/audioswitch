@@ -1,4 +1,4 @@
-package com.twilio.audioswitch.selection;
+package com.twilio.audioswitch;
 
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertFalse;
@@ -8,7 +8,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import android.content.pm.PackageManager;
-import com.twilio.audioswitch.BaseTest;
 import java.util.List;
 import kotlin.Unit;
 import kotlin.jvm.functions.Function2;

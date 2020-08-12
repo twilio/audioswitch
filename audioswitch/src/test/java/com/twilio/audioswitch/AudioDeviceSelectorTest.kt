@@ -1,4 +1,4 @@
-package com.twilio.audioswitch.selection
+package com.twilio.audioswitch
 
 import android.bluetooth.BluetoothHeadset
 import android.bluetooth.BluetoothProfile
@@ -14,16 +14,11 @@ import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.verifyZeroInteractions
 import com.nhaarman.mockitokotlin2.whenever
-import com.twilio.audioswitch.BaseTest
-import com.twilio.audioswitch.DEVICE_NAME
-import com.twilio.audioswitch.assertBluetoothHeadsetSetup
-import com.twilio.audioswitch.assertBluetoothHeadsetTeardown
-import com.twilio.audioswitch.selection.AudioDevice.Earpiece
-import com.twilio.audioswitch.selection.AudioDevice.Speakerphone
-import com.twilio.audioswitch.selection.AudioDeviceSelector.State.ACTIVATED
-import com.twilio.audioswitch.selection.AudioDeviceSelector.State.STARTED
-import com.twilio.audioswitch.selection.AudioDeviceSelector.State.STOPPED
-import com.twilio.audioswitch.simulateNewBluetoothHeadsetConnection
+import com.twilio.audioswitch.AudioDevice.Earpiece
+import com.twilio.audioswitch.AudioDevice.Speakerphone
+import com.twilio.audioswitch.AudioDeviceSelector.State.ACTIVATED
+import com.twilio.audioswitch.AudioDeviceSelector.State.STARTED
+import com.twilio.audioswitch.AudioDeviceSelector.State.STOPPED
 import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.CoreMatchers.nullValue

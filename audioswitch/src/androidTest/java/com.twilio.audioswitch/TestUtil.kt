@@ -12,9 +12,6 @@ import com.twilio.audioswitch.android.FakeBluetoothIntentProcessor
 import com.twilio.audioswitch.android.HEADSET_NAME
 import com.twilio.audioswitch.android.Logger
 import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager
-import com.twilio.audioswitch.selection.AudioDeviceManager
-import com.twilio.audioswitch.selection.AudioDeviceSelector
-import com.twilio.audioswitch.selection.AudioFocusRequestWrapper
 import com.twilio.audioswitch.wired.WiredHeadsetReceiver
 
 internal fun setupFakeAudioDeviceSelector(context: Context):

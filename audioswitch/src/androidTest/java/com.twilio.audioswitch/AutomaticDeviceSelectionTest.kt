@@ -3,8 +3,7 @@ package com.twilio.audioswitch
 import androidx.test.annotation.UiThreadTest
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
-import com.twilio.audioswitch.selection.AudioDevice.Earpiece
-import com.twilio.audioswitch.selection.AudioDeviceSelector
+import com.twilio.audioswitch.AudioDevice.Earpiece
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Assert.assertEquals

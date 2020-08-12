@@ -11,10 +11,6 @@ import com.nhaarman.mockitokotlin2.whenever
 import com.twilio.audioswitch.android.BuildWrapper
 import com.twilio.audioswitch.android.Logger
 import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager
-import com.twilio.audioswitch.selection.AudioDeviceChangeListener
-import com.twilio.audioswitch.selection.AudioDeviceManager
-import com.twilio.audioswitch.selection.AudioDeviceSelector
-import com.twilio.audioswitch.selection.AudioFocusRequestWrapper
 import com.twilio.audioswitch.wired.WiredHeadsetReceiver
 
 open class BaseTest {

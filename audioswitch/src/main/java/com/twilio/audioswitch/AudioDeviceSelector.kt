@@ -1,20 +1,19 @@
-package com.twilio.audioswitch.selection
+package com.twilio.audioswitch
 
 import android.bluetooth.BluetoothAdapter
 import android.content.Context
 import android.media.AudioManager
-import com.twilio.audioswitch.BuildConfig
+import com.twilio.audioswitch.AudioDevice.BluetoothHeadset
+import com.twilio.audioswitch.AudioDevice.Earpiece
+import com.twilio.audioswitch.AudioDevice.Speakerphone
+import com.twilio.audioswitch.AudioDevice.WiredHeadset
+import com.twilio.audioswitch.AudioDeviceSelector.State.ACTIVATED
+import com.twilio.audioswitch.AudioDeviceSelector.State.STARTED
+import com.twilio.audioswitch.AudioDeviceSelector.State.STOPPED
 import com.twilio.audioswitch.android.BuildWrapper
 import com.twilio.audioswitch.android.Logger
 import com.twilio.audioswitch.bluetooth.BluetoothHeadsetConnectionListener
 import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager
-import com.twilio.audioswitch.selection.AudioDevice.BluetoothHeadset
-import com.twilio.audioswitch.selection.AudioDevice.Earpiece
-import com.twilio.audioswitch.selection.AudioDevice.Speakerphone
-import com.twilio.audioswitch.selection.AudioDevice.WiredHeadset
-import com.twilio.audioswitch.selection.AudioDeviceSelector.State.ACTIVATED
-import com.twilio.audioswitch.selection.AudioDeviceSelector.State.STARTED
-import com.twilio.audioswitch.selection.AudioDeviceSelector.State.STOPPED
 import com.twilio.audioswitch.wired.WiredDeviceConnectionListener
 import com.twilio.audioswitch.wired.WiredHeadsetReceiver
 
