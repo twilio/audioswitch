@@ -41,7 +41,7 @@ open class BaseTest {
             audioDeviceManager, bluetoothScoHandler = handler,
             systemClockWrapper = systemClockWrapper, headsetProxy = headsetProxy
         )
-    internal var         audioSwitch = AudioSwitch(
+    internal var audioSwitch = AudioSwitch(
         context = context,
         logger = logger,
         audioDeviceManager = audioDeviceManager,
