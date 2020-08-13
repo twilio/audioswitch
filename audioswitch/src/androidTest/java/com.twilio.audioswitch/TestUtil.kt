@@ -33,11 +33,12 @@ internal fun setupFakeAudioSwitch(context: Context):
     } ?: run {
         null
     }
-    return Pair(AudioSwitch(logger,
-            audioDeviceManager,
-            wiredHeadsetReceiver,
-            headsetManager),
-            headsetManager!!)
+    return Pair(AudioSwitch(context,
+        logger,
+        audioDeviceManager,
+        wiredHeadsetReceiver,
+        headsetManager),
+        headsetManager!!)
 }
 
 internal fun simulateBluetoothSystemIntent(

@@ -3,6 +3,7 @@ package com.twilio.audioswitch
 import android.bluetooth.BluetoothAdapter
 import android.content.Context
 import android.media.AudioManager
+import androidx.annotation.VisibleForTesting
 import com.twilio.audioswitch.AudioDevice.BluetoothHeadset
 import com.twilio.audioswitch.AudioDevice.Earpiece
 import com.twilio.audioswitch.AudioDevice.Speakerphone
@@ -10,7 +11,6 @@ import com.twilio.audioswitch.AudioDevice.WiredHeadset
 import com.twilio.audioswitch.AudioSwitch.State.ACTIVATED
 import com.twilio.audioswitch.AudioSwitch.State.STARTED
 import com.twilio.audioswitch.AudioSwitch.State.STOPPED
-import com.twilio.audioswitch.android.BuildWrapper
 import com.twilio.audioswitch.android.Logger
 import com.twilio.audioswitch.bluetooth.BluetoothHeadsetConnectionListener
 import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager
@@ -26,46 +26,6 @@ private const val TAG = "AudioSwitch"
  * synchronization problems.
  */
 class AudioSwitch {
-
-    companion object {
-        /**
-         * The version of the AudioSwitch library.
-         */
-        const val VERSION = BuildConfig.VERSION_NAME
-    }
-
-    /**
-     * Constructs a new AudioSwitch instance.
-     *
-     * @param context the application context
-     */
-    constructor(context: Context) {
-        val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
-        val logger = Logger()
-        val audioDeviceManager =
-                AudioDeviceManager(context,
-                        logger,
-                        audioManager,
-                        BuildWrapper(),
-                        AudioFocusRequestWrapper())
-        this.logger = logger
-        this.audioDeviceManager = audioDeviceManager
-        this.wiredHeadsetReceiver = WiredHeadsetReceiver(context, logger)
-        this.bluetoothHeadsetManager = BluetoothHeadsetManager.newInstance(context, logger,
-                BluetoothAdapter.getDefaultAdapter(), audioDeviceManager)
-    }
-
-    internal constructor(
-        logger: Logger,
-        audioDeviceManager: AudioDeviceManager,
-        wiredHeadsetReceiver: WiredHeadsetReceiver,
-        headsetManager: BluetoothHeadsetManager?
-    ) {
-        this.logger = logger
-        this.audioDeviceManager = audioDeviceManager
-        this.wiredHeadsetReceiver = wiredHeadsetReceiver
-        this.bluetoothHeadsetManager = headsetManager
-    }
 
     private var logger: Logger = Logger()
     private val audioDeviceManager: AudioDeviceManager
@@ -106,6 +66,63 @@ class AudioSwitch {
             wiredHeadsetAvailable = false
             enumerateDevices()
         }
+    }
+
+    /**
+     * A property to configure AudioSwitch logging behavior. AudioSwitch logging is disabled by
+     * default.
+     */
+    var loggingEnabled: Boolean
+        /**
+         * Returns `true` if logging is enabled. Returns `false` by default.
+         */
+        get() = logger.loggingEnabled
+
+        /**
+         * Toggle whether logging is enabled.
+         */
+        set(value) {
+            logger.loggingEnabled = value
+        }
+
+    /**
+     * Retrieves the selected [AudioDevice] from [AudioSwitch.selectDevice].
+     *
+     * @return the selected [AudioDevice]
+     */
+    val selectedAudioDevice: AudioDevice? get() = selectedDevice
+
+    /**
+     * Retrieves the current list of available [AudioDevice]s.
+     *
+     * @return the current list of [AudioDevice]s
+     */
+    val availableAudioDevices: List<AudioDevice> = mutableAudioDevices
+
+    /**
+     * Constructs a new AudioSwitch instance.
+     *
+     * @param context the application context
+     */
+    constructor(context: Context) : this(context, Logger())
+
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    internal constructor(
+        context: Context,
+        logger: Logger,
+        audioDeviceManager: AudioDeviceManager = AudioDeviceManager(context,
+            logger,
+            context.getSystemService(Context.AUDIO_SERVICE) as AudioManager),
+        wiredHeadsetReceiver: WiredHeadsetReceiver = WiredHeadsetReceiver(context, logger),
+        headsetManager: BluetoothHeadsetManager? = BluetoothHeadsetManager.newInstance(context,
+            logger,
+            BluetoothAdapter.getDefaultAdapter(),
+            audioDeviceManager)
+    ) {
+        this.logger = logger
+        this.audioDeviceManager = audioDeviceManager
+        this.wiredHeadsetReceiver = wiredHeadsetReceiver
+        this.bluetoothHeadsetManager = headsetManager
     }
 
     /**
@@ -221,37 +238,6 @@ class AudioSwitch {
         }
     }
 
-    /**
-     * A property to configure AudioSwitch logging behavior. AudioSwitch logging is disabled by
-     * default.
-     */
-    var loggingEnabled: Boolean
-        /**
-         * Returns `true` if logging is enabled. Returns `false` by default.
-         */
-        get() = logger.loggingEnabled
-
-        /**
-         * Toggle whether logging is enabled.
-         */
-        set(value) {
-            logger.loggingEnabled = value
-        }
-
-    /**
-     * Retrieves the selected [AudioDevice] from [AudioSwitch.selectDevice].
-     *
-     * @return the selected [AudioDevice]
-     */
-    val selectedAudioDevice: AudioDevice? get() = selectedDevice
-
-    /**
-     * Retrieves the current list of available [AudioDevice]s.
-     *
-     * @return the current list of [AudioDevice]s
-     */
-    val availableAudioDevices: List<AudioDevice> = mutableAudioDevices
-
     private fun enumerateDevices(bluetoothHeadsetName: String? = null) {
         mutableAudioDevices.clear()
         /*
@@ -328,5 +314,12 @@ class AudioSwitch {
         wiredHeadsetReceiver.stop()
         audioDeviceChangeListener = null
         state = STOPPED
+    }
+
+    companion object {
+        /**
+         * The version of the AudioSwitch library.
+         */
+        const val VERSION = BuildConfig.VERSION_NAME
     }
 }
