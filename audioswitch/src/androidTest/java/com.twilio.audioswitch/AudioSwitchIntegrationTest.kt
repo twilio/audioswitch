@@ -10,9 +10,10 @@ import junit.framework.TestCase.assertNotNull
 import junit.framework.TestCase.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.util.concurrent.TimeUnit
 
 @RunWith(AndroidJUnit4::class)
-class AudioSwitchTest {
+class AudioSwitchIntegrationTest {
 
     private val context = InstrumentationRegistry.getInstrumentation().context
 
@@ -77,10 +78,12 @@ class AudioSwitchTest {
     @UiThreadTest
     fun it_should_receive_audio_focus_changes_if_configured() {
         val audioFocusChangeLatch = CountDownLatch(1)
-//        val audioSwitch = AudioSwitch(context, audioFocusChangeListener = {
-//            audioFocusChangeLatch.countDown() })
+        val audioSwitch = AudioSwitch(context, audioFocusChangeListener = {
+            audioFocusChangeLatch.countDown()
+        })
+        audioSwitch.start { _, _ -> }
+        audioSwitch.activate()
 
-//        audioFocusChangeLatch.await()
-        TODO("Not yet implemented")
+        assertTrue(audioFocusChangeLatch.await(5, TimeUnit.SECONDS))
     }
 }

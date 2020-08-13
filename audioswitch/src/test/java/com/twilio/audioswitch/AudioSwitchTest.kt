@@ -417,4 +417,14 @@ class AudioSwitchTest : BaseTest() {
         assertNotNull(AudioSwitch.VERSION)
         assertTrue(AudioSwitch.VERSION.matches(semVerRegex))
     }
+
+    @Test
+    fun `setting the audioFocusChangeListener constructor parameter should receive audio focus changes`() {
+        TODO("Not yet implemented")
+    }
+
+    @Test
+    fun `not setting the audioFocusChangeListener constructor parameter should receive audio focus changes`() {
+        TODO("Not yet implemented")
+    }
 }

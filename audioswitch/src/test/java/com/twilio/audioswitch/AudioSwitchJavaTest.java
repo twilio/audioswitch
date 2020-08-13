@@ -4,6 +4,7 @@ import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -111,6 +112,11 @@ public class AudioSwitchJavaTest extends BaseTest {
 
         assertNotNull(AudioSwitch.VERSION);
         assertTrue(AudioSwitch.VERSION.matches(semVerRegex));
+    }
+
+    @Test
+    public void shouldAllowSettingAudioFocusChangeListener() {
+        fail("Not yet implemented");
     }
 
     private void startAudioSwitch() {

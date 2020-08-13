@@ -106,7 +106,10 @@ class AudioSwitch {
      * @param loggingEnabled Toggle whether logging is enabled. This argument is false by default.
      */
     @JvmOverloads
-    constructor(context: Context, loggingEnabled: Boolean = false) : this(context, Logger(loggingEnabled))
+    constructor(context: Context,
+                loggingEnabled: Boolean = false,
+                audioFocusChangeListener: (() -> Unit)? = null)
+            : this(context, Logger(loggingEnabled))
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     internal constructor(
