@@ -17,7 +17,7 @@ class AudioSwitchTest {
 
     @Test
     @UiThreadTest
-    fun `it_should_disable_logging_by_default`() {
+    fun it_should_disable_logging_by_default() {
         val audioSwitch = AudioSwitch(context)
 
         assertFalse(audioSwitch.loggingEnabled)
@@ -25,7 +25,7 @@ class AudioSwitchTest {
 
     @Test
     @UiThreadTest
-    fun `it_should_allow_enabling_logging`() {
+    fun it_should_allow_enabling_logging() {
         val audioSwitch = AudioSwitch(context)
 
         audioSwitch.loggingEnabled = true
@@ -35,7 +35,15 @@ class AudioSwitchTest {
 
     @Test
     @UiThreadTest
-    fun `it_should_allow_toggling_logging_while_in_use`() {
+    fun it_should_allow_enabling_logging_at_construction() {
+        val audioSwitch = AudioSwitch(context, loggingEnabled = true)
+
+        assertTrue(audioSwitch.loggingEnabled)
+    }
+
+    @Test
+    @UiThreadTest
+    fun it_should_allow_toggling_logging_while_in_use() {
         val audioSwitch = AudioSwitch(context)
         audioSwitch.loggingEnabled = true
         assertTrue(audioSwitch.loggingEnabled)
