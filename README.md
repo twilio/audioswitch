@@ -104,14 +104,24 @@ Audioswitch is compatible with apps written in Java that [target Java 8](https:/
 
 By default, AudioSwitch logging is disabled. Reference the following snippet to enable AudioSwitch logging:
 
-  ```kotlin
- val audioSwitch = AudioSwitch(context)
+```kotlin
+val audioSwitch = AudioSwitch(context)
 
- audioSwitch.loggingEnabled = true
+audioSwitch.loggingEnabled = true
 
- audioSwitch.start { _, _ -> }
- ```
+audioSwitch.start { _, _ -> }
+```
 
+## Contributing
+
+We welcome and encourage contributions to AudioSwitch! However, pull request (PR) validation requires access to credentials that we cannot provide to external contributors. As a result, the contribution process is as follows:
+
+1. Submit a PR from a fork with your changes
+1. Our team will review
+1. If the changes are small enough and do not require validation (eg. documentation typo) we will merge your PR directly.
+1. If the changes require integration testing, then, once approved, our team will close your PR and create a new PR from a branch on the main repository and reference your original work.
+1. Our team will handle merging the final PR and releasing a new version with your changes.
+1. (Optional) Submit a PR that adds you to our [CONTRIBUTORS](CONTRIBUTORS.md) file so you show up on the [contributors page](https://github.com/twilio/audioswitch/graphs/contributors).
 
 ## Usage Examples
 
