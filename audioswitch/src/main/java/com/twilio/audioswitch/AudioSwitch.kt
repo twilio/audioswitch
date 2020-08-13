@@ -102,9 +102,11 @@ class AudioSwitch {
     /**
      * Constructs a new AudioSwitch instance.
      *
-     * @param context the application context
+     * @param context The application context.
+     * @param loggingEnabled Toggle whether logging is enabled. This argument is false by default.
      */
-    constructor(context: Context) : this(context, Logger())
+    @JvmOverloads
+    constructor(context: Context, loggingEnabled: Boolean = false) : this(context, Logger(loggingEnabled))
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     internal constructor(
@@ -123,6 +125,7 @@ class AudioSwitch {
         this.audioDeviceManager = audioDeviceManager
         this.wiredHeadsetReceiver = wiredHeadsetReceiver
         this.bluetoothHeadsetManager = headsetManager
+        logger.d(TAG, "AudioSwitch($VERSION)")
     }
 
     /**
