@@ -13,6 +13,7 @@ import com.twilio.audioswitch.android.HEADSET_NAME
 import com.twilio.audioswitch.android.Logger
 import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager
 import com.twilio.audioswitch.wired.WiredHeadsetReceiver
+import java.util.concurrent.TimeoutException
 
 internal fun setupFakeAudioSwitch(context: Context):
         Pair<AudioSwitch, BluetoothHeadsetManager> {
@@ -59,3 +60,21 @@ fun isSpeakerPhoneOn() =
         (getTargetContext().getSystemService(Context.AUDIO_SERVICE) as AudioManager?)?.let {
             it.isSpeakerphoneOn
         } ?: false
+
+fun retryAssertion(
+    timeoutInMilliseconds: Long = 10000L,
+    assertionAction: () -> Unit
+) {
+    val startTime = System.currentTimeMillis()
+    var currentTime = 0L
+    while (currentTime <= timeoutInMilliseconds) {
+        try {
+            assertionAction()
+            return
+        } catch (error: AssertionError) {
+            currentTime = System.currentTimeMillis() - startTime
+            Thread.sleep(10)
+        }
+    }
+    throw TimeoutException("Assertion timeout occurred")
+}
