@@ -49,7 +49,7 @@ class AudioDeviceSelector {
                         audioManager,
                         BuildWrapper(),
                         AudioFocusRequestWrapper(),
-                        AudioManager.OnAudioFocusChangeListener { i -> audioFocusChangeListener?.onAudioFocusChange(i) })
+                        AudioManager.OnAudioFocusChangeListener { focusChange -> audioFocusChangeListener?.onAudioFocusChange(focusChange) })
         this.logger = logger
         this.audioDeviceManager = audioDeviceManager
         this.wiredHeadsetReceiver = WiredHeadsetReceiver(context, logger)
@@ -78,7 +78,6 @@ class AudioDeviceSelector {
     private var wiredHeadsetAvailable = false
     private val mutableAudioDevices = ArrayList<AudioDevice>()
     private var bluetoothHeadsetManager: BluetoothHeadsetManager? = null
-    private var audioFocusChangeListener: AudioManager.OnAudioFocusChangeListener? = null
 
     internal var state: State = STOPPED
     internal enum class State {
@@ -110,6 +109,11 @@ class AudioDeviceSelector {
             enumerateDevices()
         }
     }
+
+    /**
+     * A listener that is invoked when the system audio focus is updated.
+     */
+    var audioFocusChangeListener: AudioManager.OnAudioFocusChangeListener? = null
 
     /**
      * Starts listening for audio device changes. **Note:** When audio device listening is no
@@ -222,15 +226,6 @@ class AudioDeviceSelector {
             userSelectedDevice = audioDevice
             enumerateDevices()
         }
-    }
-
-    /**
-     * Set listener for audio focus changes.
-     *
-     * @param listener receives audio focus change events
-     */
-    fun setOnAudioFocusChangeListener(listener: AudioManager.OnAudioFocusChangeListener) {
-        audioFocusChangeListener = listener
     }
 
     /**

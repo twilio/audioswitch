@@ -8,7 +8,7 @@ import android.media.AudioManager
 internal class AudioFocusRequestWrapper {
 
     @SuppressLint("NewApi")
-    fun buildRequest(listener: AudioManager.OnAudioFocusChangeListener? = null): AudioFocusRequest {
+    fun buildRequest(listener: AudioManager.OnAudioFocusChangeListener): AudioFocusRequest {
         val playbackAttributes = AudioAttributes.Builder()
                 .setUsage(AudioAttributes.USAGE_VOICE_COMMUNICATION)
                 .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
@@ -16,7 +16,7 @@ internal class AudioFocusRequestWrapper {
         return AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT)
                 .setAudioAttributes(playbackAttributes)
                 .setAcceptsDelayedFocusGain(true)
-                .setOnAudioFocusChangeListener(listener ?: AudioManager.OnAudioFocusChangeListener {})
+                .setOnAudioFocusChangeListener(listener)
                 .build()
     }
 }

@@ -231,7 +231,7 @@ class AudioDeviceSelectorTest : BaseTest() {
     fun `activate should set audio focus using Android O method if api version is 26`() {
         whenever(buildWrapper.getVersion()).thenReturn(Build.VERSION_CODES.O)
         val audioFocusRequest = mock<AudioFocusRequest>()
-        whenever(this.audioFocusRequest.buildRequest()).thenReturn(audioFocusRequest)
+        whenever(this.audioFocusRequest.buildRequest(audioFocusChangeListener)).thenReturn(audioFocusRequest)
         audioDeviceSelector.start(audioDeviceChangeListener)
         audioDeviceSelector.activate()
 
@@ -242,7 +242,7 @@ class AudioDeviceSelectorTest : BaseTest() {
     fun `activate should set audio focus using Android O method if api version is 27`() {
         whenever(buildWrapper.getVersion()).thenReturn(Build.VERSION_CODES.O_MR1)
         val audioFocusRequest = mock<AudioFocusRequest>()
-        whenever(this.audioFocusRequest.buildRequest()).thenReturn(audioFocusRequest)
+        whenever(this.audioFocusRequest.buildRequest(audioFocusChangeListener)).thenReturn(audioFocusRequest)
         audioDeviceSelector.start(audioDeviceChangeListener)
         audioDeviceSelector.activate()
 
@@ -266,7 +266,7 @@ class AudioDeviceSelectorTest : BaseTest() {
     fun `deactivate should abandon audio focus using pre Android O method if api version is 26`() {
         whenever(buildWrapper.getVersion()).thenReturn(Build.VERSION_CODES.O)
         val audioFocusRequest = mock<AudioFocusRequest>()
-        whenever(this.audioFocusRequest.buildRequest()).thenReturn(audioFocusRequest)
+        whenever(this.audioFocusRequest.buildRequest(audioFocusChangeListener)).thenReturn(audioFocusRequest)
         audioDeviceSelector.start(audioDeviceChangeListener)
         audioDeviceSelector.activate()
         audioDeviceSelector.stop()
@@ -278,7 +278,7 @@ class AudioDeviceSelectorTest : BaseTest() {
     fun `deactivate should abandon audio focus using pre Android O method if api version is 27`() {
         whenever(buildWrapper.getVersion()).thenReturn(Build.VERSION_CODES.O_MR1)
         val audioFocusRequest = mock<AudioFocusRequest>()
-        whenever(this.audioFocusRequest.buildRequest()).thenReturn(audioFocusRequest)
+        whenever(this.audioFocusRequest.buildRequest(audioFocusChangeListener)).thenReturn(audioFocusRequest)
         audioDeviceSelector.start(audioDeviceChangeListener)
         audioDeviceSelector.activate()
         audioDeviceSelector.stop()
