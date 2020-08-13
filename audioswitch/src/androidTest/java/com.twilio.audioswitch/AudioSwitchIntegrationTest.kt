@@ -3,6 +3,7 @@ package com.twilio.audioswitch
 import androidx.test.annotation.UiThreadTest
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import java.util.concurrent.CountDownLatch
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertFalse
 import junit.framework.TestCase.assertNotNull
@@ -70,5 +71,16 @@ class AudioSwitchTest {
         val version: String = AudioSwitch.VERSION
         assertNotNull(version)
         assertTrue(version.matches(semVerRegex))
+    }
+
+    @Test
+    @UiThreadTest
+    fun it_should_receive_audio_focus_changes_if_configured() {
+        val audioFocusChangeLatch = CountDownLatch(1)
+//        val audioSwitch = AudioSwitch(context, audioFocusChangeListener = {
+//            audioFocusChangeLatch.countDown() })
+
+//        audioFocusChangeLatch.await()
+        TODO("Not yet implemented")
     }
 }
