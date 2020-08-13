@@ -1,5 +1,17 @@
 # Changelog
 
+### 0.4.0
+
+Enhancements
+
+- Added a constructor parameter to enable logging. This argument is disabled by default.
+
+```kotlin
+val audioSwitch = AudioSwitch(context, loggingEnabled = true)
+
+audioSwitch.start { _, _ -> }
+```
+
 ### 0.3.0
 
 Enhancements

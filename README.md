@@ -105,9 +105,7 @@ Audioswitch is compatible with apps written in Java that [target Java 8](https:/
 By default, AudioSwitch logging is disabled. Reference the following snippet to enable AudioSwitch logging:
 
   ```kotlin
- val audioSwitch = AudioSwitch(context)
-
- audioSwitch.loggingEnabled = true
+ val audioSwitch = AudioSwitch(context, loggingEnabled = true)
 
  audioSwitch.start { _, _ -> }
  ```
