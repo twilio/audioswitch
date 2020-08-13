@@ -124,7 +124,7 @@ class AudioSwitch {
         this.audioDeviceManager = audioDeviceManager
         this.wiredHeadsetReceiver = wiredHeadsetReceiver
         this.bluetoothHeadsetManager = headsetManager
-        logger.d(TAG, "AudioSwitch(${VERSION})")
+        logger.d(TAG, "AudioSwitch($VERSION)")
     }
 
     /**
