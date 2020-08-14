@@ -6,6 +6,7 @@ import android.content.pm.PackageManager
 import android.media.AudioDeviceInfo
 import android.media.AudioFocusRequest
 import android.media.AudioManager
+import android.media.AudioManager.OnAudioFocusChangeListener
 import android.os.Build
 import com.twilio.audioswitch.android.BuildWrapper
 import com.twilio.audioswitch.android.Logger
@@ -18,8 +19,7 @@ internal class AudioDeviceManager(
     private val audioManager: AudioManager,
     private val build: BuildWrapper = BuildWrapper(),
     private val audioFocusRequest: AudioFocusRequestWrapper = AudioFocusRequestWrapper(),
-    private val audioFocusChangeListener: AudioManager.OnAudioFocusChangeListener =
-        AudioManager.OnAudioFocusChangeListener { }
+    private val audioFocusChangeListener: OnAudioFocusChangeListener
 ) {
 
     private var savedAudioMode = 0
@@ -58,7 +58,7 @@ internal class AudioDeviceManager(
     fun setAudioFocus() {
         // Request audio focus before making any device switch.
         if (build.getVersion() >= Build.VERSION_CODES.O) {
-            audioRequest = audioFocusRequest.buildRequest()
+            audioRequest = audioFocusRequest.buildRequest(audioFocusChangeListener)
             audioRequest?.let { audioManager.requestAudioFocus(it) }
         } else {
             audioManager.requestAudioFocus(
