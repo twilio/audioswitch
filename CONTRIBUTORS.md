@@ -8,3 +8,4 @@ Thank you to all our contributors!
 
 * [John Qualls](https://github.com/Alton09)
 * [Aaron Alaniz](https://github.com/aaalaniz)
+* [Tejas Nandanikar](https://github.com/tejas-n)
