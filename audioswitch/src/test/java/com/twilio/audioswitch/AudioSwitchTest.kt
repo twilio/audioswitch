@@ -82,10 +82,11 @@ class AudioSwitchTest : BaseTest() {
     @Test
     fun `start should not start the HeadsetManager if it is null`() {
         audioSwitch = AudioSwitch(
-                logger,
-                audioDeviceManager,
-                wiredHeadsetReceiver,
-                null
+            context = context,
+            logger = logger,
+            audioDeviceManager = audioDeviceManager,
+            wiredHeadsetReceiver = wiredHeadsetReceiver,
+            headsetManager = null
         )
 
         audioSwitch.start(audioDeviceChangeListener)
@@ -186,10 +187,11 @@ class AudioSwitchTest : BaseTest() {
     @Test
     fun `stop should not stop the BluetoothHeadsetManager if it is null and if transitioning from the started state`() {
         audioSwitch = AudioSwitch(
-                logger,
-                audioDeviceManager,
-                wiredHeadsetReceiver,
-                null
+            context = context,
+            logger = logger,
+            audioDeviceManager = audioDeviceManager,
+            wiredHeadsetReceiver = wiredHeadsetReceiver,
+            headsetManager = null
         )
         audioSwitch.start(audioDeviceChangeListener)
         audioSwitch.stop()
@@ -201,10 +203,11 @@ class AudioSwitchTest : BaseTest() {
     @Test
     fun `stop should not stop the BluetoothHeadsetManager if it is null and if transitioning from the activated state`() {
         audioSwitch = AudioSwitch(
-                logger,
-                audioDeviceManager,
-                wiredHeadsetReceiver,
-                null
+            context = context,
+            logger = logger,
+            audioDeviceManager = audioDeviceManager,
+            wiredHeadsetReceiver = wiredHeadsetReceiver,
+            headsetManager = null
         )
         audioSwitch.start(audioDeviceChangeListener)
         audioSwitch.activate()
