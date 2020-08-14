@@ -86,7 +86,8 @@ class AudioSwitchTest : BaseTest() {
             logger = logger,
             audioDeviceManager = audioDeviceManager,
             wiredHeadsetReceiver = wiredHeadsetReceiver,
-            headsetManager = null
+            headsetManager = null,
+            audioFocusChangeListener = defaultAudioFocusChangeListener
         )
 
         audioSwitch.start(audioDeviceChangeListener)
@@ -191,7 +192,8 @@ class AudioSwitchTest : BaseTest() {
             logger = logger,
             audioDeviceManager = audioDeviceManager,
             wiredHeadsetReceiver = wiredHeadsetReceiver,
-            headsetManager = null
+            headsetManager = null,
+            audioFocusChangeListener = defaultAudioFocusChangeListener
         )
         audioSwitch.start(audioDeviceChangeListener)
         audioSwitch.stop()
@@ -207,7 +209,8 @@ class AudioSwitchTest : BaseTest() {
             logger = logger,
             audioDeviceManager = audioDeviceManager,
             wiredHeadsetReceiver = wiredHeadsetReceiver,
-            headsetManager = null
+            headsetManager = null,
+            audioFocusChangeListener = defaultAudioFocusChangeListener
         )
         audioSwitch.start(audioDeviceChangeListener)
         audioSwitch.activate()
@@ -229,7 +232,7 @@ class AudioSwitchTest : BaseTest() {
     fun `activate should set audio focus using Android O method if api version is 26`() {
         whenever(buildWrapper.getVersion()).thenReturn(Build.VERSION_CODES.O)
         val audioFocusRequest = mock<AudioFocusRequest>()
-        whenever(this.audioFocusRequest.buildRequest()).thenReturn(audioFocusRequest)
+        whenever(this.audioFocusRequest.buildRequest(defaultAudioFocusChangeListener)).thenReturn(audioFocusRequest)
         audioSwitch.start(audioDeviceChangeListener)
         audioSwitch.activate()
 
@@ -240,7 +243,7 @@ class AudioSwitchTest : BaseTest() {
     fun `activate should set audio focus using Android O method if api version is 27`() {
         whenever(buildWrapper.getVersion()).thenReturn(Build.VERSION_CODES.O_MR1)
         val audioFocusRequest = mock<AudioFocusRequest>()
-        whenever(this.audioFocusRequest.buildRequest()).thenReturn(audioFocusRequest)
+        whenever(this.audioFocusRequest.buildRequest(defaultAudioFocusChangeListener)).thenReturn(audioFocusRequest)
         audioSwitch.start(audioDeviceChangeListener)
         audioSwitch.activate()
 
@@ -254,7 +257,7 @@ class AudioSwitchTest : BaseTest() {
         audioSwitch.activate()
 
         verify(audioManager).requestAudioFocus(
-                audioFocusChangeListener,
+                defaultAudioFocusChangeListener,
                 AudioManager.STREAM_VOICE_CALL,
                 AudioManager.AUDIOFOCUS_GAIN_TRANSIENT
         )
@@ -264,7 +267,7 @@ class AudioSwitchTest : BaseTest() {
     fun `deactivate should abandon audio focus using pre Android O method if api version is 26`() {
         whenever(buildWrapper.getVersion()).thenReturn(Build.VERSION_CODES.O)
         val audioFocusRequest = mock<AudioFocusRequest>()
-        whenever(this.audioFocusRequest.buildRequest()).thenReturn(audioFocusRequest)
+        whenever(this.audioFocusRequest.buildRequest(defaultAudioFocusChangeListener)).thenReturn(audioFocusRequest)
         audioSwitch.start(audioDeviceChangeListener)
         audioSwitch.activate()
         audioSwitch.stop()
@@ -276,7 +279,7 @@ class AudioSwitchTest : BaseTest() {
     fun `deactivate should abandon audio focus using pre Android O method if api version is 27`() {
         whenever(buildWrapper.getVersion()).thenReturn(Build.VERSION_CODES.O_MR1)
         val audioFocusRequest = mock<AudioFocusRequest>()
-        whenever(this.audioFocusRequest.buildRequest()).thenReturn(audioFocusRequest)
+        whenever(this.audioFocusRequest.buildRequest(defaultAudioFocusChangeListener)).thenReturn(audioFocusRequest)
         audioSwitch.start(audioDeviceChangeListener)
         audioSwitch.activate()
         audioSwitch.stop()
@@ -291,7 +294,7 @@ class AudioSwitchTest : BaseTest() {
         audioSwitch.activate()
         audioSwitch.stop()
 
-        verify(audioManager).abandonAudioFocus(audioFocusChangeListener)
+        verify(audioManager).abandonAudioFocus(defaultAudioFocusChangeListener)
     }
 
     @Test
@@ -416,15 +419,5 @@ class AudioSwitchTest : BaseTest() {
                 "Za-z-]+(?:\\.[0-9A-Za-z-]+)*))?(?:\\+[0-9A-Za-z-]+)?$")
         assertNotNull(AudioSwitch.VERSION)
         assertTrue(AudioSwitch.VERSION.matches(semVerRegex))
-    }
-
-    @Test
-    fun `setting the audioFocusChangeListener constructor parameter should receive audio focus changes`() {
-        TODO("Not yet implemented")
-    }
-
-    @Test
-    fun `not setting the audioFocusChangeListener constructor parameter should receive audio focus changes`() {
-        TODO("Not yet implemented")
     }
 }

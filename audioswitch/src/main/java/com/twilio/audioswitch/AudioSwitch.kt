@@ -3,6 +3,7 @@ package com.twilio.audioswitch
 import android.bluetooth.BluetoothAdapter
 import android.content.Context
 import android.media.AudioManager
+import android.media.AudioManager.OnAudioFocusChangeListener
 import androidx.annotation.VisibleForTesting
 import com.twilio.audioswitch.AudioDevice.BluetoothHeadset
 import com.twilio.audioswitch.AudioDevice.Earpiece
@@ -104,20 +105,24 @@ class AudioSwitch {
      *
      * @param context The application context.
      * @param loggingEnabled Toggle whether logging is enabled. This argument is false by default.
+     * @param audioFocusChangeListener A listener that is invoked when the system audio focus is updated.
      */
     @JvmOverloads
-    constructor(context: Context,
-                loggingEnabled: Boolean = false,
-                audioFocusChangeListener: (() -> Unit)? = null)
-            : this(context, Logger(loggingEnabled))
+    constructor(
+        context: Context,
+        loggingEnabled: Boolean = false,
+        audioFocusChangeListener: OnAudioFocusChangeListener = OnAudioFocusChangeListener {}
+    ) : this(context, Logger(loggingEnabled), audioFocusChangeListener)
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     internal constructor(
         context: Context,
         logger: Logger,
+        audioFocusChangeListener: OnAudioFocusChangeListener,
         audioDeviceManager: AudioDeviceManager = AudioDeviceManager(context,
             logger,
-            context.getSystemService(Context.AUDIO_SERVICE) as AudioManager),
+            context.getSystemService(Context.AUDIO_SERVICE) as AudioManager,
+            audioFocusChangeListener = audioFocusChangeListener),
         wiredHeadsetReceiver: WiredHeadsetReceiver = WiredHeadsetReceiver(context, logger),
         headsetManager: BluetoothHeadsetManager? = BluetoothHeadsetManager.newInstance(context,
             logger,

@@ -1,26 +1,26 @@
 package com.twilio.audioswitch
 
+import android.content.Context
+import android.media.AudioManager
 import androidx.test.annotation.UiThreadTest
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertFalse
 import junit.framework.TestCase.assertNotNull
 import junit.framework.TestCase.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
-import java.util.concurrent.TimeUnit
 
 @RunWith(AndroidJUnit4::class)
 class AudioSwitchIntegrationTest {
 
-    private val context = InstrumentationRegistry.getInstrumentation().context
-
     @Test
     @UiThreadTest
     fun it_should_disable_logging_by_default() {
-        val audioSwitch = AudioSwitch(context)
+        val audioSwitch = AudioSwitch(getInstrumentationContext())
 
         assertFalse(audioSwitch.loggingEnabled)
     }
@@ -28,7 +28,7 @@ class AudioSwitchIntegrationTest {
     @Test
     @UiThreadTest
     fun it_should_allow_enabling_logging() {
-        val audioSwitch = AudioSwitch(context)
+        val audioSwitch = AudioSwitch(getInstrumentationContext())
 
         audioSwitch.loggingEnabled = true
 
@@ -38,7 +38,7 @@ class AudioSwitchIntegrationTest {
     @Test
     @UiThreadTest
     fun it_should_allow_enabling_logging_at_construction() {
-        val audioSwitch = AudioSwitch(context, loggingEnabled = true)
+        val audioSwitch = AudioSwitch(getInstrumentationContext(), loggingEnabled = true)
 
         assertTrue(audioSwitch.loggingEnabled)
     }
@@ -46,7 +46,7 @@ class AudioSwitchIntegrationTest {
     @Test
     @UiThreadTest
     fun it_should_allow_toggling_logging_while_in_use() {
-        val audioSwitch = AudioSwitch(context)
+        val audioSwitch = AudioSwitch(getInstrumentationContext())
         audioSwitch.loggingEnabled = true
         assertTrue(audioSwitch.loggingEnabled)
         audioSwitch.start { _, _ -> }
@@ -75,15 +75,28 @@ class AudioSwitchIntegrationTest {
     }
 
     @Test
-    @UiThreadTest
     fun it_should_receive_audio_focus_changes_if_configured() {
-        val audioFocusChangeLatch = CountDownLatch(1)
-        val audioSwitch = AudioSwitch(context, audioFocusChangeListener = {
-            audioFocusChangeLatch.countDown()
-        })
-        audioSwitch.start { _, _ -> }
-        audioSwitch.activate()
+        val audioFocusLostLatch = CountDownLatch(1)
+        val audioFocusGainedLatch = CountDownLatch(1)
+        val audioFocusChangeListener = AudioManager.OnAudioFocusChangeListener { focusChange ->
+            when (focusChange) {
+                AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> audioFocusLostLatch.countDown()
+                AudioManager.AUDIOFOCUS_GAIN -> audioFocusGainedLatch.countDown()
+            }
+        }
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            val audioSwitch = AudioSwitch(getTargetContext(), true, audioFocusChangeListener)
+            audioSwitch.start { _, _ -> }
+            audioSwitch.activate()
+        }
 
-        assertTrue(audioFocusChangeLatch.await(5, TimeUnit.SECONDS))
+        val audioManager = getInstrumentationContext()
+                .getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        val audioFocusUtil = AudioFocusUtil(audioManager, audioFocusChangeListener)
+        audioFocusUtil.requestFocus()
+
+        assertTrue(audioFocusLostLatch.await(5, TimeUnit.SECONDS))
+        audioFocusUtil.abandonFocus()
+        assertTrue(audioFocusGainedLatch.await(5, TimeUnit.SECONDS))
     }
 }
