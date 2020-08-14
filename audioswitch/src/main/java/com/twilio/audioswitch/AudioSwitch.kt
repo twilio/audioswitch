@@ -111,20 +111,31 @@ class AudioSwitch {
      * @param loggingEnabled Toggle whether logging is enabled. This argument is false by default.
      */
     @JvmOverloads
-    constructor(context: Context, loggingEnabled: Boolean = false) : this(context, Logger(loggingEnabled))
+    constructor(context: Context, loggingEnabled: Boolean = false) {
+        val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        val logger = Logger(loggingEnabled)
+        val audioDeviceManager =
+                AudioDeviceManager(
+                        context = context,
+                        logger = logger,
+                        audioManager = audioManager,
+                        audioFocusChangeListener = AudioManager.OnAudioFocusChangeListener {
+                            focusChange -> audioFocusChangeListener?.onAudioFocusChange(focusChange)
+                        }
+                )
+        this.logger = logger
+        this.audioDeviceManager = audioDeviceManager
+        this.wiredHeadsetReceiver = WiredHeadsetReceiver(context, logger)
+        this.bluetoothHeadsetManager = BluetoothHeadsetManager.newInstance(context, logger,
+                BluetoothAdapter.getDefaultAdapter(), audioDeviceManager)
+    }
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     internal constructor(
-        context: Context,
         logger: Logger,
-        audioDeviceManager: AudioDeviceManager = AudioDeviceManager(context,
-            logger,
-            context.getSystemService(Context.AUDIO_SERVICE) as AudioManager),
-        wiredHeadsetReceiver: WiredHeadsetReceiver = WiredHeadsetReceiver(context, logger),
-        headsetManager: BluetoothHeadsetManager? = BluetoothHeadsetManager.newInstance(context,
-            logger,
-            BluetoothAdapter.getDefaultAdapter(),
-            audioDeviceManager)
+        audioDeviceManager: AudioDeviceManager,
+        wiredHeadsetReceiver: WiredHeadsetReceiver,
+        headsetManager: BluetoothHeadsetManager?
     ) {
         this.logger = logger
         this.audioDeviceManager = audioDeviceManager

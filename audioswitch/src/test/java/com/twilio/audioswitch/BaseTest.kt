@@ -42,7 +42,6 @@ open class BaseTest {
             systemClockWrapper = systemClockWrapper, headsetProxy = headsetProxy
         )
     internal var audioSwitch = AudioSwitch(
-        context = context,
         logger = logger,
         audioDeviceManager = audioDeviceManager,
         wiredHeadsetReceiver = wiredHeadsetReceiver,

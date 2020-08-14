@@ -25,7 +25,8 @@ internal fun setupFakeAudioSwitch(context: Context):
                     logger,
                     audioManager,
                     BuildWrapper(),
-                    AudioFocusRequestWrapper())
+                    AudioFocusRequestWrapper(),
+                    AudioManager.OnAudioFocusChangeListener {})
     val wiredHeadsetReceiver = WiredHeadsetReceiver(context, logger)
     val headsetManager = BluetoothAdapter.getDefaultAdapter()?.let { bluetoothAdapter ->
         BluetoothHeadsetManager(context, logger, bluetoothAdapter, audioDeviceManager,
@@ -33,8 +34,7 @@ internal fun setupFakeAudioSwitch(context: Context):
     } ?: run {
         null
     }
-    return Pair(AudioSwitch(context,
-        logger,
+    return Pair(AudioSwitch(logger,
         audioDeviceManager,
         wiredHeadsetReceiver,
         headsetManager),
