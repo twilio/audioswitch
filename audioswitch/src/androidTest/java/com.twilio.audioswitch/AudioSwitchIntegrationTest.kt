@@ -99,4 +99,32 @@ class AudioSwitchIntegrationTest {
         audioFocusUtil.abandonFocus()
         assertTrue(audioFocusGainedLatch.await(5, TimeUnit.SECONDS))
     }
+
+    @Test
+    fun it_should_acquire_audio_focus_if_it_is_already_acquired_in_the_system() {
+        val audioFocusLostLatch = CountDownLatch(1)
+        val audioFocusGainedLatch = CountDownLatch(1)
+        val audioFocusChangeListener = AudioManager.OnAudioFocusChangeListener { focusChange ->
+            when (focusChange) {
+                AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> audioFocusLostLatch.countDown()
+                AudioManager.AUDIOFOCUS_GAIN -> audioFocusGainedLatch.countDown()
+            }
+        }
+        val audioManager = getInstrumentationContext()
+                .getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        val audioFocusUtil = AudioFocusUtil(audioManager, audioFocusChangeListener)
+        audioFocusUtil.requestFocus()
+
+        val audioSwitch = AudioSwitch(getTargetContext(), true)
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            audioSwitch.start { _, _ -> }
+            audioSwitch.activate()
+        }
+
+        assertTrue(audioFocusLostLatch.await(5, TimeUnit.SECONDS))
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            audioSwitch.stop()
+        }
+        assertTrue(audioFocusGainedLatch.await(5, TimeUnit.SECONDS))
+    }
 }
