@@ -190,7 +190,7 @@ class BluetoothHeadsetManagerTest : BaseTest() {
 
     @Parameters(method = "parameters")
     @Test
-    fun `onReceive should register a new device when an ACL connected event is received`(
+    fun `onReceive should register a new device when an BluetoothHeadset connected event is received`(
         deviceClass: BluetoothClass?,
         isNewDeviceConnected: Boolean
     ) {
@@ -203,13 +203,14 @@ class BluetoothHeadsetManagerTest : BaseTest() {
 
     @Parameters(method = "parameters")
     @Test
-    fun `onReceive should disconnect a device when an ACL disconnected event is received`(
+    fun `onReceive should disconnect a device when an BluetoothHeadset disconnected event is received`(
         deviceClass: BluetoothClass?,
         isDeviceDisconnected: Boolean
     ) {
         whenever(expectedBluetoothDevice.bluetoothClass).thenReturn(deviceClass)
         val intent = mock<Intent> {
-            whenever(mock.action).thenReturn(BluetoothDevice.ACTION_ACL_DISCONNECTED)
+            whenever(mock.action).thenReturn(BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED)
+            whenever(mock.getIntExtra(BluetoothHeadset.EXTRA_STATE, BluetoothHeadset.STATE_DISCONNECTED)).thenReturn(BluetoothHeadset.STATE_DISCONNECTED)
             whenever(mock.getParcelableExtra<BluetoothDevice>(BluetoothDevice.EXTRA_DEVICE))
                     .thenReturn(expectedBluetoothDevice)
         }
@@ -221,7 +222,7 @@ class BluetoothHeadsetManagerTest : BaseTest() {
     }
 
     @Test
-    fun `onReceive should not register a new device when an ACL connected event is received with a null bluetooth device`() {
+    fun `onReceive should not register a new device when an BluetoothHeadset connected event is received with a null bluetooth device`() {
         whenever(expectedBluetoothDevice.bluetoothClass).thenReturn(null)
         simulateNewBluetoothHeadsetConnection()
 
@@ -237,7 +238,7 @@ class BluetoothHeadsetManagerTest : BaseTest() {
     }
 
     @Test
-    fun `onReceive should not disconnect a device when an ACL disconnected event is received with a null bluetooth device`() {
+    fun `onReceive should not disconnect a device when an BluetoothHeadset disconnected event is received with a null bluetooth device`() {
         val intent = mock<Intent> {
             whenever(mock.action).thenReturn(BluetoothDevice.ACTION_ACL_DISCONNECTED)
             whenever(mock.getParcelableExtra<BluetoothDevice>(BluetoothDevice.EXTRA_DEVICE))
