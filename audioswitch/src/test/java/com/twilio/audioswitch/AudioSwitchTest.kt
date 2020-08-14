@@ -1,4 +1,4 @@
-package com.twilio.audioswitch.selection
+package com.twilio.audioswitch
 
 import android.bluetooth.BluetoothHeadset
 import android.bluetooth.BluetoothProfile
@@ -14,16 +14,11 @@ import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.verifyZeroInteractions
 import com.nhaarman.mockitokotlin2.whenever
-import com.twilio.audioswitch.BaseTest
-import com.twilio.audioswitch.DEVICE_NAME
-import com.twilio.audioswitch.assertBluetoothHeadsetSetup
-import com.twilio.audioswitch.assertBluetoothHeadsetTeardown
-import com.twilio.audioswitch.selection.AudioDevice.Earpiece
-import com.twilio.audioswitch.selection.AudioDevice.Speakerphone
-import com.twilio.audioswitch.selection.AudioDeviceSelector.State.ACTIVATED
-import com.twilio.audioswitch.selection.AudioDeviceSelector.State.STARTED
-import com.twilio.audioswitch.selection.AudioDeviceSelector.State.STOPPED
-import com.twilio.audioswitch.simulateNewBluetoothHeadsetConnection
+import com.twilio.audioswitch.AudioDevice.Earpiece
+import com.twilio.audioswitch.AudioDevice.Speakerphone
+import com.twilio.audioswitch.AudioSwitch.State.ACTIVATED
+import com.twilio.audioswitch.AudioSwitch.State.STARTED
+import com.twilio.audioswitch.AudioSwitch.State.STOPPED
 import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.CoreMatchers.nullValue
@@ -35,7 +30,7 @@ import org.junit.Before
 import org.junit.Ignore
 import org.junit.Test
 
-class AudioDeviceSelectorTest : BaseTest() {
+class AudioSwitchTest : BaseTest() {
 
     internal val packageManager = mock<PackageManager> {
         whenever(mock.hasSystemFeature(any())).thenReturn(true)
@@ -48,36 +43,36 @@ class AudioDeviceSelectorTest : BaseTest() {
 
     @Test
     fun `start should start the bluetooth and wired headset listeners`() {
-        audioDeviceSelector.start(audioDeviceChangeListener)
+        audioSwitch.start(audioDeviceChangeListener)
 
         assertBluetoothHeadsetSetup()
 
-        assertThat(wiredHeadsetReceiver.deviceListener, equalTo(audioDeviceSelector.wiredDeviceConnectionListener))
+        assertThat(wiredHeadsetReceiver.deviceListener, equalTo(audioSwitch.wiredDeviceConnectionListener))
         verify(context).registerReceiver(eq(wiredHeadsetReceiver), isA())
     }
 
     @Test
     fun `start should transition to the started state if the current state is stopped`() {
-        audioDeviceSelector.start(audioDeviceChangeListener)
+        audioSwitch.start(audioDeviceChangeListener)
 
-        assertThat(audioDeviceSelector.state, equalTo(STARTED))
+        assertThat(audioSwitch.state, equalTo(STARTED))
     }
 
     @Test
     fun `start should cache the default audio devices and the default selected audio device`() {
-        audioDeviceSelector.start(audioDeviceChangeListener)
+        audioSwitch.start(audioDeviceChangeListener)
 
-        audioDeviceSelector.availableAudioDevices.let { audioDevices ->
+        audioSwitch.availableAudioDevices.let { audioDevices ->
             assertThat(audioDevices.size, equalTo(2))
             assertThat(audioDevices[0] is Earpiece, equalTo(true))
             assertThat(audioDevices[1] is Speakerphone, equalTo(true))
         }
-        assertThat(audioDeviceSelector.selectedAudioDevice is Earpiece, equalTo(true))
+        assertThat(audioSwitch.selectedAudioDevice is Earpiece, equalTo(true))
     }
 
     @Test
     fun `start should invoke the audio device change listener with the default audio devices`() {
-        audioDeviceSelector.start(audioDeviceChangeListener)
+        audioSwitch.start(audioDeviceChangeListener)
 
         verify(audioDeviceChangeListener).invoke(
                 listOf(Earpiece(), Speakerphone()),
@@ -86,14 +81,15 @@ class AudioDeviceSelectorTest : BaseTest() {
 
     @Test
     fun `start should not start the HeadsetManager if it is null`() {
-        audioDeviceSelector = AudioDeviceSelector(
-                logger,
-                audioDeviceManager,
-                wiredHeadsetReceiver,
-                null
+        audioSwitch = AudioSwitch(
+            context = context,
+            logger = logger,
+            audioDeviceManager = audioDeviceManager,
+            wiredHeadsetReceiver = wiredHeadsetReceiver,
+            headsetManager = null
         )
 
-        audioDeviceSelector.start(audioDeviceChangeListener)
+        audioSwitch.start(audioDeviceChangeListener)
 
         verify(bluetoothAdapter, times(0)).getProfileProxy(
                 context,
@@ -105,10 +101,10 @@ class AudioDeviceSelectorTest : BaseTest() {
 
     @Test
     fun `start should do nothing if the current state is started`() {
-        audioDeviceSelector.start(audioDeviceChangeListener)
+        audioSwitch.start(audioDeviceChangeListener)
 
         try {
-            audioDeviceSelector.start(audioDeviceChangeListener)
+            audioSwitch.start(audioDeviceChangeListener)
         } catch (e: Exception) {
             fail("Exception should not have been thrown")
         }
@@ -116,12 +112,12 @@ class AudioDeviceSelectorTest : BaseTest() {
 
     @Test
     fun `start should do nothing if the current state is activated`() {
-        audioDeviceSelector.start(audioDeviceChangeListener)
-        audioDeviceSelector.activate()
-        audioDeviceSelector.start(audioDeviceChangeListener)
+        audioSwitch.start(audioDeviceChangeListener)
+        audioSwitch.activate()
+        audioSwitch.start(audioDeviceChangeListener)
 
         try {
-            audioDeviceSelector.start(audioDeviceChangeListener)
+            audioSwitch.start(audioDeviceChangeListener)
         } catch (e: Exception) {
             fail("Exception should not have been thrown")
         }
@@ -129,18 +125,18 @@ class AudioDeviceSelectorTest : BaseTest() {
 
     @Test
     fun `stop should transition to the stopped state if the current state is started`() {
-        audioDeviceSelector.start(audioDeviceChangeListener)
-        audioDeviceSelector.stop()
+        audioSwitch.start(audioDeviceChangeListener)
+        audioSwitch.stop()
 
-        assertThat(audioDeviceSelector.state, equalTo(STOPPED))
+        assertThat(audioSwitch.state, equalTo(STOPPED))
     }
 
     @Test
     fun `stop should stop the bluetooth and wired headset listeners if the current state is started`() {
         headsetManager.onServiceConnected(0, headsetProxy)
 
-        audioDeviceSelector.start(audioDeviceChangeListener)
-        audioDeviceSelector.stop()
+        audioSwitch.start(audioDeviceChangeListener)
+        audioSwitch.stop()
 
         // Verify bluetooth behavior
         assertBluetoothHeadsetTeardown()
@@ -155,11 +151,11 @@ class AudioDeviceSelectorTest : BaseTest() {
         val bluetoothProfile = mock<BluetoothHeadset>()
         headsetManager.onServiceConnected(0, bluetoothProfile)
 
-        audioDeviceSelector.start(audioDeviceChangeListener)
-        audioDeviceSelector.activate()
-        audioDeviceSelector.stop()
+        audioSwitch.start(audioDeviceChangeListener)
+        audioSwitch.activate()
+        audioSwitch.stop()
 
-        assertThat(audioDeviceSelector.state, equalTo(STOPPED))
+        assertThat(audioSwitch.state, equalTo(STOPPED))
     }
 
     @Ignore("Finish as part of https://issues.corp.twilio.com/browse/AHOYAPPS-588")
@@ -170,11 +166,11 @@ class AudioDeviceSelectorTest : BaseTest() {
 
     @Test
     fun `stop should do nothing if the current state is stopped`() {
-        audioDeviceSelector.start(audioDeviceChangeListener)
-        audioDeviceSelector.stop()
+        audioSwitch.start(audioDeviceChangeListener)
+        audioSwitch.stop()
 
         try {
-            audioDeviceSelector.stop()
+            audioSwitch.stop()
         } catch (e: Exception) {
             fail("Exception should not have been thrown")
         }
@@ -182,22 +178,23 @@ class AudioDeviceSelectorTest : BaseTest() {
 
     @Test
     fun `stop should unassign the audio device change listener`() {
-        audioDeviceSelector.start(audioDeviceChangeListener)
-        audioDeviceSelector.stop()
+        audioSwitch.start(audioDeviceChangeListener)
+        audioSwitch.stop()
 
-        assertThat(audioDeviceSelector.audioDeviceChangeListener, `is`(nullValue()))
+        assertThat(audioSwitch.audioDeviceChangeListener, `is`(nullValue()))
     }
 
     @Test
     fun `stop should not stop the BluetoothHeadsetManager if it is null and if transitioning from the started state`() {
-        audioDeviceSelector = AudioDeviceSelector(
-                logger,
-                audioDeviceManager,
-                wiredHeadsetReceiver,
-                null
+        audioSwitch = AudioSwitch(
+            context = context,
+            logger = logger,
+            audioDeviceManager = audioDeviceManager,
+            wiredHeadsetReceiver = wiredHeadsetReceiver,
+            headsetManager = null
         )
-        audioDeviceSelector.start(audioDeviceChangeListener)
-        audioDeviceSelector.stop()
+        audioSwitch.start(audioDeviceChangeListener)
+        audioSwitch.stop()
 
         verifyZeroInteractions(bluetoothAdapter)
         verify(context, times(0)).unregisterReceiver(headsetManager)
@@ -205,15 +202,16 @@ class AudioDeviceSelectorTest : BaseTest() {
 
     @Test
     fun `stop should not stop the BluetoothHeadsetManager if it is null and if transitioning from the activated state`() {
-        audioDeviceSelector = AudioDeviceSelector(
-                logger,
-                audioDeviceManager,
-                wiredHeadsetReceiver,
-                null
+        audioSwitch = AudioSwitch(
+            context = context,
+            logger = logger,
+            audioDeviceManager = audioDeviceManager,
+            wiredHeadsetReceiver = wiredHeadsetReceiver,
+            headsetManager = null
         )
-        audioDeviceSelector.start(audioDeviceChangeListener)
-        audioDeviceSelector.activate()
-        audioDeviceSelector.stop()
+        audioSwitch.start(audioDeviceChangeListener)
+        audioSwitch.activate()
+        audioSwitch.stop()
 
         verifyZeroInteractions(bluetoothAdapter)
         verify(context, times(0)).unregisterReceiver(headsetManager)
@@ -221,10 +219,10 @@ class AudioDeviceSelectorTest : BaseTest() {
 
     @Test
     fun `activate should transition to the activated state if the current state is started`() {
-        audioDeviceSelector.start(audioDeviceChangeListener)
-        audioDeviceSelector.activate()
+        audioSwitch.start(audioDeviceChangeListener)
+        audioSwitch.activate()
 
-        assertThat(audioDeviceSelector.state, equalTo(ACTIVATED))
+        assertThat(audioSwitch.state, equalTo(ACTIVATED))
     }
 
     @Test
@@ -232,8 +230,8 @@ class AudioDeviceSelectorTest : BaseTest() {
         whenever(buildWrapper.getVersion()).thenReturn(Build.VERSION_CODES.O)
         val audioFocusRequest = mock<AudioFocusRequest>()
         whenever(this.audioFocusRequest.buildRequest(audioFocusChangeListener)).thenReturn(audioFocusRequest)
-        audioDeviceSelector.start(audioDeviceChangeListener)
-        audioDeviceSelector.activate()
+        audioSwitch.start(audioDeviceChangeListener)
+        audioSwitch.activate()
 
         verify(audioManager).requestAudioFocus(audioFocusRequest)
     }
@@ -243,8 +241,8 @@ class AudioDeviceSelectorTest : BaseTest() {
         whenever(buildWrapper.getVersion()).thenReturn(Build.VERSION_CODES.O_MR1)
         val audioFocusRequest = mock<AudioFocusRequest>()
         whenever(this.audioFocusRequest.buildRequest(audioFocusChangeListener)).thenReturn(audioFocusRequest)
-        audioDeviceSelector.start(audioDeviceChangeListener)
-        audioDeviceSelector.activate()
+        audioSwitch.start(audioDeviceChangeListener)
+        audioSwitch.activate()
 
         verify(audioManager).requestAudioFocus(audioFocusRequest)
     }
@@ -252,8 +250,8 @@ class AudioDeviceSelectorTest : BaseTest() {
     @Test
     fun `activate should set audio focus using pre Android O method if api version is 25`() {
         whenever(buildWrapper.getVersion()).thenReturn(Build.VERSION_CODES.N_MR1)
-        audioDeviceSelector.start(audioDeviceChangeListener)
-        audioDeviceSelector.activate()
+        audioSwitch.start(audioDeviceChangeListener)
+        audioSwitch.activate()
 
         verify(audioManager).requestAudioFocus(
                 audioFocusChangeListener,
@@ -267,9 +265,9 @@ class AudioDeviceSelectorTest : BaseTest() {
         whenever(buildWrapper.getVersion()).thenReturn(Build.VERSION_CODES.O)
         val audioFocusRequest = mock<AudioFocusRequest>()
         whenever(this.audioFocusRequest.buildRequest(audioFocusChangeListener)).thenReturn(audioFocusRequest)
-        audioDeviceSelector.start(audioDeviceChangeListener)
-        audioDeviceSelector.activate()
-        audioDeviceSelector.stop()
+        audioSwitch.start(audioDeviceChangeListener)
+        audioSwitch.activate()
+        audioSwitch.stop()
 
         verify(audioManager).abandonAudioFocusRequest(audioFocusRequest)
     }
@@ -279,9 +277,9 @@ class AudioDeviceSelectorTest : BaseTest() {
         whenever(buildWrapper.getVersion()).thenReturn(Build.VERSION_CODES.O_MR1)
         val audioFocusRequest = mock<AudioFocusRequest>()
         whenever(this.audioFocusRequest.buildRequest(audioFocusChangeListener)).thenReturn(audioFocusRequest)
-        audioDeviceSelector.start(audioDeviceChangeListener)
-        audioDeviceSelector.activate()
-        audioDeviceSelector.stop()
+        audioSwitch.start(audioDeviceChangeListener)
+        audioSwitch.activate()
+        audioSwitch.stop()
 
         verify(audioManager).abandonAudioFocusRequest(audioFocusRequest)
     }
@@ -289,37 +287,37 @@ class AudioDeviceSelectorTest : BaseTest() {
     @Test
     fun `deactivate should abandon audio focus using pre Android O method if api version is 25`() {
         whenever(buildWrapper.getVersion()).thenReturn(Build.VERSION_CODES.N_MR1)
-        audioDeviceSelector.start(audioDeviceChangeListener)
-        audioDeviceSelector.activate()
-        audioDeviceSelector.stop()
+        audioSwitch.start(audioDeviceChangeListener)
+        audioSwitch.activate()
+        audioSwitch.stop()
 
         verify(audioManager).abandonAudioFocus(audioFocusChangeListener)
     }
 
     @Test
     fun `activate should enable audio routing to the earpiece`() {
-        audioDeviceSelector.start(audioDeviceChangeListener)
-        val earpiece = audioDeviceSelector.availableAudioDevices.find { it.name == "Earpiece" }
-        audioDeviceSelector.selectDevice(earpiece)
-        audioDeviceSelector.activate()
+        audioSwitch.start(audioDeviceChangeListener)
+        val earpiece = audioSwitch.availableAudioDevices.find { it.name == "Earpiece" }
+        audioSwitch.selectDevice(earpiece)
+        audioSwitch.activate()
 
         verify(audioManager).isSpeakerphoneOn = false
     }
 
     @Test
     fun `activate should enable audio routing to the speakerphone device`() {
-        audioDeviceSelector.start(audioDeviceChangeListener)
-        audioDeviceSelector.selectDevice(Speakerphone())
-        audioDeviceSelector.activate()
+        audioSwitch.start(audioDeviceChangeListener)
+        audioSwitch.selectDevice(Speakerphone())
+        audioSwitch.activate()
 
         verify(audioManager).isSpeakerphoneOn = true
     }
 
     @Test
     fun `activate should enable audio routing to the bluetooth device`() {
-        audioDeviceSelector.start(audioDeviceChangeListener)
+        audioSwitch.start(audioDeviceChangeListener)
         simulateNewBluetoothHeadsetConnection()
-        audioDeviceSelector.activate()
+        audioSwitch.activate()
 
         verify(audioManager).isSpeakerphoneOn = false
         verify(audioManager).startBluetoothSco()
@@ -327,9 +325,9 @@ class AudioDeviceSelectorTest : BaseTest() {
 
     @Test
     fun `activate should enable audio routing to the wired headset device`() {
-        audioDeviceSelector.start(audioDeviceChangeListener)
-        audioDeviceSelector.wiredDeviceConnectionListener.onDeviceConnected()
-        audioDeviceSelector.activate()
+        audioSwitch.start(audioDeviceChangeListener)
+        audioSwitch.wiredDeviceConnectionListener.onDeviceConnected()
+        audioSwitch.activate()
 
         verify(audioManager).isSpeakerphoneOn = false
     }
@@ -390,11 +388,11 @@ class AudioDeviceSelectorTest : BaseTest() {
 
     @Test
     fun `onBluetoothDeviceStateChanged should enumerate devices`() {
-        audioDeviceSelector.start(audioDeviceChangeListener)
+        audioSwitch.start(audioDeviceChangeListener)
         simulateNewBluetoothHeadsetConnection()
-        audioDeviceSelector.activate()
+        audioSwitch.activate()
 
-        audioDeviceSelector.bluetoothDeviceConnectionListener.onBluetoothHeadsetStateChanged()
+        audioSwitch.bluetoothDeviceConnectionListener.onBluetoothHeadsetStateChanged()
 
         verify(audioManager, times(2)).isSpeakerphoneOn = false
         verify(audioManager).startBluetoothSco()
@@ -402,11 +400,11 @@ class AudioDeviceSelectorTest : BaseTest() {
 
     @Test
     fun `selectDevice should not re activate the bluetooth device if the same device has been selected`() {
-        audioDeviceSelector.start(audioDeviceChangeListener)
+        audioSwitch.start(audioDeviceChangeListener)
         simulateNewBluetoothHeadsetConnection()
-        audioDeviceSelector.activate()
+        audioSwitch.activate()
 
-        audioDeviceSelector.selectDevice(AudioDevice.BluetoothHeadset(DEVICE_NAME))
+        audioSwitch.selectDevice(AudioDevice.BluetoothHeadset(DEVICE_NAME))
 
         verify(audioManager).isSpeakerphoneOn = false
         verify(audioManager).startBluetoothSco()
@@ -416,7 +414,7 @@ class AudioDeviceSelectorTest : BaseTest() {
     fun `getVersion should return valid semver formatted version`() {
         val semVerRegex = Regex("^([0-9]+)\\.([0-9]+)\\.([0-9]+)(?:-([0-9A-" +
                 "Za-z-]+(?:\\.[0-9A-Za-z-]+)*))?(?:\\+[0-9A-Za-z-]+)?$")
-        assertNotNull(AudioDeviceSelector.VERSION)
-        assertTrue(AudioDeviceSelector.VERSION.matches(semVerRegex))
+        assertNotNull(AudioSwitch.VERSION)
+        assertTrue(AudioSwitch.VERSION.matches(semVerRegex))
     }
 }
