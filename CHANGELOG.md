@@ -1,5 +1,9 @@
 # Changelog
 
+### 1.0.0
+
+- Promotes 0.4.0 to the first stable release of this library.
+
 ### 0.4.0
 
 Enhancements
