@@ -1,5 +1,11 @@
 # Changelog
 
+### 1.0.1
+
+Bug Fixes
+
+- Added the internal access modifier to the `SystemClockWrapper` class since it is not meant to be exposed publicly.
+
 ### 1.0.0
 
 - Promotes 0.4.0 to the first stable release of this library.
