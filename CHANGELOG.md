@@ -2,6 +2,10 @@
 
 ### 1.0.1
 
+Enhancements
+
+- Upgraded Kotlin to `1.4.0`.
+
 Bug Fixes
 
 - Added the internal access modifier to the `SystemClockWrapper` class since it is not meant to be exposed publicly.
