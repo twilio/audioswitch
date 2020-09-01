@@ -1,4 +1,4 @@
-package com.twilio.audioswitch
+package com.twilio.audioswitch.manual
 
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothHeadset
@@ -9,6 +9,11 @@ import android.content.Intent
 import android.content.IntentFilter
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import com.twilio.audioswitch.AudioDevice
+import com.twilio.audioswitch.AudioSwitch
+import com.twilio.audioswitch.getInstrumentationContext
+import com.twilio.audioswitch.isSpeakerPhoneOn
+import com.twilio.audioswitch.retryAssertion
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import junit.framework.TestCase.assertEquals

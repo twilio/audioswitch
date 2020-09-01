@@ -1,5 +1,19 @@
 # Changelog
 
+### 1.0.1
+
+Enhancements
+
+- Upgraded Kotlin to `1.4.0`.
+
+Bug Fixes
+
+- Added the internal access modifier to the `SystemClockWrapper` class since it is not meant to be exposed publicly.
+
+### 1.0.0
+
+- Promotes 0.4.0 to the first stable release of this library.
+
 ### 0.4.0
 
 Enhancements
@@ -10,6 +24,18 @@ Enhancements
 val audioSwitch = AudioSwitch(context, loggingEnabled = true)
 
 audioSwitch.start { _, _ -> }
+```
+
+- Added another constructor parameter that allows developers to subscribe to system audio focus changes while the library is activated.
+
+```kotlin
+val audioSwitch = AudioSwitch(context, audioFocusChangeListener = OnAudioFocusChangeListener { focusChange ->
+    // Do something with audio focus change
+))}
+
+audioSwitch.start { _, _ -> }
+// Audio focus changes are received after activating
+audioSwitch.activate()
 ```
 
 ### 0.3.0
