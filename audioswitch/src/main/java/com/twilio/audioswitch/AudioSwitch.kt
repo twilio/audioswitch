@@ -43,8 +43,8 @@ class AudioSwitch {
         STARTED, ACTIVATED, STOPPED
     }
     internal val bluetoothDeviceConnectionListener = object : BluetoothHeadsetConnectionListener {
-        override fun onBluetoothHeadsetStateChanged(headsetName: String?) {
-            enumerateDevices(headsetName)
+        override fun onBluetoothHeadsetStateChanged() {
+            enumerateDevices()
         }
 
         override fun onBluetoothHeadsetActivationError() {
@@ -250,15 +250,9 @@ class AudioSwitch {
         }
     }
 
-    private fun enumerateDevices(bluetoothHeadsetName: String? = null) {
+    private fun enumerateDevices() {
         mutableAudioDevices.clear()
-        /*
-         * Since the there is a delay between receiving the ACTION_ACL_CONNECTED event and receiving
-         * the name of the connected device from querying the BluetoothHeadset proxy class, the
-         * headset name received from the ACTION_ACL_CONNECTED intent needs to be passed into this
-         * function.
-         */
-        bluetoothHeadsetManager?.getHeadset(bluetoothHeadsetName)?.let {
+        bluetoothHeadsetManager?.getHeadset()?.let {
             mutableAudioDevices.add(it)
         }
         if (wiredHeadsetAvailable) {
