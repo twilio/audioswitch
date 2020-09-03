@@ -106,27 +106,25 @@ internal constructor(
                         STATE_CONNECTED -> {
                             logger.d(
                                     TAG,
-                                    "Bluetooth headset " +
-                                            " connected")
+                                    "Bluetooth headset $bluetoothDevice connected")
                             connect()
                             headsetListener?.onBluetoothHeadsetStateChanged()
                         }
                         STATE_DISCONNECTED -> {
                             logger.d(
                                     TAG,
-                                    "Bluetooth headset " +
-                                            " disconnected")
+                                    "Bluetooth headset $bluetoothDevice disconnected")
                             disconnect()
                             headsetListener?.onBluetoothHeadsetStateChanged()
                         }
                         STATE_AUDIO_CONNECTED -> {
-                            logger.d(TAG, "Bluetooth SCO Audio connected")
+                            logger.d(TAG, "Bluetooth audio connected on device $bluetoothDevice")
                             enableBluetoothScoJob.cancelBluetoothScoJob()
                             headsetState = AudioActivated
                             headsetListener?.onBluetoothHeadsetStateChanged()
                         }
                         STATE_AUDIO_DISCONNECTED -> {
-                            logger.d(TAG, "Bluetooth SCO Audio disconnected")
+                            logger.d(TAG, "Bluetooth audio disconnected on device $bluetoothDevice")
                             disableBluetoothScoJob.cancelBluetoothScoJob()
                             /*
                              * This block is needed to restart bluetooth SCO in the event that
@@ -192,14 +190,7 @@ internal constructor(
             intentAction == ACTION_CONNECTION_STATE_CHANGED || intentAction == ACTION_AUDIO_STATE_CHANGED
 
     private fun connect() {
-        headsetState = when {
-            hasActiveHeadset() -> {
-                AudioActivated
-            }
-            else -> {
-                Connected
-            }
-        }
+        if (!hasActiveHeadset()) headsetState = Connected
     }
 
     private fun disconnect() {

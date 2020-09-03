@@ -1,6 +1,7 @@
 package com.twilio.audioswitch
 
 import android.bluetooth.BluetoothDevice
+import android.bluetooth.BluetoothHeadset
 import android.bluetooth.BluetoothProfile
 import android.content.Intent
 import android.media.AudioManager
@@ -47,7 +48,7 @@ internal fun BaseTest.assertBluetoothHeadsetSetup() {
             headsetManager,
             BluetoothProfile.HEADSET
     )
-    verify(context, times(3)).registerReceiver(eq(headsetManager), isA())
+    verify(context, times(2)).registerReceiver(eq(headsetManager), isA())
 }
 
 internal fun BaseTest.assertBluetoothHeadsetTeardown() {
@@ -60,7 +61,9 @@ internal fun BaseTest.simulateNewBluetoothHeadsetConnection(
     bluetoothDevice: BluetoothDevice = expectedBluetoothDevice
 ) {
     val intent = mock<Intent> {
-        whenever(mock.action).thenReturn(BluetoothDevice.ACTION_ACL_CONNECTED)
+        whenever(mock.action).thenReturn(BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED)
+        whenever(mock.getIntExtra(BluetoothHeadset.EXTRA_STATE, BluetoothHeadset.STATE_DISCONNECTED))
+                .thenReturn(BluetoothHeadset.STATE_CONNECTED)
         whenever(mock.getParcelableExtra<BluetoothDevice>(BluetoothDevice.EXTRA_DEVICE))
                 .thenReturn(bluetoothDevice)
     }
