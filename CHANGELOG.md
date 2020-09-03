@@ -5,6 +5,7 @@
 Enhancements
 
 - Upgraded Kotlin to `1.4.0`.
+- Improved the Bluetooth headset connection and audio change reliability by registering the `BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED` and `BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED` intent actions.
 - The context provided when constructing `AudioSwitch` can now take any context. Previously the `ApplicationContext` was required.
 
 Bug Fixes
