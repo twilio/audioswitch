@@ -1,7 +1,7 @@
 package com.twilio.audioswitch
 
 import android.bluetooth.BluetoothAdapter
-import android.bluetooth.BluetoothDevice
+import android.bluetooth.BluetoothHeadset
 import android.content.Context
 import android.content.Intent
 import android.media.AudioManager
@@ -48,9 +48,10 @@ internal fun simulateBluetoothSystemIntent(
     context: Context,
     headsetManager: BluetoothHeadsetManager,
     deviceName: String = HEADSET_NAME,
-    action: String = BluetoothDevice.ACTION_ACL_CONNECTED
+    action: String = BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED
 ) {
     val intent = Intent(action).apply {
+        putExtra(BluetoothHeadset.EXTRA_STATE, BluetoothHeadset.STATE_CONNECTED)
         putExtra(DEVICE_NAME, deviceName)
     }
     headsetManager.onReceive(context, intent)

@@ -88,7 +88,7 @@ internal constructor(
         }
         if (hasConnectedDevice()) {
             connect()
-            headsetListener?.onBluetoothHeadsetStateChanged()
+            headsetListener?.onBluetoothHeadsetStateChanged(getHeadsetName())
         }
     }
 
@@ -108,7 +108,7 @@ internal constructor(
                                     TAG,
                                     "Bluetooth headset $bluetoothDevice connected")
                             connect()
-                            headsetListener?.onBluetoothHeadsetStateChanged()
+                            headsetListener?.onBluetoothHeadsetStateChanged(bluetoothDevice.name)
                         }
                         STATE_DISCONNECTED -> {
                             logger.d(
@@ -181,9 +181,10 @@ internal constructor(
 
     fun hasActivationError() = headsetState == AudioActivationError
 
-    fun getHeadset() =
+    fun getHeadset(bluetoothHeadsetName: String?) =
             if (headsetState != Disconnected) {
-                AudioDevice.BluetoothHeadset(getHeadsetName() ?: "Bluetooth")
+                AudioDevice.BluetoothHeadset(bluetoothHeadsetName ?: getHeadsetName()
+                ?: "Bluetooth")
             } else null
 
     private fun isCorrectIntentAction(intentAction: String?) =

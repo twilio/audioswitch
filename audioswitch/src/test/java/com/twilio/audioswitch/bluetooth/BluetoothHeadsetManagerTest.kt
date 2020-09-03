@@ -13,6 +13,7 @@ import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.verifyZeroInteractions
 import com.nhaarman.mockitokotlin2.whenever
 import com.twilio.audioswitch.BaseTest
+import com.twilio.audioswitch.DEVICE_NAME
 import com.twilio.audioswitch.assertBluetoothHeadsetSetup
 import com.twilio.audioswitch.assertBluetoothHeadsetTeardown
 import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager.HeadsetState.AudioActivated
@@ -46,7 +47,7 @@ class BluetoothHeadsetManagerTest : BaseTest() {
     fun `onServiceConnected should notify the deviceListener if there are connected devices`() {
         setupConnectedState()
 
-        verify(headsetListener).onBluetoothHeadsetStateChanged()
+        verify(headsetListener).onBluetoothHeadsetStateChanged(DEVICE_NAME)
     }
 
     @Test
@@ -204,7 +205,7 @@ class BluetoothHeadsetManagerTest : BaseTest() {
         headsetManager.onReceive(context, intent)
 
         val invocationCount = if (isNewDeviceConnected) 1 else 0
-        verify(headsetListener, times(invocationCount)).onBluetoothHeadsetStateChanged()
+        verify(headsetListener, times(invocationCount)).onBluetoothHeadsetStateChanged(DEVICE_NAME)
     }
 
     @Parameters(method = "parameters")
