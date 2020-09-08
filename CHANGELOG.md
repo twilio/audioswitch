@@ -5,6 +5,7 @@
 Enhancements
 
 - Upgraded Kotlin to `1.4.0`.
+- The `AudioSwitch` public constructor now retrieves the application context from the context passed in from the client.
 
 Bug Fixes
 
