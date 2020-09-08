@@ -113,7 +113,7 @@ class AudioSwitch {
         context: Context,
         loggingEnabled: Boolean = false,
         audioFocusChangeListener: OnAudioFocusChangeListener = OnAudioFocusChangeListener {}
-    ) : this(context, Logger(loggingEnabled), audioFocusChangeListener)
+    ) : this(context.applicationContext, Logger(loggingEnabled), audioFocusChangeListener)
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     internal constructor(
