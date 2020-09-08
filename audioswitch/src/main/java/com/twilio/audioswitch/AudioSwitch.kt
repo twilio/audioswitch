@@ -103,7 +103,7 @@ class AudioSwitch {
     /**
      * Constructs a new AudioSwitch instance.
      *
-     * @param context The application context.
+     * @param context An Android Context.
      * @param loggingEnabled Toggle whether logging is enabled. This argument is false by default.
      * @param audioFocusChangeListener A listener that is invoked when the system audio focus is
      * updated. Note that updates are only sent to the listener after [activate] has been called.
