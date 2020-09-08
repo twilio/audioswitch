@@ -5,6 +5,7 @@
 Enhancements
 
 - Upgraded Kotlin to `1.4.0`.
+- The context provided when constructing `AudioSwitch` can now take any context. Previously the `ApplicationContext` was required.
 
 Bug Fixes
 
