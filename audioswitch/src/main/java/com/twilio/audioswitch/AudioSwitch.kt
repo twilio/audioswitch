@@ -239,7 +239,7 @@ class AudioSwitch {
     /**
      * Selects the desired [AudioDevice]. If the provided [AudioDevice] is not
      * available, no changes are made. If the provided [AudioDevice] is null, an [AudioDevice] is
-     * chosen based on the following preference: Bluetooth, Wired Headset, Microphone, Speakerphone.
+     * chosen based on the following preference: Bluetooth, Wired Headset, Earpiece, Speakerphone.
      *
      * @param audioDevice The [AudioDevice] to use
      */
