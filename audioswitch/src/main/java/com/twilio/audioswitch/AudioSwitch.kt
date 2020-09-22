@@ -17,6 +17,7 @@ import com.twilio.audioswitch.bluetooth.BluetoothHeadsetConnectionListener
 import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager
 import com.twilio.audioswitch.wired.WiredDeviceConnectionListener
 import com.twilio.audioswitch.wired.WiredHeadsetReceiver
+import kotlin.reflect.KClass
 
 private const val TAG = "AudioSwitch"
 
@@ -37,6 +38,7 @@ class AudioSwitch {
     private var wiredHeadsetAvailable = false
     private val mutableAudioDevices = ArrayList<AudioDevice>()
     private var bluetoothHeadsetManager: BluetoothHeadsetManager? = null
+    private val selectionOrder: List<KClass<out AudioDevice>>
 
     internal var state: State = STOPPED
     internal enum class State {
@@ -112,14 +114,18 @@ class AudioSwitch {
     constructor(
         context: Context,
         loggingEnabled: Boolean = false,
-        audioFocusChangeListener: OnAudioFocusChangeListener = OnAudioFocusChangeListener {}
-    ) : this(context.applicationContext, Logger(loggingEnabled), audioFocusChangeListener)
+        audioFocusChangeListener: OnAudioFocusChangeListener = OnAudioFocusChangeListener {},
+        automaticSelectionOrder: List<KClass<out AudioDevice>> = listOf(BluetoothHeadset::class,
+                WiredHeadset::class, Earpiece::class, Speakerphone::class)
+    ) : this(context.applicationContext, Logger(loggingEnabled), audioFocusChangeListener,
+            automaticSelectionOrder)
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     internal constructor(
         context: Context,
         logger: Logger,
         audioFocusChangeListener: OnAudioFocusChangeListener,
+        automaticSelectionOrder: List<KClass<out AudioDevice>>,
         audioDeviceManager: AudioDeviceManager = AudioDeviceManager(context,
             logger,
             context.getSystemService(Context.AUDIO_SERVICE) as AudioManager,
@@ -134,6 +140,7 @@ class AudioSwitch {
         this.audioDeviceManager = audioDeviceManager
         this.wiredHeadsetReceiver = wiredHeadsetReceiver
         this.bluetoothHeadsetManager = headsetManager
+        this.selectionOrder = automaticSelectionOrder
         logger.d(TAG, "AudioSwitch($VERSION)")
     }
 
@@ -251,27 +258,7 @@ class AudioSwitch {
     }
 
     private fun enumerateDevices(bluetoothHeadsetName: String? = null) {
-        mutableAudioDevices.clear()
-        /*
-         * Since the there is a delay between receiving the ACTION_ACL_CONNECTED event and receiving
-         * the name of the connected device from querying the BluetoothHeadset proxy class, the
-         * headset name received from the ACTION_ACL_CONNECTED intent needs to be passed into this
-         * function.
-         */
-        bluetoothHeadsetManager?.getHeadset(bluetoothHeadsetName)?.let {
-            mutableAudioDevices.add(it)
-        }
-        if (wiredHeadsetAvailable) {
-            mutableAudioDevices.add(WiredHeadset())
-        }
-        if (audioDeviceManager.hasEarpiece() && !wiredHeadsetAvailable) {
-            mutableAudioDevices.add(Earpiece())
-        }
-        if (audioDeviceManager.hasSpeakerphone()) {
-            mutableAudioDevices.add(Speakerphone())
-        }
-
-        logger.d(TAG, "Available AudioDevice list updated: $availableAudioDevices")
+        addAvailableAudioDevices(bluetoothHeadsetName)
 
         // Check whether the user selected device is still present
         if (!userSelectedDevicePresent(mutableAudioDevices)) {
@@ -310,6 +297,42 @@ class AudioSwitch {
                 listener.invoke(mutableAudioDevices, null)
             }
         }
+    }
+
+    private fun addAvailableAudioDevices(bluetoothHeadsetName: String?) {
+        mutableAudioDevices.clear()
+        selectionOrder.forEach { audioDevice ->
+            when (audioDevice) {
+                BluetoothHeadset::class -> {
+                /*
+                 * Since the there is a delay between receiving the ACTION_ACL_CONNECTED event and receiving
+                 * the name of the connected device from querying the BluetoothHeadset proxy class, the
+                 * headset name received from the ACTION_ACL_CONNECTED intent needs to be passed into this
+                 * function.
+                 */
+                bluetoothHeadsetManager?.getHeadset(bluetoothHeadsetName)?.let {
+                        mutableAudioDevices.add(it)
+                    }
+                }
+                WiredHeadset::class -> {
+                    if (wiredHeadsetAvailable) {
+                        mutableAudioDevices.add(WiredHeadset())
+                    }
+                }
+                Earpiece::class -> {
+                    if (audioDeviceManager.hasEarpiece() && !wiredHeadsetAvailable) {
+                        mutableAudioDevices.add(Earpiece())
+                    }
+                }
+                Speakerphone::class -> {
+                    if (audioDeviceManager.hasSpeakerphone()) {
+                        mutableAudioDevices.add(Speakerphone())
+                    }
+                }
+            }
+        }
+
+        logger.d(TAG, "Available AudioDevice list updated: $availableAudioDevices")
     }
 
     private fun userSelectedDevicePresent(audioDevices: List<AudioDevice>): Boolean {
