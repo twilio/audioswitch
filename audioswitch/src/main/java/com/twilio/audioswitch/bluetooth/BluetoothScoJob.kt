@@ -24,7 +24,8 @@ internal abstract class BluetoothScoJob(
     open fun scoTimeOutAction() {}
 
     fun executeBluetoothScoJob() {
-        bluetoothScoRunnable = BluetoothScoRunnable().apply {
+        BluetoothScoRunnable().apply {
+            bluetoothScoRunnable = this
             bluetoothScoHandler.post(this)
         }
         logger.d(TAG, "Scheduled bluetooth sco job")
