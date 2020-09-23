@@ -183,8 +183,9 @@ internal constructor(
 
     fun getHeadset(bluetoothHeadsetName: String?) =
             if (headsetState != Disconnected) {
-                AudioDevice.BluetoothHeadset(bluetoothHeadsetName ?: getHeadsetName()
-                ?: "Bluetooth")
+                bluetoothHeadsetName?.let { AudioDevice.BluetoothHeadset(it) }
+                ?: getHeadsetName()?.let { AudioDevice.BluetoothHeadset(it) }
+                ?: AudioDevice.BluetoothHeadset()
             } else null
 
     private fun isCorrectIntentAction(intentAction: String?) =

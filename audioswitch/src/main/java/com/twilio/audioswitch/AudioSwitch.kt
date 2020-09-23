@@ -17,7 +17,6 @@ import com.twilio.audioswitch.bluetooth.BluetoothHeadsetConnectionListener
 import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager
 import com.twilio.audioswitch.wired.WiredDeviceConnectionListener
 import com.twilio.audioswitch.wired.WiredHeadsetReceiver
-import kotlin.reflect.KClass
 
 private const val TAG = "AudioSwitch"
 
@@ -38,7 +37,7 @@ class AudioSwitch {
     private var wiredHeadsetAvailable = false
     private val mutableAudioDevices = ArrayList<AudioDevice>()
     private var bluetoothHeadsetManager: BluetoothHeadsetManager? = null
-    private val selectionOrder: List<KClass<out AudioDevice>>
+    private val automaticSelectionOrder: List<AudioDevice>
 
     internal var state: State = STOPPED
     internal enum class State {
@@ -115,8 +114,8 @@ class AudioSwitch {
         context: Context,
         loggingEnabled: Boolean = false,
         audioFocusChangeListener: OnAudioFocusChangeListener = OnAudioFocusChangeListener {},
-        automaticSelectionOrder: List<KClass<out AudioDevice>> = listOf(BluetoothHeadset::class,
-                WiredHeadset::class, Earpiece::class, Speakerphone::class)
+        automaticSelectionOrder: List<AudioDevice> = listOf(BluetoothHeadset(), WiredHeadset(),
+                Earpiece(), Speakerphone())
     ) : this(context.applicationContext, Logger(loggingEnabled), audioFocusChangeListener,
             automaticSelectionOrder)
 
@@ -125,7 +124,7 @@ class AudioSwitch {
         context: Context,
         logger: Logger,
         audioFocusChangeListener: OnAudioFocusChangeListener,
-        automaticSelectionOrder: List<KClass<out AudioDevice>>,
+        automaticSelectionOrder: List<AudioDevice>,
         audioDeviceManager: AudioDeviceManager = AudioDeviceManager(context,
             logger,
             context.getSystemService(Context.AUDIO_SERVICE) as AudioManager,
@@ -140,7 +139,7 @@ class AudioSwitch {
         this.audioDeviceManager = audioDeviceManager
         this.wiredHeadsetReceiver = wiredHeadsetReceiver
         this.bluetoothHeadsetManager = headsetManager
-        this.selectionOrder = automaticSelectionOrder
+        this.automaticSelectionOrder = automaticSelectionOrder
         logger.d(TAG, "AudioSwitch($VERSION)")
     }
 
@@ -301,9 +300,9 @@ class AudioSwitch {
 
     private fun addAvailableAudioDevices(bluetoothHeadsetName: String?) {
         mutableAudioDevices.clear()
-        selectionOrder.forEach { audioDevice ->
+        automaticSelectionOrder.forEach { audioDevice ->
             when (audioDevice) {
-                BluetoothHeadset::class -> {
+                is BluetoothHeadset -> {
                 /*
                  * Since the there is a delay between receiving the ACTION_ACL_CONNECTED event and receiving
                  * the name of the connected device from querying the BluetoothHeadset proxy class, the
@@ -314,17 +313,17 @@ class AudioSwitch {
                         mutableAudioDevices.add(it)
                     }
                 }
-                WiredHeadset::class -> {
+                is WiredHeadset -> {
                     if (wiredHeadsetAvailable) {
                         mutableAudioDevices.add(WiredHeadset())
                     }
                 }
-                Earpiece::class -> {
+                is Earpiece -> {
                     if (audioDeviceManager.hasEarpiece() && !wiredHeadsetAvailable) {
                         mutableAudioDevices.add(Earpiece())
                     }
                 }
-                Speakerphone::class -> {
+                is Speakerphone -> {
                     if (audioDeviceManager.hasSpeakerphone()) {
                         mutableAudioDevices.add(Speakerphone())
                     }
