@@ -37,7 +37,7 @@ class AudioSwitch {
     private var wiredHeadsetAvailable = false
     private val mutableAudioDevices = ArrayList<AudioDevice>()
     private var bluetoothHeadsetManager: BluetoothHeadsetManager? = null
-    private val automaticSelectionOrder: List<AudioDevice>
+    private val automaticSelectionOrder: Set<AudioDevice>
 
     internal var state: State = STOPPED
     internal enum class State {
@@ -114,7 +114,7 @@ class AudioSwitch {
         context: Context,
         loggingEnabled: Boolean = false,
         audioFocusChangeListener: OnAudioFocusChangeListener = OnAudioFocusChangeListener {},
-        automaticSelectionOrder: List<AudioDevice> = listOf(BluetoothHeadset(), WiredHeadset(),
+        automaticSelectionOrder: Set<AudioDevice> = setOf(BluetoothHeadset(), WiredHeadset(),
                 Earpiece(), Speakerphone())
     ) : this(context.applicationContext, Logger(loggingEnabled), audioFocusChangeListener,
             automaticSelectionOrder)
@@ -124,7 +124,7 @@ class AudioSwitch {
         context: Context,
         logger: Logger,
         audioFocusChangeListener: OnAudioFocusChangeListener,
-        automaticSelectionOrder: List<AudioDevice>,
+        automaticSelectionOrder: Set<AudioDevice>,
         audioDeviceManager: AudioDeviceManager = AudioDeviceManager(context,
             logger,
             context.getSystemService(Context.AUDIO_SERVICE) as AudioManager,
@@ -135,6 +135,7 @@ class AudioSwitch {
             BluetoothAdapter.getDefaultAdapter(),
             audioDeviceManager)
     ) {
+        validateSelectionOrder(automaticSelectionOrder)
         this.logger = logger
         this.audioDeviceManager = audioDeviceManager
         this.wiredHeadsetReceiver = wiredHeadsetReceiver
@@ -207,23 +208,6 @@ class AudioSwitch {
         }
     }
 
-    private fun activate(audioDevice: AudioDevice) {
-        when (audioDevice) {
-            is BluetoothHeadset -> {
-                audioDeviceManager.enableSpeakerphone(false)
-                bluetoothHeadsetManager?.activate()
-            }
-            is Earpiece, is WiredHeadset -> {
-                audioDeviceManager.enableSpeakerphone(false)
-                bluetoothHeadsetManager?.deactivate()
-            }
-            is Speakerphone -> {
-                audioDeviceManager.enableSpeakerphone(true)
-                bluetoothHeadsetManager?.deactivate()
-            }
-        }
-    }
-
     /**
      * Restores the audio state prior to calling [AudioSwitch.activate] and removes
      * audio focus from the client application.
@@ -253,6 +237,29 @@ class AudioSwitch {
         if (selectedDevice != audioDevice) {
             userSelectedDevice = audioDevice
             enumerateDevices()
+        }
+    }
+
+    private fun validateSelectionOrder(automaticSelectionOrder: Set<AudioDevice>) {
+        automaticSelectionOrder.run {
+            require(isNotEmpty() && size > 3)
+        }
+    }
+
+    private fun activate(audioDevice: AudioDevice) {
+        when (audioDevice) {
+            is BluetoothHeadset -> {
+                audioDeviceManager.enableSpeakerphone(false)
+                bluetoothHeadsetManager?.activate()
+            }
+            is Earpiece, is WiredHeadset -> {
+                audioDeviceManager.enableSpeakerphone(false)
+                bluetoothHeadsetManager?.deactivate()
+            }
+            is Speakerphone -> {
+                audioDeviceManager.enableSpeakerphone(true)
+                bluetoothHeadsetManager?.deactivate()
+            }
         }
     }
 

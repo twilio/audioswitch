@@ -12,6 +12,9 @@ import com.twilio.audioswitch.android.BuildWrapper
 import com.twilio.audioswitch.android.Logger
 import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager
 import com.twilio.audioswitch.wired.WiredHeadsetReceiver
+import com.twilio.audioswitch.AudioDevice.Earpiece
+import com.twilio.audioswitch.AudioDevice.Speakerphone
+import com.twilio.audioswitch.AudioDevice.WiredHeadset
 
 open class BaseTest {
     private val bluetoothClass = mock<BluetoothClass> {
@@ -35,6 +38,8 @@ open class BaseTest {
     internal var handler = setupScoHandlerMock()
     internal var systemClockWrapper = setupSystemClockMock()
     internal val headsetProxy = mock<BluetoothHeadset>()
+    internal val automaticSelectionOrder = setOf(AudioDevice.BluetoothHeadset(), WiredHeadset(),
+            Earpiece(), Speakerphone())
     internal var headsetManager =
         BluetoothHeadsetManager(
             context, logger, bluetoothAdapter,
@@ -47,6 +52,8 @@ open class BaseTest {
         audioDeviceManager = audioDeviceManager,
         wiredHeadsetReceiver = wiredHeadsetReceiver,
         headsetManager = headsetManager,
-        audioFocusChangeListener = defaultAudioFocusChangeListener
+        audioFocusChangeListener = defaultAudioFocusChangeListener,
+            automaticSelectionOrder = automaticSelectionOrder
+
     )
 }

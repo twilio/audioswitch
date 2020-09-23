@@ -16,9 +16,12 @@ import com.nhaarman.mockitokotlin2.verifyZeroInteractions
 import com.nhaarman.mockitokotlin2.whenever
 import com.twilio.audioswitch.AudioDevice.Earpiece
 import com.twilio.audioswitch.AudioDevice.Speakerphone
+import com.twilio.audioswitch.AudioDevice.WiredHeadset
 import com.twilio.audioswitch.AudioSwitch.State.ACTIVATED
 import com.twilio.audioswitch.AudioSwitch.State.STARTED
 import com.twilio.audioswitch.AudioSwitch.State.STOPPED
+import junitparams.JUnitParamsRunner
+import junitparams.Parameters
 import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.CoreMatchers.nullValue
@@ -29,7 +32,9 @@ import org.junit.Assert.fail
 import org.junit.Before
 import org.junit.Ignore
 import org.junit.Test
+import org.junit.runner.RunWith
 
+@RunWith(JUnitParamsRunner::class)
 class AudioSwitchTest : BaseTest() {
 
     internal val packageManager = mock<PackageManager> {
@@ -87,7 +92,8 @@ class AudioSwitchTest : BaseTest() {
             audioDeviceManager = audioDeviceManager,
             wiredHeadsetReceiver = wiredHeadsetReceiver,
             headsetManager = null,
-            audioFocusChangeListener = defaultAudioFocusChangeListener
+            audioFocusChangeListener = defaultAudioFocusChangeListener,
+            automaticSelectionOrder = automaticSelectionOrder
         )
 
         audioSwitch.start(audioDeviceChangeListener)
@@ -193,7 +199,8 @@ class AudioSwitchTest : BaseTest() {
             audioDeviceManager = audioDeviceManager,
             wiredHeadsetReceiver = wiredHeadsetReceiver,
             headsetManager = null,
-            audioFocusChangeListener = defaultAudioFocusChangeListener
+            audioFocusChangeListener = defaultAudioFocusChangeListener,
+            automaticSelectionOrder = automaticSelectionOrder
         )
         audioSwitch.start(audioDeviceChangeListener)
         audioSwitch.stop()
@@ -210,7 +217,8 @@ class AudioSwitchTest : BaseTest() {
             audioDeviceManager = audioDeviceManager,
             wiredHeadsetReceiver = wiredHeadsetReceiver,
             headsetManager = null,
-            audioFocusChangeListener = defaultAudioFocusChangeListener
+            audioFocusChangeListener = defaultAudioFocusChangeListener,
+            automaticSelectionOrder = automaticSelectionOrder
         )
         audioSwitch.start(audioDeviceChangeListener)
         audioSwitch.activate()
@@ -419,5 +427,27 @@ class AudioSwitchTest : BaseTest() {
                 "Za-z-]+(?:\\.[0-9A-Za-z-]+)*))?(?:\\+[0-9A-Za-z-]+)?$")
         assertNotNull(AudioSwitch.VERSION)
         assertTrue(AudioSwitch.VERSION.matches(semVerRegex))
+    }
+
+    fun invalidAutoDevicesParams() = arrayOf(
+            setOf(),
+            setOf(WiredHeadset(), Earpiece(), Speakerphone()),
+            setOf(AudioDevice.BluetoothHeadset(), Earpiece(), Earpiece(), Speakerphone()),
+    )
+
+    @Parameters(method = "invalidAutoDevicesParams")
+    @Test(expected = IllegalArgumentException::class)
+    fun `constructor should throw IllegalArgumentException for invalid automatic device selection list`(
+            automaticSelectionOrder: Set<AudioDevice>
+    ) {
+        audioSwitch = AudioSwitch(
+                context = context,
+                logger = logger,
+                audioDeviceManager = audioDeviceManager,
+                wiredHeadsetReceiver = wiredHeadsetReceiver,
+                headsetManager = null,
+                audioFocusChangeListener = defaultAudioFocusChangeListener,
+                automaticSelectionOrder = automaticSelectionOrder
+        )
     }
 }

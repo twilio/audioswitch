@@ -31,6 +31,7 @@ public class AudioSwitchJavaTest extends BaseTest {
                         getContext$audioswitch_debug(),
                         getLogger$audioswitch_debug(),
                         getDefaultAudioFocusChangeListener$audioswitch_debug(),
+                        getAutomaticSelectionOrder$audioswitch_debug(),
                         getAudioDeviceManager$audioswitch_debug(),
                         getWiredHeadsetReceiver$audioswitch_debug(),
                         getHeadsetManager$audioswitch_debug());
