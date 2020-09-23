@@ -162,18 +162,18 @@ workflows:
   build-test-publish:
     jobs:
       - lint
-      - check-format
+#      - check-format
       - build-audioswitch
       - unit-tests:
           requires:
             - build-audioswitch
             - lint
-            - check-format
+#            - check-format
       - integration-tests:
           requires:
             - build-audioswitch
             - lint
-            - check-format
+#            - check-format
       - publish-pre-release:
           filters:
             branches:
