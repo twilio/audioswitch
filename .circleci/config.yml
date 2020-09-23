@@ -162,7 +162,7 @@ workflows:
   build-test-publish:
     jobs:
       - lint
-      - check-format
+#      - check-format
       - build-audioswitch
       - unit-tests:
           requires:
