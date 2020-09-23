@@ -235,6 +235,7 @@ class AudioSwitch {
      */
     fun selectDevice(audioDevice: AudioDevice?) {
         if (selectedDevice != audioDevice) {
+            logger.d(TAG, "Selected AudioDevice = $audioDevice")
             userSelectedDevice = audioDevice
             enumerateDevices()
         }
@@ -266,13 +267,13 @@ class AudioSwitch {
     private fun enumerateDevices(bluetoothHeadsetName: String? = null) {
         addAvailableAudioDevices(bluetoothHeadsetName)
 
-        // Check whether the user selected device is still present
         if (!userSelectedDevicePresent(mutableAudioDevices)) {
             userSelectedDevice = null
         }
 
         // Select the audio device
-        selectedDevice = if (userSelectedDevice != null && userSelectedDevicePresent(mutableAudioDevices)) {
+        logger.d(TAG, "Current user selected AudioDevice = $userSelectedDevice")
+        selectedDevice = if (userSelectedDevice != null) {
             userSelectedDevice
         } else if (mutableAudioDevices.size > 0) {
             val firstAudioDevice = mutableAudioDevices[0]
@@ -341,14 +342,18 @@ class AudioSwitch {
         logger.d(TAG, "Available AudioDevice list updated: $availableAudioDevices")
     }
 
-    private fun userSelectedDevicePresent(audioDevices: List<AudioDevice>): Boolean {
-        for (audioDevice in audioDevices) {
-            if (audioDevice == userSelectedDevice) {
-                return true
-            }
-        }
-        return false
-    }
+    private fun userSelectedDevicePresent(audioDevices: List<AudioDevice>) =
+            userSelectedDevice?.let { selectedDevice ->
+                if(selectedDevice is BluetoothHeadset) {
+                    // Match any bluetooth headset as a new one may have been connected
+                    audioDevices.find { it is BluetoothHeadset }?.let { newHeadset ->
+                        userSelectedDevice = newHeadset
+                        true
+                    } ?: false
+                } else {
+                    audioDevices.contains(selectedDevice)
+                }
+            } ?: false
 
     private fun closeListeners() {
         bluetoothHeadsetManager?.stop()
