@@ -1,5 +1,6 @@
 package com.twilio.audioswitch
 
+import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothHeadset
 import android.bluetooth.BluetoothProfile
 import android.content.pm.PackageManager
@@ -449,5 +450,37 @@ class AudioSwitchTest : BaseTest() {
                 audioFocusChangeListener = defaultAudioFocusChangeListener,
                 automaticSelectionOrder = automaticSelectionOrder
         )
+    }
+
+    @Test
+    fun `a new bluetooth headset should automatically connect if it is the user's selection`() {
+        // Switch selection order so BT isn't automatically selected
+        audioSwitch = AudioSwitch(
+                context = context,
+                logger = logger,
+                audioDeviceManager = audioDeviceManager,
+                wiredHeadsetReceiver = wiredHeadsetReceiver,
+                headsetManager = headsetManager,
+                audioFocusChangeListener = defaultAudioFocusChangeListener,
+                automaticSelectionOrder = setOf(Earpiece(), WiredHeadset(), Speakerphone(),
+                        AudioDevice.BluetoothHeadset())
+
+        )
+        val secondBluetoothDevice = mock<BluetoothDevice> {
+            whenever(mock.name).thenReturn("$DEVICE_NAME 2")
+            whenever(mock.bluetoothClass).thenReturn(bluetoothClass)
+        }
+
+        audioSwitch.run {
+            start(this@AudioSwitchTest.audioDeviceChangeListener)
+            simulateNewBluetoothHeadsetConnection()
+            val bluetoothDevice = availableAudioDevices.find { it is AudioDevice.BluetoothHeadset }
+            selectDevice(bluetoothDevice)
+            activate()
+            simulateNewBluetoothHeadsetConnection(secondBluetoothDevice)
+
+            assertThat(selectedAudioDevice,
+                    equalTo(AudioDevice.BluetoothHeadset(secondBluetoothDevice.name)))
+        }
     }
 }
