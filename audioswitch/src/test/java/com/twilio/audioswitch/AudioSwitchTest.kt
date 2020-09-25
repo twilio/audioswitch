@@ -94,7 +94,7 @@ class AudioSwitchTest : BaseTest() {
             wiredHeadsetReceiver = wiredHeadsetReceiver,
             headsetManager = null,
             audioFocusChangeListener = defaultAudioFocusChangeListener,
-            automaticSelectionOrder = automaticSelectionOrder
+            preferredDeviceList = preferredDeviceList
         )
 
         audioSwitch.start(audioDeviceChangeListener)
@@ -201,7 +201,7 @@ class AudioSwitchTest : BaseTest() {
             wiredHeadsetReceiver = wiredHeadsetReceiver,
             headsetManager = null,
             audioFocusChangeListener = defaultAudioFocusChangeListener,
-            automaticSelectionOrder = automaticSelectionOrder
+            preferredDeviceList = preferredDeviceList
         )
         audioSwitch.start(audioDeviceChangeListener)
         audioSwitch.stop()
@@ -219,7 +219,7 @@ class AudioSwitchTest : BaseTest() {
             wiredHeadsetReceiver = wiredHeadsetReceiver,
             headsetManager = null,
             audioFocusChangeListener = defaultAudioFocusChangeListener,
-            automaticSelectionOrder = automaticSelectionOrder
+            preferredDeviceList = preferredDeviceList
         )
         audioSwitch.start(audioDeviceChangeListener)
         audioSwitch.activate()
@@ -431,15 +431,15 @@ class AudioSwitchTest : BaseTest() {
     }
 
     fun invalidAutoDevicesParams() = arrayOf(
-            setOf(),
-            setOf(WiredHeadset(), Earpiece(), Speakerphone()),
-            setOf(AudioDevice.BluetoothHeadset(), Earpiece(), Earpiece(), Speakerphone()),
+            listOf(),
+            listOf(WiredHeadset::class.java, Earpiece::class.java, Speakerphone::class.java),
+            listOf(AudioDevice.BluetoothHeadset::class.java, Earpiece::class.java, Earpiece::class.java, Speakerphone::class.java),
     )
 
     @Parameters(method = "invalidAutoDevicesParams")
     @Test(expected = IllegalArgumentException::class)
     fun `constructor should throw IllegalArgumentException for invalid automatic device selection list`(
-            automaticSelectionOrder: Set<AudioDevice>
+            preferredDeviceList: List<Class<out AudioDevice>>
     ) {
         audioSwitch = AudioSwitch(
                 context = context,
@@ -448,7 +448,7 @@ class AudioSwitchTest : BaseTest() {
                 wiredHeadsetReceiver = wiredHeadsetReceiver,
                 headsetManager = null,
                 audioFocusChangeListener = defaultAudioFocusChangeListener,
-                automaticSelectionOrder = automaticSelectionOrder
+                preferredDeviceList = preferredDeviceList
         )
     }
 
@@ -462,8 +462,8 @@ class AudioSwitchTest : BaseTest() {
                 wiredHeadsetReceiver = wiredHeadsetReceiver,
                 headsetManager = headsetManager,
                 audioFocusChangeListener = defaultAudioFocusChangeListener,
-                automaticSelectionOrder = setOf(Earpiece(), WiredHeadset(), Speakerphone(),
-                        AudioDevice.BluetoothHeadset())
+                preferredDeviceList = listOf(Earpiece::class.java, WiredHeadset::class.java, Speakerphone::class.java,
+                        AudioDevice.BluetoothHeadset::class.java)
 
         )
         val secondBluetoothDevice = mock<BluetoothDevice> {

@@ -9,14 +9,14 @@ sealed class AudioDevice {
     abstract val name: String
 
     /** An [AudioDevice] representing a Bluetooth Headset.*/
-    data class BluetoothHeadset constructor(override val name: String = "Bluetooth") : AudioDevice()
+    data class BluetoothHeadset internal constructor(override val name: String = "Bluetooth") : AudioDevice()
 
     /** An [AudioDevice] representing a Wired Headset.*/
-    data class WiredHeadset constructor(override val name: String = "Wired Headset") : AudioDevice()
+    data class WiredHeadset internal constructor(override val name: String = "Wired Headset") : AudioDevice()
 
     /** An [AudioDevice] representing the Earpiece.*/
-    data class Earpiece constructor(override val name: String = "Earpiece") : AudioDevice()
+    data class Earpiece internal constructor(override val name: String = "Earpiece") : AudioDevice()
 
     /** An [AudioDevice] representing the Speakerphone.*/
-    data class Speakerphone constructor(override val name: String = "Speakerphone") : AudioDevice()
+    data class Speakerphone internal constructor(override val name: String = "Speakerphone") : AudioDevice()
 }

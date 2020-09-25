@@ -37,7 +37,7 @@ class AudioSwitch {
     private var wiredHeadsetAvailable = false
     private val mutableAudioDevices = ArrayList<AudioDevice>()
     private var bluetoothHeadsetManager: BluetoothHeadsetManager? = null
-    private val automaticSelectionOrder: Set<AudioDevice>
+    private val preferredDeviceList: List<Class<out AudioDevice>>
 
     internal var state: State = STOPPED
     internal enum class State {
@@ -114,17 +114,17 @@ class AudioSwitch {
         context: Context,
         loggingEnabled: Boolean = false,
         audioFocusChangeListener: OnAudioFocusChangeListener = OnAudioFocusChangeListener {},
-        automaticSelectionOrder: Set<AudioDevice> = setOf(BluetoothHeadset(), WiredHeadset(),
-                Earpiece(), Speakerphone())
+        preferredDeviceList: List<Class<out AudioDevice>> = listOf(BluetoothHeadset::class.java, WiredHeadset::class.java,
+                Earpiece::class.java, Speakerphone::class.java)
     ) : this(context.applicationContext, Logger(loggingEnabled), audioFocusChangeListener,
-            automaticSelectionOrder)
+            preferredDeviceList)
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     internal constructor(
         context: Context,
         logger: Logger,
         audioFocusChangeListener: OnAudioFocusChangeListener,
-        automaticSelectionOrder: Set<AudioDevice>,
+        preferredDeviceList: List<Class<out AudioDevice>>,
         audioDeviceManager: AudioDeviceManager = AudioDeviceManager(context,
             logger,
             context.getSystemService(Context.AUDIO_SERVICE) as AudioManager,
@@ -135,12 +135,12 @@ class AudioSwitch {
             BluetoothAdapter.getDefaultAdapter(),
             audioDeviceManager)
     ) {
-        validateSelectionOrder(automaticSelectionOrder)
+        validateSelectionOrder(preferredDeviceList)
         this.logger = logger
         this.audioDeviceManager = audioDeviceManager
         this.wiredHeadsetReceiver = wiredHeadsetReceiver
         this.bluetoothHeadsetManager = headsetManager
-        this.automaticSelectionOrder = automaticSelectionOrder
+        this.preferredDeviceList = preferredDeviceList
         logger.d(TAG, "AudioSwitch($VERSION)")
     }
 
@@ -241,8 +241,8 @@ class AudioSwitch {
         }
     }
 
-    private fun validateSelectionOrder(automaticSelectionOrder: Set<AudioDevice>) {
-        automaticSelectionOrder.run {
+    private fun validateSelectionOrder(preferredDeviceList: List<Class<out AudioDevice>>) {
+        preferredDeviceList.run {
             require(isNotEmpty() && size > 3)
         }
     }
@@ -308,9 +308,9 @@ class AudioSwitch {
 
     private fun addAvailableAudioDevices(bluetoothHeadsetName: String?) {
         mutableAudioDevices.clear()
-        automaticSelectionOrder.forEach { audioDevice ->
+        preferredDeviceList.forEach { audioDevice ->
             when (audioDevice) {
-                is BluetoothHeadset -> {
+                BluetoothHeadset::class.java -> {
                 /*
                  * Since the there is a delay between receiving the ACTION_ACL_CONNECTED event and receiving
                  * the name of the connected device from querying the BluetoothHeadset proxy class, the
@@ -321,17 +321,17 @@ class AudioSwitch {
                         mutableAudioDevices.add(it)
                     }
                 }
-                is WiredHeadset -> {
+                WiredHeadset::class.java -> {
                     if (wiredHeadsetAvailable) {
                         mutableAudioDevices.add(WiredHeadset())
                     }
                 }
-                is Earpiece -> {
+                Earpiece::class.java -> {
                     if (audioDeviceManager.hasEarpiece() && !wiredHeadsetAvailable) {
                         mutableAudioDevices.add(Earpiece())
                     }
                 }
-                is Speakerphone -> {
+                Speakerphone::class.java -> {
                     if (audioDeviceManager.hasSpeakerphone()) {
                         mutableAudioDevices.add(Speakerphone())
                     }
