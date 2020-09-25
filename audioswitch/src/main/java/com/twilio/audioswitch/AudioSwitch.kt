@@ -135,7 +135,7 @@ class AudioSwitch {
             BluetoothAdapter.getDefaultAdapter(),
             audioDeviceManager)
     ) {
-        validateSelectionOrder(preferredDeviceList)
+        require(preferredDeviceList.isNotEmpty() && hasNoDuplicates(preferredDeviceList))
         this.logger = logger
         this.audioDeviceManager = audioDeviceManager
         this.wiredHeadsetReceiver = wiredHeadsetReceiver
@@ -241,11 +241,9 @@ class AudioSwitch {
         }
     }
 
-    private fun validateSelectionOrder(preferredDeviceList: List<Class<out AudioDevice>>) {
-        preferredDeviceList.run {
-            require(isNotEmpty() && size > 3)
-        }
-    }
+    private fun hasNoDuplicates(list: List<Class<out AudioDevice>>) =
+        list.groupingBy { it }.eachCount().filter { it.value > 1 }.isEmpty()
+
 
     private fun activate(audioDevice: AudioDevice) {
         when (audioDevice) {

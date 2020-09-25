@@ -432,8 +432,7 @@ class AudioSwitchTest : BaseTest() {
 
     fun invalidAutoDevicesParams() = arrayOf(
             listOf(),
-            listOf(WiredHeadset::class.java, Earpiece::class.java, Speakerphone::class.java),
-            listOf(AudioDevice.BluetoothHeadset::class.java, Earpiece::class.java, Earpiece::class.java, Speakerphone::class.java),
+            listOf(Speakerphone::class.java, AudioDevice.BluetoothHeadset::class.java, Earpiece::class.java, Speakerphone::class.java)
     )
 
     @Parameters(method = "invalidAutoDevicesParams")
@@ -482,5 +481,118 @@ class AudioSwitchTest : BaseTest() {
             assertThat(selectedAudioDevice,
                     equalTo(AudioDevice.BluetoothHeadset(secondBluetoothDevice.name)))
         }
+    }
+
+    fun devicePreferenceParams(): Array<Any>? {
+        return arrayOf(
+                arrayOf(
+                        listOf(
+                                Earpiece::class.java,
+                                AudioDevice.BluetoothHeadset::class.java,
+                                Speakerphone::class.java,
+                                WiredHeadset::class.java),
+                        Earpiece()
+                ),
+
+                arrayOf(
+                    listOf(Speakerphone::class.java),
+                    Speakerphone()
+                ),
+
+                arrayOf(
+                    listOf(AudioDevice.BluetoothHeadset::class.java, Speakerphone::class.java),
+                    Speakerphone()),
+
+                arrayOf(
+                    listOf(
+                            WiredHeadset::class.java,
+                            AudioDevice.BluetoothHeadset::class.java,
+                            Earpiece::class.java),
+                    Earpiece())
+        )
+    }
+
+    @Parameters(method = "devicePreferenceParams")
+    @Test
+    fun `when configuring a new preferred device list, the correct device should be automatically selected and activated`(
+            preferredDeviceList: List<Class<out AudioDevice>>,
+            expectedDeviceSelection: AudioDevice
+    ) {
+        audioSwitch = AudioSwitch(
+                context = context,
+                logger = logger,
+                audioDeviceManager = audioDeviceManager,
+                wiredHeadsetReceiver = wiredHeadsetReceiver,
+                headsetManager = headsetManager,
+                audioFocusChangeListener = defaultAudioFocusChangeListener,
+                preferredDeviceList = preferredDeviceList
+        )
+
+        audioSwitch.run {
+            start(this@AudioSwitchTest.audioDeviceChangeListener)
+
+            assertThat(selectedAudioDevice, equalTo(expectedDeviceSelection))
+            TODO("Assert activation")
+        }
+    }
+
+    @Parameters(method = "devicePreferenceParams")
+    @Test
+    fun `when configuring a new preferred device list, the earpiece and speakerphone should be available`(
+            preferredDeviceList: List<Class<out AudioDevice>>,
+            expectedDeviceSelection: AudioDevice
+    ) {
+        audioSwitch = AudioSwitch(
+                context = context,
+                logger = logger,
+                audioDeviceManager = audioDeviceManager,
+                wiredHeadsetReceiver = wiredHeadsetReceiver,
+                headsetManager = headsetManager,
+                audioFocusChangeListener = defaultAudioFocusChangeListener,
+                preferredDeviceList = preferredDeviceList
+        )
+
+        audioSwitch.run {
+            start(this@AudioSwitchTest.audioDeviceChangeListener)
+
+            assertThat(true,
+                    equalTo(availableAudioDevices.containsAll(listOf(Earpiece(), Speakerphone()))))
+        }
+    }
+
+    @Parameters(method = "")
+    @Test
+    fun `when configuring a new preferred device list, the correct device should be automatically selected and activated with a bluetooth headset connected`(
+            preferredDeviceList: List<Class<out AudioDevice>>,
+            expectedDeviceSelection: AudioDevice
+    ) {
+        TODO("Not yet implemented")
+    }
+
+    @Parameters(method = "")
+    @Test
+    fun `when configuring a new preferred device list, the default devices should be available with a bluetooth headset connected`(
+            preferredDeviceList: List<Class<out AudioDevice>>,
+            expectedDeviceSelection: AudioDevice
+    ) {
+        TODO("Not yet implemented")
+    }
+
+    @Parameters(method = "")
+    @Test
+    fun `when configuring a new preferred device list, the correct device should be automatically selected and activated with a wired headset connected`(
+            preferredDeviceList: List<Class<out AudioDevice>>,
+            expectedDeviceSelection: AudioDevice
+    ) {
+        TODO("Not yet implemented")
+    }
+
+    @Parameters(method = "")
+    @Test
+    fun `when configuring a new preferred device list, the default devices should be available with a wired headset connected`(
+            preferredDeviceList: List<Class<out AudioDevice>>,
+            expectedDeviceSelection: AudioDevice
+    ) {
+        TODO("Not yet implemented")
     }
 }
