@@ -66,6 +66,14 @@ private val commonTestCases = listOf(
         listOf(Speakerphone::class.java)
 )
 
+private fun buildParamsWithExpectedDevice(expectedDevices: List<AudioDevice>): Array<Any> {
+    return mutableListOf<Array<Any>>().apply {
+        commonTestCases.forEachIndexed { index, devices ->
+            add(arrayOf(devices, expectedDevices[index]))
+        }
+    }.toTypedArray()
+}
+
 class EarpieceSpeakerParams {
     companion object {
         @JvmStatic
@@ -85,11 +93,7 @@ class EarpieceSpeakerParams {
                     Earpiece(),
                     Speakerphone(),
             )
-            return mutableListOf<Array<Any>>().apply {
-                        commonTestCases.forEachIndexed { index, devices ->
-                            add(arrayOf(devices, expectedDevices[index]))
-                        }
-                    }.toTypedArray()
+            return buildParamsWithExpectedDevice(expectedDevices)
         }
     }
 }
@@ -113,11 +117,7 @@ class SpeakerParams {
                     Earpiece(),
                     Speakerphone(),
             )
-            return mutableListOf<Array<Any>>().apply {
-                commonTestCases.forEachIndexed { index, devices ->
-                    add(arrayOf(devices, expectedDevices[index]))
-                }
-            }.toTypedArray()
+            return buildParamsWithExpectedDevice(expectedDevices)
         }
     }
 }
@@ -141,11 +141,7 @@ class WiredHeadsetParams {
                     WiredHeadset(),
                     Speakerphone(),
             )
-            return mutableListOf<Array<Any>>().apply {
-                commonTestCases.forEachIndexed { index, devices ->
-                    add(arrayOf(devices, expectedDevices[index]))
-                }
-            }.toTypedArray()
+            return buildParamsWithExpectedDevice(expectedDevices)
         }
     }
 }
@@ -169,11 +165,7 @@ class BluetoothHeadsetParams {
                     Earpiece(),
                     Speakerphone(),
             )
-            return mutableListOf<Array<Any>>().apply {
-                commonTestCases.forEachIndexed { index, devices ->
-                    add(arrayOf(devices, expectedDevices[index]))
-                }
-            }.toTypedArray()
+            return buildParamsWithExpectedDevice(expectedDevices)
         }
     }
 }
