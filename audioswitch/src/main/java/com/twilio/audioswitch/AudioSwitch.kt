@@ -114,8 +114,7 @@ class AudioSwitch {
         context: Context,
         loggingEnabled: Boolean = false,
         audioFocusChangeListener: OnAudioFocusChangeListener = OnAudioFocusChangeListener {},
-        preferredDeviceList: List<Class<out AudioDevice>> = listOf(BluetoothHeadset::class.java, WiredHeadset::class.java,
-                Earpiece::class.java, Speakerphone::class.java)
+        preferredDeviceList: List<Class<out AudioDevice>> = defaultPreferredDeviceList,
     ) : this(context.applicationContext, Logger(loggingEnabled), audioFocusChangeListener,
             preferredDeviceList)
 
@@ -135,13 +134,27 @@ class AudioSwitch {
             BluetoothAdapter.getDefaultAdapter(),
             audioDeviceManager)
     ) {
-        require(preferredDeviceList.isNotEmpty() && hasNoDuplicates(preferredDeviceList))
         this.logger = logger
         this.audioDeviceManager = audioDeviceManager
         this.wiredHeadsetReceiver = wiredHeadsetReceiver
         this.bluetoothHeadsetManager = headsetManager
-        this.preferredDeviceList = preferredDeviceList
+        this.preferredDeviceList = getPreferredDeviceList(preferredDeviceList)
         logger.d(TAG, "AudioSwitch($VERSION)")
+    }
+
+    private fun getPreferredDeviceList(preferredDeviceList: List<Class<out AudioDevice>>):
+            List<Class<out AudioDevice>> {
+        require(preferredDeviceList.isNotEmpty() && hasNoDuplicates(preferredDeviceList))
+
+        return if(preferredDeviceList == defaultPreferredDeviceList) defaultPreferredDeviceList
+        else {
+            val result = defaultPreferredDeviceList.toMutableList()
+            result.remove(preferredDeviceList)
+            preferredDeviceList.forEachIndexed { index, device ->
+                result.add(index, device)
+            }
+            result
+        }
     }
 
     /**
@@ -365,5 +378,10 @@ class AudioSwitch {
          * The version of the AudioSwitch library.
          */
         const val VERSION = BuildConfig.VERSION_NAME
+
+        private val defaultPreferredDeviceList by lazy {
+            listOf(BluetoothHeadset::class.java,
+                    WiredHeadset::class.java, Earpiece::class.java, Speakerphone::class.java)
+        }
     }
 }

@@ -1,9 +1,6 @@
 package com.twilio.audioswitch
 
-import android.bluetooth.BluetoothDevice
-import android.bluetooth.BluetoothHeadset
 import android.bluetooth.BluetoothProfile
-import android.content.Intent
 import android.media.AudioManager
 import android.os.Handler
 import com.nhaarman.mockitokotlin2.any
@@ -15,9 +12,6 @@ import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import com.twilio.audioswitch.android.SystemClockWrapper
 import com.twilio.audioswitch.bluetooth.BluetoothScoJob
-import org.hamcrest.CoreMatchers.`is`
-import org.hamcrest.CoreMatchers.nullValue
-import org.hamcrest.MatcherAssert.assertThat
 
 const val DEVICE_NAME = "Bluetooth"
 
@@ -49,25 +43,6 @@ internal fun BaseTest.assertBluetoothHeadsetSetup() {
             BluetoothProfile.HEADSET
     )
     verify(context, times(2)).registerReceiver(eq(headsetManager), isA())
-}
-
-internal fun BaseTest.assertBluetoothHeadsetTeardown() {
-    assertThat(headsetManager.headsetListener, `is`(nullValue()))
-    verify(bluetoothAdapter).closeProfileProxy(BluetoothProfile.HEADSET, headsetProxy)
-    verify(context).unregisterReceiver(headsetManager)
-}
-
-internal fun BaseTest.simulateNewBluetoothHeadsetConnection(
-    bluetoothDevice: BluetoothDevice = expectedBluetoothDevice
-) {
-    val intent = mock<Intent> {
-        whenever(mock.action).thenReturn(BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED)
-        whenever(mock.getIntExtra(BluetoothHeadset.EXTRA_STATE, BluetoothHeadset.STATE_DISCONNECTED))
-                .thenReturn(BluetoothHeadset.STATE_CONNECTED)
-        whenever(mock.getParcelableExtra<BluetoothDevice>(BluetoothDevice.EXTRA_DEVICE))
-                .thenReturn(bluetoothDevice)
-    }
-    headsetManager.onReceive(context, intent)
 }
 
 fun createHeadset(name: String): AudioDevice.BluetoothHeadset = AudioDevice.BluetoothHeadset(name)

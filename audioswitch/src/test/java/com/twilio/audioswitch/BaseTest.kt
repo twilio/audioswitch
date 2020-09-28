@@ -4,9 +4,12 @@ import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothClass
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothHeadset
+import android.bluetooth.BluetoothProfile
 import android.content.Context
+import android.content.Intent
 import android.media.AudioManager.OnAudioFocusChangeListener
 import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import com.twilio.audioswitch.android.BuildWrapper
 import com.twilio.audioswitch.android.Logger
@@ -15,6 +18,11 @@ import com.twilio.audioswitch.wired.WiredHeadsetReceiver
 import com.twilio.audioswitch.AudioDevice.Earpiece
 import com.twilio.audioswitch.AudioDevice.Speakerphone
 import com.twilio.audioswitch.AudioDevice.WiredHeadset
+import com.twilio.audioswitch.wired.INTENT_STATE
+import com.twilio.audioswitch.wired.STATE_PLUGGED
+import com.twilio.audioswitch.wired.STATE_UNPLUGGED
+import org.hamcrest.CoreMatchers
+import org.hamcrest.MatcherAssert.assertThat
 
 open class BaseTest {
     internal val bluetoothClass = mock<BluetoothClass> {
@@ -55,4 +63,23 @@ open class BaseTest {
         audioFocusChangeListener = defaultAudioFocusChangeListener,
         preferredDeviceList = preferredDeviceList
     )
+
+    internal fun assertBluetoothHeadsetTeardown() {
+        assertThat(headsetManager.headsetListener, CoreMatchers.`is`(CoreMatchers.nullValue()))
+        verify(bluetoothAdapter).closeProfileProxy(BluetoothProfile.HEADSET, headsetProxy)
+        verify(context).unregisterReceiver(headsetManager)
+    }
+
+    internal fun simulateNewBluetoothHeadsetConnection(
+            bluetoothDevice: BluetoothDevice = expectedBluetoothDevice
+    ) {
+        val intent = mock<Intent> {
+            whenever(mock.action).thenReturn(BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED)
+            whenever(mock.getIntExtra(BluetoothHeadset.EXTRA_STATE, BluetoothHeadset.STATE_DISCONNECTED))
+                    .thenReturn(BluetoothHeadset.STATE_CONNECTED)
+            whenever(mock.getParcelableExtra<BluetoothDevice>(BluetoothDevice.EXTRA_DEVICE))
+                    .thenReturn(bluetoothDevice)
+        }
+        headsetManager.onReceive(context, intent)
+    }
 }

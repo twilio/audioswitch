@@ -3,6 +3,7 @@ package com.twilio.audioswitch
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothHeadset
 import android.bluetooth.BluetoothProfile
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.media.AudioFocusRequest
 import android.media.AudioManager
@@ -21,6 +22,9 @@ import com.twilio.audioswitch.AudioDevice.WiredHeadset
 import com.twilio.audioswitch.AudioSwitch.State.ACTIVATED
 import com.twilio.audioswitch.AudioSwitch.State.STARTED
 import com.twilio.audioswitch.AudioSwitch.State.STOPPED
+import com.twilio.audioswitch.wired.INTENT_STATE
+import com.twilio.audioswitch.wired.STATE_PLUGGED
+import com.twilio.audioswitch.wired.STATE_UNPLUGGED
 import junitparams.JUnitParamsRunner
 import junitparams.Parameters
 import org.hamcrest.CoreMatchers.`is`
@@ -483,40 +487,11 @@ class AudioSwitchTest : BaseTest() {
         }
     }
 
-    fun devicePreferenceParams(): Array<Any>? {
-        return arrayOf(
-                arrayOf(
-                        listOf(
-                                Earpiece::class.java,
-                                AudioDevice.BluetoothHeadset::class.java,
-                                Speakerphone::class.java,
-                                WiredHeadset::class.java),
-                        Earpiece()
-                ),
-
-                arrayOf(
-                    listOf(Speakerphone::class.java),
-                    Speakerphone()
-                ),
-
-                arrayOf(
-                    listOf(AudioDevice.BluetoothHeadset::class.java, Speakerphone::class.java),
-                    Speakerphone()),
-
-                arrayOf(
-                    listOf(
-                            WiredHeadset::class.java,
-                            AudioDevice.BluetoothHeadset::class.java,
-                            Earpiece::class.java),
-                    Earpiece())
-        )
-    }
-
-    @Parameters(method = "devicePreferenceParams")
+    @Parameters(source = EarpieceSpeakerParams::class)
     @Test
     fun `when configuring a new preferred device list, the correct device should be automatically selected and activated`(
             preferredDeviceList: List<Class<out AudioDevice>>,
-            expectedDeviceSelection: AudioDevice
+            expectedDevice: AudioDevice
     ) {
         audioSwitch = AudioSwitch(
                 context = context,
@@ -530,69 +505,138 @@ class AudioSwitchTest : BaseTest() {
 
         audioSwitch.run {
             start(this@AudioSwitchTest.audioDeviceChangeListener)
+            activate()
 
-            assertThat(selectedAudioDevice, equalTo(expectedDeviceSelection))
-            TODO("Assert activation")
+            assertThat(selectedAudioDevice, equalTo(expectedDevice))
+            assertActivated(expectedDevice)
         }
     }
 
-    @Parameters(method = "devicePreferenceParams")
-    @Test
-    fun `when configuring a new preferred device list, the earpiece and speakerphone should be available`(
-            preferredDeviceList: List<Class<out AudioDevice>>,
-            expectedDeviceSelection: AudioDevice
-    ) {
-        audioSwitch = AudioSwitch(
-                context = context,
-                logger = logger,
-                audioDeviceManager = audioDeviceManager,
-                wiredHeadsetReceiver = wiredHeadsetReceiver,
-                headsetManager = headsetManager,
-                audioFocusChangeListener = defaultAudioFocusChangeListener,
-                preferredDeviceList = preferredDeviceList
-        )
-
-        audioSwitch.run {
-            start(this@AudioSwitchTest.audioDeviceChangeListener)
-
-            assertThat(true,
-                    equalTo(availableAudioDevices.containsAll(listOf(Earpiece(), Speakerphone()))))
-        }
-    }
-
-    @Parameters(method = "")
-    @Test
-    fun `when configuring a new preferred device list, the correct device should be automatically selected and activated with a bluetooth headset connected`(
-            preferredDeviceList: List<Class<out AudioDevice>>,
-            expectedDeviceSelection: AudioDevice
-    ) {
-        TODO("Not yet implemented")
-    }
-
-    @Parameters(method = "")
-    @Test
-    fun `when configuring a new preferred device list, the default devices should be available with a bluetooth headset connected`(
-            preferredDeviceList: List<Class<out AudioDevice>>,
-            expectedDeviceSelection: AudioDevice
-    ) {
-        TODO("Not yet implemented")
-    }
-
-    @Parameters(method = "")
+    @Parameters(source = WiredHeadsetParams::class)
     @Test
     fun `when configuring a new preferred device list, the correct device should be automatically selected and activated with a wired headset connected`(
             preferredDeviceList: List<Class<out AudioDevice>>,
-            expectedDeviceSelection: AudioDevice
+            expectedDevice: AudioDevice
     ) {
-        TODO("Not yet implemented")
+        audioSwitch = AudioSwitch(
+                context = context,
+                logger = logger,
+                audioDeviceManager = audioDeviceManager,
+                wiredHeadsetReceiver = wiredHeadsetReceiver,
+                headsetManager = headsetManager,
+                audioFocusChangeListener = defaultAudioFocusChangeListener,
+                preferredDeviceList = preferredDeviceList
+        )
+
+        audioSwitch.run {
+            start(this@AudioSwitchTest.audioDeviceChangeListener)
+            simulateNewWiredHeadsetConnection()
+            activate()
+
+            assertThat(selectedAudioDevice, equalTo(expectedDevice))
+            assertActivated(expectedDevice)
+        }
     }
 
-    @Parameters(method = "")
+    @Parameters(source = BluetoothHeadsetParams::class)
     @Test
-    fun `when configuring a new preferred device list, the default devices should be available with a wired headset connected`(
+    fun `when configuring a new preferred device list, the correct device should be automatically selected and activated with a bluetooth headset connected`(
             preferredDeviceList: List<Class<out AudioDevice>>,
-            expectedDeviceSelection: AudioDevice
+            expectedDevice: AudioDevice
     ) {
-        TODO("Not yet implemented")
+        audioSwitch = AudioSwitch(
+                context = context,
+                logger = logger,
+                audioDeviceManager = audioDeviceManager,
+                wiredHeadsetReceiver = wiredHeadsetReceiver,
+                headsetManager = headsetManager,
+                audioFocusChangeListener = defaultAudioFocusChangeListener,
+                preferredDeviceList = preferredDeviceList
+        )
+
+        audioSwitch.run {
+            start(this@AudioSwitchTest.audioDeviceChangeListener)
+            simulateNewBluetoothHeadsetConnection()
+            activate()
+
+            assertThat(selectedAudioDevice, equalTo(expectedDevice))
+            assertActivated(expectedDevice)
+        }
+    }
+
+    @Parameters(source = DefaultDeviceParams::class)
+    @Test
+    fun `when configuring a new preferred device list, all connected devices should be available but earpiece when a wired headset is connected`(
+            preferredDeviceList: List<Class<out AudioDevice>>
+    ) {
+        audioSwitch = AudioSwitch(
+                context = context,
+                logger = logger,
+                audioDeviceManager = audioDeviceManager,
+                wiredHeadsetReceiver = wiredHeadsetReceiver,
+                headsetManager = headsetManager,
+                audioFocusChangeListener = defaultAudioFocusChangeListener,
+                preferredDeviceList = preferredDeviceList
+        )
+
+        audioSwitch.run {
+            start(this@AudioSwitchTest.audioDeviceChangeListener)
+            simulateNewBluetoothHeadsetConnection()
+            simulateNewWiredHeadsetConnection()
+
+            assertThat(availableAudioDevices.containsAll(listOf(AudioDevice.BluetoothHeadset(),
+                    WiredHeadset(), Speakerphone())),
+                    equalTo(true))
+        }
+    }
+
+    @Parameters(source = DefaultDeviceParams::class)
+    @Test
+    fun `when configuring a new preferred device list, all connected devices should be available but the wired headset`(
+            preferredDeviceList: List<Class<out AudioDevice>>
+    ) {
+        audioSwitch = AudioSwitch(
+                context = context,
+                logger = logger,
+                audioDeviceManager = audioDeviceManager,
+                wiredHeadsetReceiver = wiredHeadsetReceiver,
+                headsetManager = headsetManager,
+                audioFocusChangeListener = defaultAudioFocusChangeListener,
+                preferredDeviceList = preferredDeviceList
+        )
+
+        audioSwitch.run {
+            start(this@AudioSwitchTest.audioDeviceChangeListener)
+            simulateNewBluetoothHeadsetConnection()
+
+            assertThat(availableAudioDevices.containsAll(listOf(AudioDevice.BluetoothHeadset(),
+                    Earpiece(), Speakerphone())),
+                    equalTo(true))
+        }
+    }
+
+    private fun assertActivated(device: AudioDevice) {
+        val isSpeakerphoneOn = when(device) {
+            is AudioDevice.BluetoothHeadset -> {
+                verify(audioManager).startBluetoothSco()
+                false
+            }
+            is WiredHeadset, is Earpiece -> {
+                false
+            }
+            is Speakerphone -> {
+                true
+            }
+        }
+
+        verify(audioManager).isSpeakerphoneOn = isSpeakerphoneOn
+    }
+
+    private fun simulateNewWiredHeadsetConnection() {
+        val intent = mock<Intent> {
+            whenever(mock.getIntExtra(INTENT_STATE, STATE_UNPLUGGED))
+                    .thenReturn(STATE_PLUGGED)
+        }
+        wiredHeadsetReceiver.onReceive(context, intent)
     }
 }
