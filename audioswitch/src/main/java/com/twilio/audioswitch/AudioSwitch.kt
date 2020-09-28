@@ -149,7 +149,7 @@ class AudioSwitch {
         return if(preferredDeviceList == defaultPreferredDeviceList) defaultPreferredDeviceList
         else {
             val result = defaultPreferredDeviceList.toMutableList()
-            result.remove(preferredDeviceList)
+            result.removeAll(preferredDeviceList)
             preferredDeviceList.forEachIndexed { index, device ->
                 result.add(index, device)
             }

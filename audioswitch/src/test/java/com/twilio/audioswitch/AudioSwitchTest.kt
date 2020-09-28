@@ -584,6 +584,7 @@ class AudioSwitchTest : BaseTest() {
             simulateNewBluetoothHeadsetConnection()
             simulateNewWiredHeadsetConnection()
 
+            assertThat(availableAudioDevices.size, equalTo(3))
             assertThat(availableAudioDevices.containsAll(listOf(AudioDevice.BluetoothHeadset(),
                     WiredHeadset(), Speakerphone())),
                     equalTo(true))
@@ -609,6 +610,7 @@ class AudioSwitchTest : BaseTest() {
             start(this@AudioSwitchTest.audioDeviceChangeListener)
             simulateNewBluetoothHeadsetConnection()
 
+            assertThat(availableAudioDevices.size, equalTo(3))
             assertThat(availableAudioDevices.containsAll(listOf(AudioDevice.BluetoothHeadset(),
                     Earpiece(), Speakerphone())),
                     equalTo(true))
