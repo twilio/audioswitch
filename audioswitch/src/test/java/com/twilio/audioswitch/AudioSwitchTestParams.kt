@@ -74,6 +74,14 @@ private fun buildParamsWithExpectedDevice(expectedDevices: List<AudioDevice>): A
     }.toTypedArray()
 }
 
+private fun buildParamsWithExpectedDeviceAndVerificationCount(expectedDevices: List<AudioDevice>, speakerPhoneVerificationParams: List<Int>): Array<Any> {
+    return mutableListOf<Array<Any>>().apply {
+        commonTestCases.forEachIndexed { index, devices ->
+            add(arrayOf(devices, expectedDevices[index], speakerPhoneVerificationParams[index]))
+        }
+    }.toTypedArray()
+}
+
 class EarpieceSpeakerParams {
     companion object {
         @JvmStatic
@@ -141,7 +149,22 @@ class WiredHeadsetParams {
                     WiredHeadset(),
                     Speakerphone()
             )
-            return buildParamsWithExpectedDevice(expectedDevices)
+            val speakerPhoneVerificationParams = listOf(
+                    2,
+                    2,
+                    2,
+                    2,
+                    2,
+                    1,
+                    2,
+                    1,
+                    2,
+                    2,
+                    2,
+                    2,
+                    2
+            )
+            return buildParamsWithExpectedDeviceAndVerificationCount(expectedDevices, speakerPhoneVerificationParams)
         }
     }
 }
@@ -165,7 +188,22 @@ class BluetoothHeadsetParams {
                     Earpiece(),
                     Speakerphone()
             )
-            return buildParamsWithExpectedDevice(expectedDevices)
+            val speakerPhoneVerificationParams = listOf(
+                    2,
+                    2,
+                    2,
+                    2,
+                    2,
+                    2,
+                    2,
+                    1,
+                    2,
+                    1,
+                    1,
+                    2,
+                    2
+            )
+            return buildParamsWithExpectedDeviceAndVerificationCount(expectedDevices, speakerPhoneVerificationParams)
         }
     }
 }

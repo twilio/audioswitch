@@ -57,10 +57,6 @@ class AudioSwitch {
     internal val wiredDeviceConnectionListener = object : WiredDeviceConnectionListener {
         override fun onDeviceConnected() {
             wiredHeadsetAvailable = true
-            logger.d(TAG, "Wired Headset available")
-            if (this@AudioSwitch.state == ACTIVATED) {
-                userSelectedDevice = WiredHeadset()
-            }
             enumerateDevices()
         }
 

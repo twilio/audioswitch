@@ -516,7 +516,8 @@ class AudioSwitchTest : BaseTest() {
     @Test
     fun `when configuring a new preferred device list, the correct device should be automatically selected and activated with a wired headset connected`(
         preferredDeviceList: List<Class<out AudioDevice>>,
-        expectedDevice: AudioDevice
+        expectedDevice: AudioDevice,
+        verificationCount: Int
     ) {
         audioSwitch = AudioSwitch(
                 context = context,
@@ -534,7 +535,7 @@ class AudioSwitchTest : BaseTest() {
             simulateNewWiredHeadsetConnection()
 
             assertThat(selectedAudioDevice, equalTo(expectedDevice))
-            assertActivated(expectedDevice)
+            assertActivated(expectedDevice, verificationCount)
         }
     }
 
@@ -542,7 +543,8 @@ class AudioSwitchTest : BaseTest() {
     @Test
     fun `when configuring a new preferred device list, the correct device should be automatically selected and activated with a bluetooth headset connected`(
         preferredDeviceList: List<Class<out AudioDevice>>,
-        expectedDevice: AudioDevice
+        expectedDevice: AudioDevice,
+        verificationCount: Int
     ) {
         audioSwitch = AudioSwitch(
                 context = context,
@@ -560,7 +562,7 @@ class AudioSwitchTest : BaseTest() {
             simulateNewBluetoothHeadsetConnection()
 
             assertThat(selectedAudioDevice, equalTo(expectedDevice))
-            assertActivated(expectedDevice)
+            assertActivated(expectedDevice, verificationCount)
         }
     }
 
@@ -619,7 +621,7 @@ class AudioSwitchTest : BaseTest() {
         }
     }
 
-    private fun assertActivated(device: AudioDevice) {
+    private fun assertActivated(device: AudioDevice, speakerphoneVerificationCount: Int = 1) {
         val isSpeakerphoneOn = when (device) {
             is AudioDevice.BluetoothHeadset -> {
                 verify(audioManager).startBluetoothSco()
@@ -633,7 +635,7 @@ class AudioSwitchTest : BaseTest() {
             }
         }
 
-        verify(audioManager).isSpeakerphoneOn = isSpeakerphoneOn
+        verify(audioManager, times(speakerphoneVerificationCount)).isSpeakerphoneOn = isSpeakerphoneOn
     }
 
     private fun simulateNewWiredHeadsetConnection() {
