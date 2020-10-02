@@ -13,6 +13,7 @@ import com.twilio.audioswitch.AudioSwitch.State.ACTIVATED
 import com.twilio.audioswitch.AudioSwitch.State.STARTED
 import com.twilio.audioswitch.AudioSwitch.State.STOPPED
 import com.twilio.audioswitch.android.Logger
+import com.twilio.audioswitch.android.ProductionLogger
 import com.twilio.audioswitch.bluetooth.BluetoothHeadsetConnectionListener
 import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager
 import com.twilio.audioswitch.wired.WiredDeviceConnectionListener
@@ -28,7 +29,7 @@ private const val TAG = "AudioSwitch"
  */
 class AudioSwitch {
 
-    private var logger: Logger = Logger()
+    private var logger: Logger = ProductionLogger()
     private val audioDeviceManager: AudioDeviceManager
     private val wiredHeadsetReceiver: WiredHeadsetReceiver
     internal var audioDeviceChangeListener: AudioDeviceChangeListener? = null
@@ -111,8 +112,8 @@ class AudioSwitch {
         loggingEnabled: Boolean = false,
         audioFocusChangeListener: OnAudioFocusChangeListener = OnAudioFocusChangeListener {},
         vararg preferredDeviceList: Class<out AudioDevice> = defaultPreferredDeviceList
-    ) : this(context = context.applicationContext, logger = Logger(loggingEnabled),
-            audioFocusChangeListener = audioFocusChangeListener, preferredDeviceList = preferredDeviceList)
+    ) : this(context.applicationContext, ProductionLogger(loggingEnabled), audioFocusChangeListener,
+            preferredDeviceList)
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     internal constructor(
@@ -136,6 +137,7 @@ class AudioSwitch {
         this.bluetoothHeadsetManager = headsetManager
         this.preferredDeviceList = getPreferredDeviceList(preferredDeviceList)
         logger.d(TAG, "AudioSwitch($VERSION)")
+        logger.d(TAG, "Preferred device list = ${this.preferredDeviceList.map { it.simpleName }}")
     }
 
     private fun getPreferredDeviceList(preferredDeviceList: Array<out Class<out AudioDevice>>):

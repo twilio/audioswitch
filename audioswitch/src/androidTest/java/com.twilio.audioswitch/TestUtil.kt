@@ -13,7 +13,7 @@ import com.twilio.audioswitch.android.BuildWrapper
 import com.twilio.audioswitch.android.DEVICE_NAME
 import com.twilio.audioswitch.android.FakeBluetoothIntentProcessor
 import com.twilio.audioswitch.android.HEADSET_NAME
-import com.twilio.audioswitch.android.Logger
+import com.twilio.audioswitch.android.ProductionLogger
 import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager
 import com.twilio.audioswitch.wired.WiredHeadsetReceiver
 import java.util.concurrent.TimeoutException
@@ -22,7 +22,7 @@ internal fun setupFakeAudioSwitch(context: Context):
         Pair<AudioSwitch, BluetoothHeadsetManager> {
 
     val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
-    val logger = Logger()
+    val logger = ProductionLogger(true)
     val audioDeviceManager =
             AudioDeviceManager(context,
                     logger,
