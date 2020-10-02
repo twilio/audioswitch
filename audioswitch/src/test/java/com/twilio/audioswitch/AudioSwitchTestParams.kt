@@ -91,7 +91,7 @@ class EarpieceSpeakerParams {
                     Speakerphone(),
                     Speakerphone(),
                     Earpiece(),
-                    Speakerphone(),
+                    Speakerphone()
             )
             return buildParamsWithExpectedDevice(expectedDevices)
         }
@@ -115,7 +115,7 @@ class SpeakerParams {
                     Speakerphone(),
                     Speakerphone(),
                     Earpiece(),
-                    Speakerphone(),
+                    Speakerphone()
             )
             return buildParamsWithExpectedDevice(expectedDevices)
         }
@@ -139,7 +139,7 @@ class WiredHeadsetParams {
                     Speakerphone(),
                     Speakerphone(),
                     WiredHeadset(),
-                    Speakerphone(),
+                    Speakerphone()
             )
             return buildParamsWithExpectedDevice(expectedDevices)
         }
@@ -163,7 +163,7 @@ class BluetoothHeadsetParams {
                     BluetoothHeadset(),
                     BluetoothHeadset(),
                     Earpiece(),
-                    Speakerphone(),
+                    Speakerphone()
             )
             return buildParamsWithExpectedDevice(expectedDevices)
         }

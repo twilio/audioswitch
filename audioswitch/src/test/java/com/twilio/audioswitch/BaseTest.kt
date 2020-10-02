@@ -11,16 +11,13 @@ import android.media.AudioManager.OnAudioFocusChangeListener
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
+import com.twilio.audioswitch.AudioDevice.Earpiece
+import com.twilio.audioswitch.AudioDevice.Speakerphone
+import com.twilio.audioswitch.AudioDevice.WiredHeadset
 import com.twilio.audioswitch.android.BuildWrapper
 import com.twilio.audioswitch.android.Logger
 import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager
 import com.twilio.audioswitch.wired.WiredHeadsetReceiver
-import com.twilio.audioswitch.AudioDevice.Earpiece
-import com.twilio.audioswitch.AudioDevice.Speakerphone
-import com.twilio.audioswitch.AudioDevice.WiredHeadset
-import com.twilio.audioswitch.wired.INTENT_STATE
-import com.twilio.audioswitch.wired.STATE_PLUGGED
-import com.twilio.audioswitch.wired.STATE_UNPLUGGED
 import org.hamcrest.CoreMatchers
 import org.hamcrest.MatcherAssert.assertThat
 
@@ -71,7 +68,7 @@ open class BaseTest {
     }
 
     internal fun simulateNewBluetoothHeadsetConnection(
-            bluetoothDevice: BluetoothDevice = expectedBluetoothDevice
+        bluetoothDevice: BluetoothDevice = expectedBluetoothDevice
     ) {
         val intent = mock<Intent> {
             whenever(mock.action).thenReturn(BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED)

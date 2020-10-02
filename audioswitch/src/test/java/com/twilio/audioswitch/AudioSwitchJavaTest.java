@@ -1,30 +1,26 @@
 package com.twilio.audioswitch;
 
-import android.content.pm.PackageManager;
-
-import com.twilio.audioswitch.AudioDevice.BluetoothHeadset;
-import com.twilio.audioswitch.AudioDevice.Earpiece;
-import com.twilio.audioswitch.AudioDevice.Speakerphone;
-import com.twilio.audioswitch.AudioDevice.WiredHeadset;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import kotlin.Unit;
-import kotlin.jvm.functions.Function2;
-
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+
+import android.content.pm.PackageManager;
+import com.twilio.audioswitch.AudioDevice.BluetoothHeadset;
+import com.twilio.audioswitch.AudioDevice.Earpiece;
+import com.twilio.audioswitch.AudioDevice.Speakerphone;
+import com.twilio.audioswitch.AudioDevice.WiredHeadset;
+import java.util.ArrayList;
+import java.util.List;
+import kotlin.Unit;
+import kotlin.jvm.functions.Function2;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class AudioSwitchJavaTest extends BaseTest {
@@ -131,14 +127,15 @@ public class AudioSwitchJavaTest extends BaseTest {
         preferredDeviceList.add(Earpiece.class);
         preferredDeviceList.add(WiredHeadset.class);
         preferredDeviceList.add(BluetoothHeadset.class);
-        javaAudioSwitch = new AudioSwitch(
-                getContext$audioswitch_debug(),
-                getLogger$audioswitch_debug(),
-                getDefaultAudioFocusChangeListener$audioswitch_debug(),
-                preferredDeviceList,
-                getAudioDeviceManager$audioswitch_debug(),
-                getWiredHeadsetReceiver$audioswitch_debug(),
-                getHeadsetManager$audioswitch_debug());
+        javaAudioSwitch =
+                new AudioSwitch(
+                        getContext$audioswitch_debug(),
+                        getLogger$audioswitch_debug(),
+                        getDefaultAudioFocusChangeListener$audioswitch_debug(),
+                        preferredDeviceList,
+                        getAudioDeviceManager$audioswitch_debug(),
+                        getWiredHeadsetReceiver$audioswitch_debug(),
+                        getHeadsetManager$audioswitch_debug());
 
         startAudioSwitch();
 

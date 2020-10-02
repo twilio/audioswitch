@@ -114,7 +114,7 @@ class AudioSwitch {
         context: Context,
         loggingEnabled: Boolean = false,
         audioFocusChangeListener: OnAudioFocusChangeListener = OnAudioFocusChangeListener {},
-        preferredDeviceList: List<Class<out AudioDevice>> = defaultPreferredDeviceList,
+        preferredDeviceList: List<Class<out AudioDevice>> = defaultPreferredDeviceList
     ) : this(context.applicationContext, Logger(loggingEnabled), audioFocusChangeListener,
             preferredDeviceList)
 
@@ -146,7 +146,7 @@ class AudioSwitch {
             List<Class<out AudioDevice>> {
         require(preferredDeviceList.isNotEmpty() && hasNoDuplicates(preferredDeviceList))
 
-        return if(preferredDeviceList == defaultPreferredDeviceList) defaultPreferredDeviceList
+        return if (preferredDeviceList == defaultPreferredDeviceList) defaultPreferredDeviceList
         else {
             val result = defaultPreferredDeviceList.toMutableList()
             result.removeAll(preferredDeviceList)
@@ -257,7 +257,6 @@ class AudioSwitch {
     private fun hasNoDuplicates(list: List<Class<out AudioDevice>>) =
         list.groupingBy { it }.eachCount().filter { it.value > 1 }.isEmpty()
 
-
     private fun activate(audioDevice: AudioDevice) {
         when (audioDevice) {
             is BluetoothHeadset -> {
@@ -355,7 +354,7 @@ class AudioSwitch {
 
     private fun userSelectedDevicePresent(audioDevices: List<AudioDevice>) =
             userSelectedDevice?.let { selectedDevice ->
-                if(selectedDevice is BluetoothHeadset) {
+                if (selectedDevice is BluetoothHeadset) {
                     // Match any bluetooth headset as a new one may have been connected
                     audioDevices.find { it is BluetoothHeadset }?.let { newHeadset ->
                         userSelectedDevice = newHeadset

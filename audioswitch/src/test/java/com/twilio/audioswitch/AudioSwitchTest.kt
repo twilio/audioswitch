@@ -442,7 +442,7 @@ class AudioSwitchTest : BaseTest() {
     @Parameters(method = "invalidAutoDevicesParams")
     @Test(expected = IllegalArgumentException::class)
     fun `constructor should throw IllegalArgumentException for invalid automatic device selection list`(
-            preferredDeviceList: List<Class<out AudioDevice>>
+        preferredDeviceList: List<Class<out AudioDevice>>
     ) {
         audioSwitch = AudioSwitch(
                 context = context,
@@ -490,8 +490,8 @@ class AudioSwitchTest : BaseTest() {
     @Parameters(source = EarpieceSpeakerParams::class)
     @Test
     fun `when configuring a new preferred device list, the correct device should be automatically selected and activated`(
-            preferredDeviceList: List<Class<out AudioDevice>>,
-            expectedDevice: AudioDevice
+        preferredDeviceList: List<Class<out AudioDevice>>,
+        expectedDevice: AudioDevice
     ) {
         audioSwitch = AudioSwitch(
                 context = context,
@@ -515,8 +515,8 @@ class AudioSwitchTest : BaseTest() {
     @Parameters(source = WiredHeadsetParams::class)
     @Test
     fun `when configuring a new preferred device list, the correct device should be automatically selected and activated with a wired headset connected`(
-            preferredDeviceList: List<Class<out AudioDevice>>,
-            expectedDevice: AudioDevice
+        preferredDeviceList: List<Class<out AudioDevice>>,
+        expectedDevice: AudioDevice
     ) {
         audioSwitch = AudioSwitch(
                 context = context,
@@ -530,8 +530,8 @@ class AudioSwitchTest : BaseTest() {
 
         audioSwitch.run {
             start(this@AudioSwitchTest.audioDeviceChangeListener)
-            simulateNewWiredHeadsetConnection()
             activate()
+            simulateNewWiredHeadsetConnection()
 
             assertThat(selectedAudioDevice, equalTo(expectedDevice))
             assertActivated(expectedDevice)
@@ -541,8 +541,8 @@ class AudioSwitchTest : BaseTest() {
     @Parameters(source = BluetoothHeadsetParams::class)
     @Test
     fun `when configuring a new preferred device list, the correct device should be automatically selected and activated with a bluetooth headset connected`(
-            preferredDeviceList: List<Class<out AudioDevice>>,
-            expectedDevice: AudioDevice
+        preferredDeviceList: List<Class<out AudioDevice>>,
+        expectedDevice: AudioDevice
     ) {
         audioSwitch = AudioSwitch(
                 context = context,
@@ -556,8 +556,8 @@ class AudioSwitchTest : BaseTest() {
 
         audioSwitch.run {
             start(this@AudioSwitchTest.audioDeviceChangeListener)
-            simulateNewBluetoothHeadsetConnection()
             activate()
+            simulateNewBluetoothHeadsetConnection()
 
             assertThat(selectedAudioDevice, equalTo(expectedDevice))
             assertActivated(expectedDevice)
@@ -567,7 +567,7 @@ class AudioSwitchTest : BaseTest() {
     @Parameters(source = DefaultDeviceParams::class)
     @Test
     fun `when configuring a new preferred device list, all connected devices should be available but earpiece when a wired headset is connected`(
-            preferredDeviceList: List<Class<out AudioDevice>>
+        preferredDeviceList: List<Class<out AudioDevice>>
     ) {
         audioSwitch = AudioSwitch(
                 context = context,
@@ -581,6 +581,7 @@ class AudioSwitchTest : BaseTest() {
 
         audioSwitch.run {
             start(this@AudioSwitchTest.audioDeviceChangeListener)
+            activate()
             simulateNewBluetoothHeadsetConnection()
             simulateNewWiredHeadsetConnection()
 
@@ -594,7 +595,7 @@ class AudioSwitchTest : BaseTest() {
     @Parameters(source = DefaultDeviceParams::class)
     @Test
     fun `when configuring a new preferred device list, all connected devices should be available but the wired headset`(
-            preferredDeviceList: List<Class<out AudioDevice>>
+        preferredDeviceList: List<Class<out AudioDevice>>
     ) {
         audioSwitch = AudioSwitch(
                 context = context,
@@ -608,6 +609,7 @@ class AudioSwitchTest : BaseTest() {
 
         audioSwitch.run {
             start(this@AudioSwitchTest.audioDeviceChangeListener)
+            activate()
             simulateNewBluetoothHeadsetConnection()
 
             assertThat(availableAudioDevices.size, equalTo(3))
@@ -618,7 +620,7 @@ class AudioSwitchTest : BaseTest() {
     }
 
     private fun assertActivated(device: AudioDevice) {
-        val isSpeakerphoneOn = when(device) {
+        val isSpeakerphoneOn = when (device) {
             is AudioDevice.BluetoothHeadset -> {
                 verify(audioManager).startBluetoothSco()
                 false
