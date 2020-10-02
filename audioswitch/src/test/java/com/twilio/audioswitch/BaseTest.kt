@@ -43,7 +43,7 @@ open class BaseTest {
     internal var handler = setupScoHandlerMock()
     internal var systemClockWrapper = setupSystemClockMock()
     internal val headsetProxy = mock<BluetoothHeadset>()
-    internal val preferredDeviceList = listOf(AudioDevice.BluetoothHeadset::class.java, WiredHeadset::class.java,
+    internal val preferredDeviceList = arrayOf(AudioDevice.BluetoothHeadset::class.java, WiredHeadset::class.java,
             Earpiece::class.java, Speakerphone::class.java)
     internal var headsetManager =
         BluetoothHeadsetManager(

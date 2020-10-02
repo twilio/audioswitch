@@ -40,7 +40,7 @@ internal fun setupFakeAudioSwitch(context: Context):
     return Pair(AudioSwitch(context,
         logger,
             {},
-        listOf(AudioDevice.BluetoothHeadset::class.java, WiredHeadset::class.java,
+        arrayOf(AudioDevice.BluetoothHeadset::class.java, WiredHeadset::class.java,
                 Earpiece::class.java, Speakerphone::class.java),
         audioDeviceManager,
         wiredHeadsetReceiver,

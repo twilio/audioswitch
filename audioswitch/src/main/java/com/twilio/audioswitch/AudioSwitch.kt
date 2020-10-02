@@ -37,7 +37,7 @@ class AudioSwitch {
     private var wiredHeadsetAvailable = false
     private val mutableAudioDevices = ArrayList<AudioDevice>()
     private var bluetoothHeadsetManager: BluetoothHeadsetManager? = null
-    private val preferredDeviceList: List<Class<out AudioDevice>>
+    private val preferredDeviceList: Array<Class<out AudioDevice>>
 
     internal var state: State = STOPPED
     internal enum class State {
@@ -110,16 +110,16 @@ class AudioSwitch {
         context: Context,
         loggingEnabled: Boolean = false,
         audioFocusChangeListener: OnAudioFocusChangeListener = OnAudioFocusChangeListener {},
-        preferredDeviceList: List<Class<out AudioDevice>> = defaultPreferredDeviceList
-    ) : this(context.applicationContext, Logger(loggingEnabled), audioFocusChangeListener,
-            preferredDeviceList)
+        vararg preferredDeviceList: Class<out AudioDevice> = defaultPreferredDeviceList
+    ) : this(context = context.applicationContext, logger = Logger(loggingEnabled),
+            audioFocusChangeListener = audioFocusChangeListener, preferredDeviceList = preferredDeviceList)
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     internal constructor(
         context: Context,
         logger: Logger,
         audioFocusChangeListener: OnAudioFocusChangeListener,
-        preferredDeviceList: List<Class<out AudioDevice>>,
+        preferredDeviceList: Array<out Class<out AudioDevice>>,
         audioDeviceManager: AudioDeviceManager = AudioDeviceManager(context,
             logger,
             context.getSystemService(Context.AUDIO_SERVICE) as AudioManager,
@@ -138,18 +138,18 @@ class AudioSwitch {
         logger.d(TAG, "AudioSwitch($VERSION)")
     }
 
-    private fun getPreferredDeviceList(preferredDeviceList: List<Class<out AudioDevice>>):
-            List<Class<out AudioDevice>> {
+    private fun getPreferredDeviceList(preferredDeviceList: Array<out Class<out AudioDevice>>):
+            Array<Class<out AudioDevice>> {
         require(preferredDeviceList.isNotEmpty() && hasNoDuplicates(preferredDeviceList))
 
-        return if (preferredDeviceList == defaultPreferredDeviceList) defaultPreferredDeviceList
+        return if (preferredDeviceList.contentEquals(defaultPreferredDeviceList)) defaultPreferredDeviceList
         else {
             val result = defaultPreferredDeviceList.toMutableList()
             result.removeAll(preferredDeviceList)
             preferredDeviceList.forEachIndexed { index, device ->
                 result.add(index, device)
             }
-            result
+            result.toTypedArray()
         }
     }
 
@@ -250,7 +250,7 @@ class AudioSwitch {
         }
     }
 
-    private fun hasNoDuplicates(list: List<Class<out AudioDevice>>) =
+    private fun hasNoDuplicates(list: Array<out Class<out AudioDevice>>) =
         list.groupingBy { it }.eachCount().filter { it.value > 1 }.isEmpty()
 
     private fun activate(audioDevice: AudioDevice) {
@@ -375,7 +375,7 @@ class AudioSwitch {
         const val VERSION = BuildConfig.VERSION_NAME
 
         private val defaultPreferredDeviceList by lazy {
-            listOf(BluetoothHeadset::class.java,
+            arrayOf(BluetoothHeadset::class.java,
                     WiredHeadset::class.java, Earpiece::class.java, Speakerphone::class.java)
         }
     }
