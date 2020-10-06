@@ -4,9 +4,10 @@ import androidx.test.annotation.UiThreadTest
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
 import com.twilio.audioswitch.AudioDevice.Earpiece
+import com.twilio.audioswitch.AudioDevice.Speakerphone
+import com.twilio.audioswitch.AudioDevice.WiredHeadset
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.MatcherAssert.assertThat
-import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -17,20 +18,53 @@ class AutomaticDeviceSelectionTest {
     @UiThreadTest
     @Test
     fun `it_should_select_the_bluetooth_audio_device_by_default`() {
-        val (audioSwitch, bluetoothHeadsetReceiver) = setupFakeAudioSwitch(getInstrumentationContext())
+        val context = getInstrumentationContext()
+        val (audioSwitch, bluetoothHeadsetReceiver, wiredHeadsetReceiver) = setupFakeAudioSwitch(context)
 
         audioSwitch.start { _, _ -> }
-        simulateBluetoothSystemIntent(getInstrumentationContext(), bluetoothHeadsetReceiver)
+        simulateBluetoothSystemIntent(context, bluetoothHeadsetReceiver)
+        simulateWiredHeadsetSystemIntent(context, wiredHeadsetReceiver)
 
-        assertEquals("Fake Headset", audioSwitch.selectedAudioDevice!!.name)
+        assertThat(audioSwitch.selectedAudioDevice!! is AudioDevice.BluetoothHeadset, equalTo(true))
+
+        audioSwitch.activate()
+    }
+
+    @UiThreadTest
+    @Test
+    fun `it_should_select_the_wired_headset_by_default`() {
+        val context = getInstrumentationContext()
+        val (audioSwitch, bluetoothHeadsetReceiver, wiredHeadsetReceiver) =
+                setupFakeAudioSwitch(context, WiredHeadset::class.java)
+
+        audioSwitch.start { _, _ -> }
+        simulateBluetoothSystemIntent(context, bluetoothHeadsetReceiver)
+        simulateWiredHeadsetSystemIntent(context, wiredHeadsetReceiver)
+
+        assertThat(audioSwitch.selectedAudioDevice!! is WiredHeadset, equalTo(true))
     }
 
     @UiThreadTest
     @Test
     fun `it_should_select_the_earpiece_audio_device_by_default`() {
-        val audioSwitch = AudioSwitch(getInstrumentationContext())
+        val context = getInstrumentationContext()
+        val (audioSwitch, bluetoothHeadsetReceiver) =
+                setupFakeAudioSwitch(context, Earpiece::class.java)
         audioSwitch.start { _, _ -> }
+        simulateBluetoothSystemIntent(context, bluetoothHeadsetReceiver)
 
-        assertThat(audioSwitch.selectedAudioDevice is Earpiece, equalTo(true))
+        assertThat(audioSwitch.selectedAudioDevice!! is Earpiece, equalTo(true))
+    }
+
+    @UiThreadTest
+    @Test
+    fun `it_should_select_the_speakerphone_audio_device_by_default`() {
+        val context = getInstrumentationContext()
+        val (audioSwitch, bluetoothHeadsetReceiver) =
+                setupFakeAudioSwitch(context, Speakerphone::class.java)
+        audioSwitch.start { _, _ -> }
+        simulateBluetoothSystemIntent(context, bluetoothHeadsetReceiver)
+
+        assertThat(audioSwitch.selectedAudioDevice!! is Speakerphone, equalTo(true))
     }
 }
