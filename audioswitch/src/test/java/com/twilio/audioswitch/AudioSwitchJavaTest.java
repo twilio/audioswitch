@@ -33,7 +33,7 @@ public class AudioSwitchJavaTest extends BaseTest {
         javaAudioSwitch =
                 new AudioSwitch(
                         getContext$audioswitch_debug(),
-                        getLogger$audioswitch_debug(),
+                        new UnitTestLogger(false),
                         getDefaultAudioFocusChangeListener$audioswitch_debug(),
                         getPreferredDeviceList$audioswitch_debug(),
                         getAudioDeviceManager$audioswitch_debug(),
