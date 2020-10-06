@@ -105,9 +105,8 @@ class AudioSwitch {
      * @param loggingEnabled Toggle whether logging is enabled. This argument is false by default.
      * @param audioFocusChangeListener A listener that is invoked when the system audio focus is updated.
      * Note that updates are only sent to the listener after [activate] has been called.
-     * @param preferredDevices The order in which [AudioSwitch] automatically activates an [AudioDevice] when
-     * in the activated state as a result of calling [activate]. This list is ignored if the
-     * [selectedAudioDevice] is not null.
+     * @param preferredDevices The order in which [AudioSwitch] automatically selects and activates
+     * an [AudioDevice]. This parameter is ignored if the [selectedAudioDevice] is not null.
      *
      * The default preferred [AudioDevice] order is the following:
      *
