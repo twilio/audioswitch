@@ -113,7 +113,7 @@ class AudioSwitch {
      *
      * [BluetoothHeadset], [WiredHeadset], [Earpiece], [Speakerphone]
      *
-     * [preferredDevices] are added to the top of the default list. For example, if [preferredDevices]
+     * [preferredDevices] are added to the front of the default list. For example, if [preferredDevices]
      * is [Speakerphone] and [BluetoothHeadset], then the new preferred audio
      * device list will be:
      *
