@@ -103,17 +103,30 @@ class AudioSwitch {
      *
      * @param context An Android Context.
      * @param loggingEnabled Toggle whether logging is enabled. This argument is false by default.
-     * @param audioFocusChangeListener A listener that is invoked when the system audio focus is
-     * updated. Note that updates are only sent to the listener after [activate] has been called.
+     * @param audioFocusChangeListener A listener that is invoked when the system audio focus is updated.
+     * Note that updates are only sent to the listener after [activate] has been called.
+     * @param preferredDevices The order in which [AudioSwitch] automatically activates an [AudioDevice] when
+     * in the activated state as a result of calling [activate]. This list is ignored if the
+     * [selectedAudioDevice] is not null.
+     *
+     * The default preferred [AudioDevice] order is the following:
+     *
+     * [BluetoothHeadset], [WiredHeadset], [Earpiece], [Speakerphone]
+     *
+     * [preferredDevices] are added to the top of the default list. For example, if [preferredDevices]
+     * is [Speakerphone] and [BluetoothHeadset], then the new preferred audio
+     * device list will be:
+     *
+     * [Speakerphone], [BluetoothHeadset], [WiredHeadset], [Earpiece].
      */
     @JvmOverloads
     constructor(
         context: Context,
         loggingEnabled: Boolean = false,
         audioFocusChangeListener: OnAudioFocusChangeListener = OnAudioFocusChangeListener {},
-        vararg preferredDeviceList: Class<out AudioDevice> = defaultPreferredDeviceList
+        vararg preferredDevices: Class<out AudioDevice> = defaultPreferredDeviceList
     ) : this(context.applicationContext, ProductionLogger(loggingEnabled), audioFocusChangeListener,
-            preferredDeviceList)
+            preferredDevices)
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     internal constructor(
