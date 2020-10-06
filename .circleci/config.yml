@@ -168,12 +168,12 @@ workflows:
           requires:
             - build-audioswitch
             - lint
-#            - check-format
+            - check-format
       - integration-tests:
           requires:
             - build-audioswitch
             - lint
-#            - check-format
+            - check-format
       - publish-pre-release:
           filters:
             branches:
