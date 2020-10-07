@@ -12,6 +12,7 @@ import com.twilio.audioswitch.AudioDevice.BluetoothHeadset;
 import com.twilio.audioswitch.AudioDevice.Earpiece;
 import com.twilio.audioswitch.AudioDevice.Speakerphone;
 import com.twilio.audioswitch.AudioDevice.WiredHeadset;
+import java.util.ArrayList;
 import java.util.List;
 import kotlin.Unit;
 import kotlin.jvm.functions.Function2;
@@ -121,10 +122,11 @@ public class AudioSwitchJavaTest extends BaseTest {
 
     @Test
     public void shouldAllowChangingThePreferredDeviceList() {
-        Class<? extends AudioDevice>[] preferredDeviceList =
-                new Class[] {
-                    Speakerphone.class, Earpiece.class, WiredHeadset.class, BluetoothHeadset.class,
-                };
+        List<Class<? extends AudioDevice>> preferredDeviceList = new ArrayList<>();
+        preferredDeviceList.add(Speakerphone.class);
+        preferredDeviceList.add(Earpiece.class);
+        preferredDeviceList.add(WiredHeadset.class);
+        preferredDeviceList.add(BluetoothHeadset.class);
         javaAudioSwitch =
                 new AudioSwitch(
                         getContext$audioswitch_debug(),

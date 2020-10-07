@@ -451,7 +451,7 @@ class AudioSwitchTest : BaseTest() {
                 wiredHeadsetReceiver = wiredHeadsetReceiver,
                 headsetManager = null,
                 audioFocusChangeListener = defaultAudioFocusChangeListener,
-                preferredDeviceList = preferredDeviceList.toTypedArray()
+                preferredDeviceList = preferredDeviceList
         )
     }
 
@@ -465,7 +465,7 @@ class AudioSwitchTest : BaseTest() {
                 wiredHeadsetReceiver = wiredHeadsetReceiver,
                 headsetManager = headsetManager,
                 audioFocusChangeListener = defaultAudioFocusChangeListener,
-                preferredDeviceList = arrayOf(Earpiece::class.java, WiredHeadset::class.java, Speakerphone::class.java,
+                preferredDeviceList = listOf(Earpiece::class.java, WiredHeadset::class.java, Speakerphone::class.java,
                         AudioDevice.BluetoothHeadset::class.java)
 
         )
@@ -500,7 +500,7 @@ class AudioSwitchTest : BaseTest() {
                 wiredHeadsetReceiver = wiredHeadsetReceiver,
                 headsetManager = headsetManager,
                 audioFocusChangeListener = defaultAudioFocusChangeListener,
-                preferredDeviceList = preferredDeviceList.toTypedArray()
+                preferredDeviceList = preferredDeviceList
         )
 
         audioSwitch.run {
@@ -526,7 +526,7 @@ class AudioSwitchTest : BaseTest() {
                 wiredHeadsetReceiver = wiredHeadsetReceiver,
                 headsetManager = headsetManager,
                 audioFocusChangeListener = defaultAudioFocusChangeListener,
-                preferredDeviceList = preferredDeviceList.toTypedArray()
+                preferredDeviceList = preferredDeviceList
         )
 
         audioSwitch.run {
@@ -553,7 +553,7 @@ class AudioSwitchTest : BaseTest() {
                 wiredHeadsetReceiver = wiredHeadsetReceiver,
                 headsetManager = headsetManager,
                 audioFocusChangeListener = defaultAudioFocusChangeListener,
-                preferredDeviceList = preferredDeviceList.toTypedArray()
+                preferredDeviceList = preferredDeviceList
         )
 
         audioSwitch.run {
@@ -578,7 +578,7 @@ class AudioSwitchTest : BaseTest() {
                 wiredHeadsetReceiver = wiredHeadsetReceiver,
                 headsetManager = headsetManager,
                 audioFocusChangeListener = defaultAudioFocusChangeListener,
-                preferredDeviceList = preferredDeviceList.toTypedArray()
+                preferredDeviceList = preferredDeviceList
         )
 
         audioSwitch.run {
@@ -606,7 +606,7 @@ class AudioSwitchTest : BaseTest() {
                 wiredHeadsetReceiver = wiredHeadsetReceiver,
                 headsetManager = headsetManager,
                 audioFocusChangeListener = defaultAudioFocusChangeListener,
-                preferredDeviceList = preferredDeviceList.toTypedArray()
+                preferredDeviceList = preferredDeviceList
         )
 
         audioSwitch.run {

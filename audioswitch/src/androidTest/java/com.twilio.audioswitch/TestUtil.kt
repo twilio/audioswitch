@@ -22,8 +22,8 @@ import java.util.concurrent.TimeoutException
 
 internal fun setupFakeAudioSwitch(
     context: Context,
-    vararg preferredDevices: Class<out AudioDevice> =
-            arrayOf(AudioDevice.BluetoothHeadset::class.java, WiredHeadset::class.java,
+    preferredDevicesList: List<Class<out AudioDevice>> =
+            listOf(AudioDevice.BluetoothHeadset::class.java, WiredHeadset::class.java,
                     Earpiece::class.java, Speakerphone::class.java)
 ):
         Triple<AudioSwitch, BluetoothHeadsetManager, WiredHeadsetReceiver> {
@@ -47,7 +47,7 @@ internal fun setupFakeAudioSwitch(
     return Triple(AudioSwitch(context,
         logger,
             {},
-            preferredDevices,
+            preferredDevicesList,
         audioDeviceManager,
         wiredHeadsetReceiver,
         headsetManager),
