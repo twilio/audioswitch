@@ -4,6 +4,15 @@ import com.twilio.audioswitch.AudioDevice.BluetoothHeadset
 import com.twilio.audioswitch.AudioDevice.Earpiece
 import com.twilio.audioswitch.AudioDevice.Speakerphone
 import com.twilio.audioswitch.AudioDevice.WiredHeadset
+import com.twilio.audioswitch.TestType.BluetoothHeadsetTest
+import com.twilio.audioswitch.TestType.EarpieceAndSpeakerTest
+import com.twilio.audioswitch.TestType.WiredHeadsetTest
+
+private sealed class TestType {
+    object EarpieceAndSpeakerTest : TestType()
+    object WiredHeadsetTest : TestType()
+    object BluetoothHeadsetTest : TestType()
+}
 
 private val commonTestCases = listOf(
         listOf(
@@ -67,68 +76,42 @@ private val commonTestCases = listOf(
         listOf()
 )
 
-private fun buildParamsWithExpectedDevice(expectedDevices: List<AudioDevice>): Array<Any> {
+private fun getTestInput(testType: TestType): Array<Any> {
     return mutableListOf<Array<Any>>().apply {
         commonTestCases.forEachIndexed { index, devices ->
-            add(arrayOf(devices, expectedDevices[index]))
+            add(arrayOf(devices, getExpectedDevice(testType, devices)))
         }
     }.toTypedArray()
 }
 
-private fun buildParamsWithExpectedDeviceAndVerificationCount(expectedDevices: List<AudioDevice>, speakerPhoneVerificationParams: List<Int>): Array<Any> {
-    return mutableListOf<Array<Any>>().apply {
-        commonTestCases.forEachIndexed { index, devices ->
-            add(arrayOf(devices, expectedDevices[index], speakerPhoneVerificationParams[index]))
+private fun getExpectedDevice(
+    testType: TestType,
+    preferredDeviceList: List<Class<out AudioDevice>>
+): AudioDevice {
+    return when (testType) {
+        EarpieceAndSpeakerTest -> {
+            preferredDeviceList.find {
+                it == Earpiece::class.java || it == Speakerphone::class.java
+            }?.newInstance() ?: Earpiece()
         }
-    }.toTypedArray()
-}
-
-class EarpieceSpeakerParams {
-    companion object {
-        @JvmStatic
-        fun provideParams(): Array<Any> {
-            val expectedDevices = listOf(
-                    Earpiece(),
-                    Earpiece(),
-                    Earpiece(),
-                    Earpiece(),
-                    Earpiece(),
-                    Earpiece(),
-                    Earpiece(),
-                    Speakerphone(),
-                    Speakerphone(),
-                    Speakerphone(),
-                    Speakerphone(),
-                    Earpiece(),
-                    Speakerphone(),
-                    Earpiece()
-            )
-            return buildParamsWithExpectedDevice(expectedDevices)
+        WiredHeadsetTest -> {
+            preferredDeviceList.find {
+                it == WiredHeadset::class.java || it == Speakerphone::class.java
+            }?.newInstance() ?: WiredHeadset()
+        }
+        BluetoothHeadsetTest -> {
+            preferredDeviceList.find {
+                it == BluetoothHeadset::class.java || it == Earpiece::class.java || it == Speakerphone::class.java
+            }?.newInstance() ?: BluetoothHeadset()
         }
     }
 }
 
-class SpeakerParams {
+class EarpieceAndSpeakerParams {
     companion object {
         @JvmStatic
         fun provideParams(): Array<Any> {
-            val expectedDevices = listOf(
-                    Earpiece(),
-                    Earpiece(),
-                    Earpiece(),
-                    Earpiece(),
-                    Earpiece(),
-                    Earpiece(),
-                    Earpiece(),
-                    Speakerphone(),
-                    Speakerphone(),
-                    Speakerphone(),
-                    Speakerphone(),
-                    Earpiece(),
-                    Speakerphone(),
-                    Earpiece()
-            )
-            return buildParamsWithExpectedDevice(expectedDevices)
+            return getTestInput(EarpieceAndSpeakerTest)
         }
     }
 }
@@ -137,39 +120,7 @@ class WiredHeadsetParams {
     companion object {
         @JvmStatic
         fun provideParams(): Array<Any> {
-            val expectedDevices = listOf(
-                    WiredHeadset(),
-                    WiredHeadset(),
-                    WiredHeadset(),
-                    WiredHeadset(),
-                    WiredHeadset(),
-                    Speakerphone(),
-                    WiredHeadset(),
-                    WiredHeadset(),
-                    Speakerphone(),
-                    Speakerphone(),
-                    Speakerphone(),
-                    WiredHeadset(),
-                    Speakerphone(),
-                    WiredHeadset()
-            )
-            val speakerPhoneVerificationParams = listOf(
-                    2,
-                    2,
-                    2,
-                    2,
-                    2,
-                    1,
-                    2,
-                    1,
-                    2,
-                    2,
-                    2,
-                    2,
-                    2,
-                    2
-            )
-            return buildParamsWithExpectedDeviceAndVerificationCount(expectedDevices, speakerPhoneVerificationParams)
+            return getTestInput(WiredHeadsetTest)
         }
     }
 }
@@ -178,39 +129,7 @@ class BluetoothHeadsetParams {
     companion object {
         @JvmStatic
         fun provideParams(): Array<Any> {
-            val expectedDevices = listOf(
-                    BluetoothHeadset(),
-                    BluetoothHeadset(),
-                    Earpiece(),
-                    Earpiece(),
-                    BluetoothHeadset(),
-                    BluetoothHeadset(),
-                    Earpiece(),
-                    BluetoothHeadset(),
-                    Speakerphone(),
-                    BluetoothHeadset(),
-                    BluetoothHeadset(),
-                    Earpiece(),
-                    Speakerphone(),
-                    BluetoothHeadset()
-            )
-            val speakerPhoneVerificationParams = listOf(
-                    2,
-                    2,
-                    2,
-                    2,
-                    2,
-                    2,
-                    2,
-                    1,
-                    2,
-                    1,
-                    1,
-                    2,
-                    2,
-                    2
-            )
-            return buildParamsWithExpectedDeviceAndVerificationCount(expectedDevices, speakerPhoneVerificationParams)
+            return getTestInput(BluetoothHeadsetTest)
         }
     }
 }

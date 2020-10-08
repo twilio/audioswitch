@@ -481,7 +481,7 @@ class AudioSwitchTest : BaseTest() {
         }
     }
 
-    @Parameters(source = EarpieceSpeakerParams::class)
+    @Parameters(source = EarpieceAndSpeakerParams::class)
     @Test
     fun `when configuring a new preferred device list, the correct device should be automatically selected and activated`(
         preferredDeviceList: List<Class<out AudioDevice>>,
@@ -502,7 +502,6 @@ class AudioSwitchTest : BaseTest() {
             activate()
 
             assertThat(selectedAudioDevice, equalTo(expectedDevice))
-            assertActivated(expectedDevice)
         }
     }
 
@@ -510,8 +509,7 @@ class AudioSwitchTest : BaseTest() {
     @Test
     fun `when configuring a new preferred device list, the correct device should be automatically selected and activated with a wired headset connected`(
         preferredDeviceList: List<Class<out AudioDevice>>,
-        expectedDevice: AudioDevice,
-        verificationCount: Int
+        expectedDevice: AudioDevice
     ) {
         audioSwitch = AudioSwitch(
                 context = context,
@@ -529,7 +527,6 @@ class AudioSwitchTest : BaseTest() {
             simulateNewWiredHeadsetConnection()
 
             assertThat(selectedAudioDevice, equalTo(expectedDevice))
-            assertActivated(expectedDevice, verificationCount)
         }
     }
 
@@ -537,8 +534,7 @@ class AudioSwitchTest : BaseTest() {
     @Test
     fun `when configuring a new preferred device list, the correct device should be automatically selected and activated with a bluetooth headset connected`(
         preferredDeviceList: List<Class<out AudioDevice>>,
-        expectedDevice: AudioDevice,
-        verificationCount: Int
+        expectedDevice: AudioDevice
     ) {
         audioSwitch = AudioSwitch(
                 context = context,
@@ -556,7 +552,6 @@ class AudioSwitchTest : BaseTest() {
             simulateNewBluetoothHeadsetConnection()
 
             assertThat(selectedAudioDevice, equalTo(expectedDevice))
-            assertActivated(expectedDevice, verificationCount)
         }
     }
 
@@ -613,23 +608,6 @@ class AudioSwitchTest : BaseTest() {
                     Earpiece(), Speakerphone())),
                     equalTo(true))
         }
-    }
-
-    private fun assertActivated(device: AudioDevice, speakerphoneVerificationCount: Int = 1) {
-        val isSpeakerphoneOn = when (device) {
-            is AudioDevice.BluetoothHeadset -> {
-                verify(audioManager).startBluetoothSco()
-                false
-            }
-            is WiredHeadset, is Earpiece -> {
-                false
-            }
-            is Speakerphone -> {
-                true
-            }
-        }
-
-        verify(audioManager, times(speakerphoneVerificationCount)).isSpeakerphoneOn = isSpeakerphoneOn
     }
 
     private fun simulateNewWiredHeadsetConnection() {
