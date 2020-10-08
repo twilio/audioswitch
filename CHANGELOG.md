@@ -8,6 +8,7 @@ Enhancements
 ```kotlin
 val audioSwitch = AudioSwitch(application, preferredDeviceList = listOf(Speakerphone::class.java, BluetoothHeadset::class.java))
 ```
+- Updated `compileSdkVersion` and `targetSdkVersion` to Android API version `30`.
 
 
 ### 1.0.1
