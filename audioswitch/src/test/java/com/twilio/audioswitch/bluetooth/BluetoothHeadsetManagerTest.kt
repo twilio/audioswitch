@@ -15,13 +15,11 @@ import com.nhaarman.mockitokotlin2.whenever
 import com.twilio.audioswitch.BaseTest
 import com.twilio.audioswitch.DEVICE_NAME
 import com.twilio.audioswitch.assertBluetoothHeadsetSetup
-import com.twilio.audioswitch.assertBluetoothHeadsetTeardown
 import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager.HeadsetState.AudioActivated
 import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager.HeadsetState.AudioActivating
 import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager.HeadsetState.AudioActivationError
 import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager.HeadsetState.Connected
 import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager.HeadsetState.Disconnected
-import com.twilio.audioswitch.simulateNewBluetoothHeadsetConnection
 import junitparams.JUnitParamsRunner
 import junitparams.Parameters
 import org.hamcrest.CoreMatchers.`is`

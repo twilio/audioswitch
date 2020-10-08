@@ -1,5 +1,16 @@
 # Changelog
 
+### 1.1.0
+
+Enhancements
+
+- Added a constructor parameter named `preferredDeviceList` to configure the order in which audio devices are automatically selected and activated when `selectedAudioDevice` is null.
+```kotlin
+val audioSwitch = AudioSwitch(application, preferredDeviceList = listOf(Speakerphone::class.java, BluetoothHeadset::class.java))
+```
+- Updated `compileSdkVersion` and `targetSdkVersion` to Android API version `30`.
+
+
 ### 1.0.1
 
 Enhancements

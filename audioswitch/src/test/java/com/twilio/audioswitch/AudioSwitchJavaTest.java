@@ -8,6 +8,11 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import android.content.pm.PackageManager;
+import com.twilio.audioswitch.AudioDevice.BluetoothHeadset;
+import com.twilio.audioswitch.AudioDevice.Earpiece;
+import com.twilio.audioswitch.AudioDevice.Speakerphone;
+import com.twilio.audioswitch.AudioDevice.WiredHeadset;
+import java.util.ArrayList;
 import java.util.List;
 import kotlin.Unit;
 import kotlin.jvm.functions.Function2;
@@ -29,8 +34,9 @@ public class AudioSwitchJavaTest extends BaseTest {
         javaAudioSwitch =
                 new AudioSwitch(
                         getContext$audioswitch_debug(),
-                        getLogger$audioswitch_debug(),
+                        new UnitTestLogger(false),
                         getDefaultAudioFocusChangeListener$audioswitch_debug(),
+                        getPreferredDeviceList$audioswitch_debug(),
                         getAudioDeviceManager$audioswitch_debug(),
                         getWiredHeadsetReceiver$audioswitch_debug(),
                         getHeadsetManager$audioswitch_debug());
@@ -88,7 +94,7 @@ public class AudioSwitchJavaTest extends BaseTest {
 
     @Test
     public void shouldAllowSelectingAudioDevice() {
-        AudioDevice.Earpiece earpiece = new AudioDevice.Earpiece();
+        Earpiece earpiece = new Earpiece();
         javaAudioSwitch.selectDevice(earpiece);
 
         assertEquals(earpiece, javaAudioSwitch.getSelectedAudioDevice());
@@ -112,6 +118,28 @@ public class AudioSwitchJavaTest extends BaseTest {
 
         assertNotNull(AudioSwitch.VERSION);
         assertTrue(AudioSwitch.VERSION.matches(semVerRegex));
+    }
+
+    @Test
+    public void shouldAllowChangingThePreferredDeviceList() {
+        List<Class<? extends AudioDevice>> preferredDeviceList = new ArrayList<>();
+        preferredDeviceList.add(Speakerphone.class);
+        preferredDeviceList.add(Earpiece.class);
+        preferredDeviceList.add(WiredHeadset.class);
+        preferredDeviceList.add(BluetoothHeadset.class);
+        javaAudioSwitch =
+                new AudioSwitch(
+                        getContext$audioswitch_debug(),
+                        getLogger$audioswitch_debug(),
+                        getDefaultAudioFocusChangeListener$audioswitch_debug(),
+                        preferredDeviceList,
+                        getAudioDeviceManager$audioswitch_debug(),
+                        getWiredHeadsetReceiver$audioswitch_debug(),
+                        getHeadsetManager$audioswitch_debug());
+
+        startAudioSwitch();
+
+        assertEquals(new Speakerphone(), javaAudioSwitch.getSelectedAudioDevice());
     }
 
     private void startAudioSwitch() {

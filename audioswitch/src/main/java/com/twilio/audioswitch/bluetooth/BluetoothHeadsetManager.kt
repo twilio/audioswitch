@@ -53,7 +53,7 @@ internal constructor(
         set(value) {
             if (field != value) {
                 field = value
-                logger.d(TAG, "Headset state changed to $field")
+                logger.d(TAG, "Headset state changed to ${field::class.simpleName}")
                 if (value == Disconnected) enableBluetoothScoJob.cancelBluetoothScoJob()
             }
         }
@@ -167,7 +167,7 @@ internal constructor(
         if (headsetState == Connected || headsetState == AudioActivationError)
             enableBluetoothScoJob.executeBluetoothScoJob()
         else {
-            logger.w(TAG, "Cannot activate when in the $headsetState state")
+            logger.w(TAG, "Cannot activate when in the ${headsetState::class.simpleName} state")
         }
     }
 
@@ -175,16 +175,18 @@ internal constructor(
         if (headsetState == AudioActivated) {
             disableBluetoothScoJob.executeBluetoothScoJob()
         } else {
-            logger.w(TAG, "Cannot deactivate when in the $headsetState state")
+            logger.w(TAG, "Cannot deactivate when in the ${headsetState::class.simpleName} state")
         }
     }
 
     fun hasActivationError() = headsetState == AudioActivationError
 
+    // TODO Remove bluetoothHeadsetName param
     fun getHeadset(bluetoothHeadsetName: String?) =
             if (headsetState != Disconnected) {
-                AudioDevice.BluetoothHeadset(bluetoothHeadsetName ?: getHeadsetName()
-                ?: "Bluetooth")
+                val headsetName = bluetoothHeadsetName ?: getHeadsetName()
+                headsetName?.let { AudioDevice.BluetoothHeadset(it) }
+                        ?: AudioDevice.BluetoothHeadset()
             } else null
 
     private fun isCorrectIntentAction(intentAction: String?) =
