@@ -117,6 +117,8 @@ class AudioSwitch {
      * device list will be:
      *
      * [Speakerphone], [BluetoothHeadset], [WiredHeadset], [Earpiece].
+     *
+     * @throws IllegalArgumentException if the [preferredDeviceList] contains duplicate [AudioDevice] elements.
      */
     @JvmOverloads
     constructor(
