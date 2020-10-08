@@ -434,16 +434,8 @@ class AudioSwitchTest : BaseTest() {
         assertTrue(AudioSwitch.VERSION.matches(semVerRegex))
     }
 
-    fun invalidAutoDevicesParams() = arrayOf(
-            listOf(),
-            listOf(Speakerphone::class.java, AudioDevice.BluetoothHeadset::class.java, Earpiece::class.java, Speakerphone::class.java)
-    )
-
-    @Parameters(method = "invalidAutoDevicesParams")
     @Test(expected = IllegalArgumentException::class)
-    fun `constructor should throw IllegalArgumentException for invalid automatic device selection list`(
-        preferredDeviceList: List<Class<out AudioDevice>>
-    ) {
+    fun `constructor should throw an IllegalArgumentException given duplicate preferred devices`() {
         audioSwitch = AudioSwitch(
                 context = context,
                 logger = logger,
@@ -451,7 +443,9 @@ class AudioSwitchTest : BaseTest() {
                 wiredHeadsetReceiver = wiredHeadsetReceiver,
                 headsetManager = null,
                 audioFocusChangeListener = defaultAudioFocusChangeListener,
-                preferredDeviceList = preferredDeviceList
+                preferredDeviceList = listOf(Speakerphone::class.java,
+                        AudioDevice.BluetoothHeadset::class.java, Earpiece::class.java,
+                        Speakerphone::class.java)
         )
     }
 

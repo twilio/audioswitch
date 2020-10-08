@@ -63,7 +63,8 @@ private val commonTestCases = listOf(
         listOf(
                 Earpiece::class.java,
                 BluetoothHeadset::class.java),
-        listOf(Speakerphone::class.java)
+        listOf(Speakerphone::class.java),
+        listOf()
 )
 
 private fun buildParamsWithExpectedDevice(expectedDevices: List<AudioDevice>): Array<Any> {
@@ -99,7 +100,8 @@ class EarpieceSpeakerParams {
                     Speakerphone(),
                     Speakerphone(),
                     Earpiece(),
-                    Speakerphone()
+                    Speakerphone(),
+                    Earpiece()
             )
             return buildParamsWithExpectedDevice(expectedDevices)
         }
@@ -123,7 +125,8 @@ class SpeakerParams {
                     Speakerphone(),
                     Speakerphone(),
                     Earpiece(),
-                    Speakerphone()
+                    Speakerphone(),
+                    Earpiece()
             )
             return buildParamsWithExpectedDevice(expectedDevices)
         }
@@ -147,7 +150,8 @@ class WiredHeadsetParams {
                     Speakerphone(),
                     Speakerphone(),
                     WiredHeadset(),
-                    Speakerphone()
+                    Speakerphone(),
+                    WiredHeadset()
             )
             val speakerPhoneVerificationParams = listOf(
                     2,
@@ -158,6 +162,7 @@ class WiredHeadsetParams {
                     1,
                     2,
                     1,
+                    2,
                     2,
                     2,
                     2,
@@ -186,7 +191,8 @@ class BluetoothHeadsetParams {
                     BluetoothHeadset(),
                     BluetoothHeadset(),
                     Earpiece(),
-                    Speakerphone()
+                    Speakerphone(),
+                    BluetoothHeadset()
             )
             val speakerPhoneVerificationParams = listOf(
                     2,
@@ -200,6 +206,7 @@ class BluetoothHeadsetParams {
                     2,
                     1,
                     1,
+                    2,
                     2,
                     2
             )

@@ -154,10 +154,11 @@ class AudioSwitch {
 
     private fun getPreferredDeviceList(preferredDeviceList: List<Class<out AudioDevice>>):
             List<Class<out AudioDevice>> {
-        require(preferredDeviceList.isNotEmpty() && hasNoDuplicates(preferredDeviceList))
+        require(hasNoDuplicates(preferredDeviceList))
 
-        return if (preferredDeviceList == defaultPreferredDeviceList) defaultPreferredDeviceList
-        else {
+        return if (preferredDeviceList.isEmpty() || preferredDeviceList == defaultPreferredDeviceList) {
+            defaultPreferredDeviceList
+        } else {
             val result = defaultPreferredDeviceList.toMutableList()
             result.removeAll(preferredDeviceList)
             preferredDeviceList.forEachIndexed { index, device ->
