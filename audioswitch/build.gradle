@@ -3,6 +3,7 @@ apply plugin: 'maven'
 apply plugin: 'maven-publish'
 apply plugin: "com.jfrog.artifactory"
 apply plugin: 'kotlin-android'
+apply plugin: "org.jetbrains.dokka"
 
 android {
     compileSdkVersion 30
@@ -37,6 +38,13 @@ android {
         }
     }
 
+    dokkaHtml.configure {
+        dokkaSourceSets {
+            named("main") {
+                noAndroidSdkLink.set(false)
+            }
+        }
+    }
 }
 
 dependencies {
