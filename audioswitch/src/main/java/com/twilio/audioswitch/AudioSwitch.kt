@@ -26,7 +26,12 @@ private const val TAG = "AudioSwitch"
  * should be routed to. It is strongly recommended that instances of this class are created and
  * accessed from a single application thread. Accessing an instance from multiple threads may cause
  * synchronization problems.
- */
+ *
+ * @property loggingEnabled A property to configure AudioSwitch logging behavior. AudioSwitch logging is disabled by
+ * default.
+ * @property selectedAudioDevice Retrieves the selected [AudioDevice] from [AudioSwitch.selectDevice].
+ * @property availableAudioDevices Retrieves the current list of available [AudioDevice]s.
+**/
 class AudioSwitch {
 
     private var logger: Logger = ProductionLogger()
@@ -67,35 +72,13 @@ class AudioSwitch {
         }
     }
 
-    /**
-     * A property to configure AudioSwitch logging behavior. AudioSwitch logging is disabled by
-     * default.
-     */
     var loggingEnabled: Boolean
-        /**
-         * Returns `true` if logging is enabled. Returns `false` by default.
-         */
         get() = logger.loggingEnabled
 
-        /**
-         * Toggle whether logging is enabled.
-         */
         set(value) {
             logger.loggingEnabled = value
         }
-
-    /**
-     * Retrieves the selected [AudioDevice] from [AudioSwitch.selectDevice].
-     *
-     * @return the selected [AudioDevice]
-     */
     val selectedAudioDevice: AudioDevice? get() = selectedDevice
-
-    /**
-     * Retrieves the current list of available [AudioDevice]s.
-     *
-     * @return the current list of [AudioDevice]s
-     */
     val availableAudioDevices: List<AudioDevice> = mutableAudioDevices
 
     /**
@@ -254,10 +237,10 @@ class AudioSwitch {
 
     /**
      * Selects the desired [AudioDevice]. If the provided [AudioDevice] is not
-     * available, no changes are made. If the provided [AudioDevice] is null, an [AudioDevice] is
-     * chosen based on the following preference: Bluetooth, Wired Headset, Earpiece, Speakerphone.
+     * available, no changes are made. If the provided device is null, one is chosen based on the
+     * specified preferred device list or the following default list:
      *
-     * @param audioDevice The [AudioDevice] to use
+     * [Bluetooth], [WiredHeadset], [Earpiece], [Speakerphone].
      */
     fun selectDevice(audioDevice: AudioDevice?) {
         if (selectedDevice != audioDevice) {
