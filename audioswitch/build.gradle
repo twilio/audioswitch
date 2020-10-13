@@ -38,7 +38,7 @@ android {
         }
     }
 
-    dokkaHtml.configure {
+    dokkaJekyll.configure {
         dokkaSourceSets {
             named("main") {
                 noAndroidSdkLink.set(false)
