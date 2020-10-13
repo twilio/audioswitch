@@ -83,25 +83,19 @@ class AudioSwitch {
 
     /**
      * Constructs a new AudioSwitch instance.
-     *
-     * @param context An Android Context.
-     * @param loggingEnabled Toggle whether logging is enabled. This argument is false by default.
-     * @param audioFocusChangeListener A listener that is invoked when the system audio focus is updated.
+     * - [context] - An Android Context.
+     * - [loggingEnabled] - Toggle whether logging is enabled. This argument is false by default.
+     * - [audioFocusChangeListener] - A listener that is invoked when the system audio focus is updated.
      * Note that updates are only sent to the listener after [activate] has been called.
-     * @param preferredDeviceList The order in which [AudioSwitch] automatically selects and activates
+     * - [preferredDeviceList] - The order in which [AudioSwitch] automatically selects and activates
      * an [AudioDevice]. This parameter is ignored if the [selectedAudioDevice] is not `null`.
-     *
      * The default preferred [AudioDevice] order is the following:
-     *
      * [BluetoothHeadset], [WiredHeadset], [Earpiece], [Speakerphone]
-     *
-     * [preferredDeviceList] is added to the front of the default list. For example, if [preferredDeviceList]
+     * . The [preferredDeviceList] is added to the front of the default list. For example, if [preferredDeviceList]
      * is [Speakerphone] and [BluetoothHeadset], then the new preferred audio
      * device list will be:
-     *
      * [Speakerphone], [BluetoothHeadset], [WiredHeadset], [Earpiece].
-     *
-     * @throws IllegalArgumentException if the [preferredDeviceList] contains duplicate [AudioDevice] elements.
+     * An [IllegalArgumentException] is thrown if the [preferredDeviceList] contains duplicate [AudioDevice] elements.
      */
     @JvmOverloads
     constructor(
