@@ -148,11 +148,9 @@ class AudioSwitch {
     }
 
     /**
-     * Starts listening for audio device changes. **Note:** When audio device listening is no
-     * longer needed, [AudioSwitch.stop] should be called in order to prevent a
-     * memory leak.
-     *
-     * @param listener receives audio device change events
+     * Starts listening for audio device changes and calls the [listener] upon each change.
+     * **Note:** When audio device listening is no longer needed, [AudioSwitch.stop] should be
+     * called in order to prevent a memory leak.
      */
     fun start(listener: AudioDeviceChangeListener) {
         audioDeviceChangeListener = listener
@@ -230,11 +228,10 @@ class AudioSwitch {
     }
 
     /**
-     * Selects the desired [AudioDevice]. If the provided [AudioDevice] is not
+     * Selects the desired [audioDevice]. If the provided [AudioDevice] is not
      * available, no changes are made. If the provided device is null, one is chosen based on the
      * specified preferred device list or the following default list:
-     *
-     * [Bluetooth], [WiredHeadset], [Earpiece], [Speakerphone].
+     * [BluetoothHeadset], [WiredHeadset], [Earpiece], [Speakerphone].
      */
     fun selectDevice(audioDevice: AudioDevice?) {
         if (selectedDevice != audioDevice) {
