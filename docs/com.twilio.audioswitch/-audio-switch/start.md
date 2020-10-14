@@ -10,7 +10,7 @@ title: start -
 Brief description  
 
 
-Starts listening for audio device changes and calls the listener upon each change. **Note:** When audio device listening is no longer needed, [AudioSwitch.stop](stop.md) should be called in order to prevent a memory leak.
+Starts listening for audio device changes and calls the listener upon each change.<br><br> **Note:** When audio device listening is no longer needed, [AudioSwitch.stop](stop.md) should be called in order to prevent a memory leak.
 
   
 Content  
