@@ -82,12 +82,12 @@ class AudioSwitch {
     val availableAudioDevices: List<AudioDevice> = mutableAudioDevices
 
     /**
-     * Constructs a new AudioSwitch instance.<br><br>
-     * **[context]** - An Android Context.<br>
-     * **[loggingEnabled]** - Toggle whether logging is enabled. This argument is false by default.<br>
-     * **[audioFocusChangeListener]** - A listener that is invoked when the system audio focus is updated.
-     * Note that updates are only sent to the listener after [activate] has been called.<br>
-     * **[preferredDeviceList]** - The order in which [AudioSwitch] automatically selects and activates
+     * Constructs a new AudioSwitch instance.
+     * - [context] - An Android Context.
+     * - [loggingEnabled] - Toggle whether logging is enabled. This argument is false by default.
+     * - [audioFocusChangeListener] - A listener that is invoked when the system audio focus is updated.
+     * Note that updates are only sent to the listener after [activate] has been called.
+     * - [preferredDeviceList] - The order in which [AudioSwitch] automatically selects and activates
      * an [AudioDevice]. This parameter is ignored if the [selectedAudioDevice] is not `null`.
      * The default preferred [AudioDevice] order is the following:
      * [BluetoothHeadset], [WiredHeadset], [Earpiece], [Speakerphone]
@@ -148,7 +148,7 @@ class AudioSwitch {
     }
 
     /**
-     * Starts listening for audio device changes and calls the [listener] upon each change.<br><br>
+     * Starts listening for audio device changes and calls the [listener] upon each change.
      * **Note:** When audio device listening is no longer needed, [AudioSwitch.stop] should be
      * called in order to prevent a memory leak.
      */
@@ -189,7 +189,7 @@ class AudioSwitch {
 
     /**
      * Performs audio routing and unmuting on the selected device from
-     * [AudioSwitch.selectDevice]. Audio focus is also acquired for the client application.<br><br>
+     * [AudioSwitch.selectDevice]. Audio focus is also acquired for the client application.
      * **Note:** [AudioSwitch.deactivate] should be invoked to restore the prior audio
      * state.
      */
