@@ -83,10 +83,10 @@ class AudioSwitch {
 
     /**
      * Constructs a new AudioSwitch instance.<br><br>
-     * **[context]** - An Android Context.<br><br>
-     * **[loggingEnabled]** - Toggle whether logging is enabled. This argument is false by default.<br><br>
+     * **[context]** - An Android Context.<br>
+     * **[loggingEnabled]** - Toggle whether logging is enabled. This argument is false by default.<br>
      * **[audioFocusChangeListener]** - A listener that is invoked when the system audio focus is updated.
-     * Note that updates are only sent to the listener after [activate] has been called.<br><br>
+     * Note that updates are only sent to the listener after [activate] has been called.<br>
      * **[preferredDeviceList]** - The order in which [AudioSwitch] automatically selects and activates
      * an [AudioDevice]. This parameter is ignored if the [selectedAudioDevice] is not `null`.
      * The default preferred [AudioDevice] order is the following:
