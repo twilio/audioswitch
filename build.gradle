@@ -242,3 +242,74 @@ task bintrayAudioSwitchReleaseUpload(type: RootGradleBuild) {
             'maven.password': "${getPropertyValue("AUDIOSWITCH_BINTRAY_PASSWORD")}"
     ]
 }
+
+task publishDocs {
+    description = 'Publish AudioSwitch KDocs to gh-pages branch'
+    group = 'Publishing'
+    dependsOn validateReleaseTag
+    dependsOn dokkaHtml
+    def releaseVersion = System.getenv("CIRCLE_TAG") == null ?
+            ("") :
+            (System.getenv("CIRCLE_TAG"))
+    def pinLatestDocsCommand = ["ln", "-sfn", "${releaseVersion}", "docs/latest"]
+    def githubToken = System.getenv("GITHUB_TOKEN")
+    def repoSlug = "${System.env.CIRCLE_PROJECT_USERNAME}/${System.env.CIRCLE_PROJECT_REPONAME}"
+    def gitRef = "https://${githubToken}@github.com/${repoSlug}.git"
+    def remote = "upstream"
+    def pushNullFile = new FileOutputStream("/dev/null")
+
+    doLast {
+        exec {
+            workingDir "${rootDir}"
+            commandLine "git", "remote", "add", "${remote}", "${gitRef}"
+            // Ignore exit value because remote may have been added in previous task
+            ignoreExitValue true
+        }
+
+        exec {
+            workingDir "${rootDir}"
+            commandLine "git", "fetch", "${remote}"
+        }
+
+        exec {
+            workingDir "${rootDir}"
+            commandLine "git", "checkout", "-b", "gh-pages", "remotes/${remote}/gh-pages"
+        }
+
+        exec {
+            workingDir "${rootDir}"
+            commandLine "mv", "audioswitch/build/dokka/html/*", "docs/${releaseVersion}"
+        }
+
+        exec {
+            workingDir "${rootDir}"
+            commandLine "cp", "index.html", "docs/${releaseVersion}"
+        }
+
+        exec {
+            workingDir "${rootDir}"
+            commandLine pinLatestDocsCommand
+        }
+
+        exec {
+            workingDir "${rootDir}"
+            commandLine "git", "add", "docs/${releaseVersion}", "docs/latest"
+        }
+
+        exec {
+            workingDir "${rootDir}"
+            commandLine "git", "commit", "-m", "\"${releaseVersion} release docs [skip ci]\""
+        }
+
+        exec {
+            workingDir "${rootDir}"
+            commandLine "git", "push", "--quiet", "${remote}", "gh-pages"
+            standardOutput pushNullFile
+        }
+
+        exec {
+            workingDir "${rootDir}"
+            commandLine "git", "checkout", "${releaseVersion}"
+        }
+    }
+}
