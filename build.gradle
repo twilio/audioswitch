@@ -283,7 +283,7 @@ task publishDocs {
 
         exec {
             workingDir "${rootDir}"
-            commandLine "cp", "index.html", "docs/${releaseVersion}"
+            commandLine "cp", "docs/index.html", "docs/${releaseVersion}"
         }
 
         exec {
