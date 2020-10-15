@@ -20,9 +20,9 @@ Android Studio Version | Android API Version Min
 ------------ | -------------
 3.6+ | 16
 
-## API Documentation
+## Documentation
 
-The KDoc for this library can be found [here](https://twilio.github.io/audioswitch).
+The KDoc for this library can be found [here](https://twilio.github.io/audioswitch/latest).
 
 ## Getting Started
 
