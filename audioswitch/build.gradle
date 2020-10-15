@@ -41,7 +41,6 @@ android {
     dokkaHtml.configure {
         dokkaSourceSets {
             named("main") {
-                outputDirectory = new File(buildDir, '../../docs')
                 noAndroidSdkLink.set(false)
                 includeNonPublic = false
                 reportUndocumented = true
