@@ -278,7 +278,7 @@ task publishDocs {
 
         exec {
             workingDir "${rootDir}"
-            commandLine "mv", "audioswitch/build/dokka/html/*", "docs/${releaseVersion}"
+            commandLine "mv", "audioswitch/build/dokka/html", "docs/${releaseVersion}"
         }
 
         exec {
