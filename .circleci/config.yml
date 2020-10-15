@@ -158,6 +158,20 @@ jobs:
           command: ./gradlew incrementVersion
       - save_cache: *save_cache-gradle
 
+  publish-docs:
+    <<: *build-defaults
+    resource_class: large
+    steps:
+      - checkout
+      - attach_workspace:
+          at: *workspace
+      - restore_cache: *restore_cache-gradle
+      - run: *configure-git-user
+      - run:
+          name: Publish Docs
+          command: ./gradlew publishDocs
+      - save_cache: *save_cache-gradle
+
 workflows:
   build-test-publish:
     jobs:
@@ -187,7 +201,11 @@ workflows:
     jobs:
       - publish-release:
           <<: *release-filter
-      - bump-version:
+      - publish-docs:
           <<: *release-filter
           requires:
             - publish-release
+      - bump-version:
+          <<: *release-filter
+          requires:
+            - publish-docs
