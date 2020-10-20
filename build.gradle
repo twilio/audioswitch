@@ -1,5 +1,6 @@
 buildscript {
     ext.kotlin_version = '1.4.0'
+    ext.dokka_version = '1.4.10'
 
     /**
      * Properties and environment variables needed to publish to Bintray.
@@ -74,17 +75,20 @@ buildscript {
     dependencies {
         classpath 'com.android.tools.build:gradle:4.0.0'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath "org.jetbrains.dokka:dokka-gradle-plugin:$dokka_version"
     }
 }
 
 plugins {
     id "com.diffplug.spotless" version "5.6.1"
     id "com.jfrog.artifactory" version "4.15.2"
+    id "org.jetbrains.dokka" version "1.4.10"
 }
 apply plugin: "com.diffplug.spotless"
 spotless {
     format 'misc', {
         target '**/*.gradle', '**/*.md', '**/.gitignore'
+        targetExclude 'docs/**'
 
         trimTrailingWhitespace()
         indentWithSpaces()
@@ -237,4 +241,86 @@ task bintrayAudioSwitchReleaseUpload(type: RootGradleBuild) {
             'maven.username': "${getPropertyValue("AUDIOSWITCH_BINTRAY_USERNAME")}",
             'maven.password': "${getPropertyValue("AUDIOSWITCH_BINTRAY_PASSWORD")}"
     ]
+}
+
+task publishDocs {
+    description = 'Publish AudioSwitch KDocs to gh-pages branch'
+    group = 'Publishing'
+    dependsOn 'audioswitch:dokkaHtml'
+    dependsOn validateReleaseTag
+    def releaseVersion = System.getenv("CIRCLE_TAG") == null ?
+            ("") :
+            (System.getenv("CIRCLE_TAG"))
+    def pinLatestDocsCommand = ["ln", "-sfn", "${releaseVersion}", "docs/latest"]
+    def githubToken = System.getenv("GITHUB_TOKEN")
+    def repoSlug = "${System.env.CIRCLE_PROJECT_USERNAME}/${System.env.CIRCLE_PROJECT_REPONAME}"
+    def gitRef = "https://${githubToken}@github.com/${repoSlug}.git"
+    def remote = "upstream"
+    def pushNullFile = new FileOutputStream("/dev/null")
+
+    doLast {
+        exec {
+            workingDir "${rootDir}"
+            commandLine "cp", "audioswitch/index.html", "audioswitch/build"
+        }
+
+        exec {
+            workingDir "${rootDir}"
+            commandLine "git", "remote", "add", "${remote}", "${gitRef}"
+            // Ignore exit value because remote may have been added in previous task
+            ignoreExitValue true
+        }
+
+        exec {
+            workingDir "${rootDir}"
+            commandLine "git", "fetch", "${remote}"
+        }
+
+        exec {
+            workingDir "${rootDir}"
+            commandLine "git", "checkout", "-b", "gh-pages", "remotes/${remote}/gh-pages"
+        }
+
+        exec {
+            workingDir "${rootDir}"
+            commandLine "mkdir", "docs"
+            ignoreExitValue true
+        }
+
+        exec {
+            workingDir "${rootDir}"
+            commandLine "cp", "-r", "audioswitch/build/dokka/html/.", "docs/${releaseVersion}"
+        }
+
+        exec {
+            workingDir "${rootDir}"
+            commandLine "cp", "audioswitch/build/index.html", "docs/${releaseVersion}"
+        }
+
+        exec {
+            workingDir "${rootDir}"
+            commandLine pinLatestDocsCommand
+        }
+
+        exec {
+            workingDir "${rootDir}"
+            commandLine "git", "add", "docs/${releaseVersion}", "docs/latest"
+        }
+
+        exec {
+            workingDir "${rootDir}"
+            commandLine "git", "commit", "-m", "\"${releaseVersion} release docs [skip ci]\""
+        }
+
+        exec {
+            workingDir "${rootDir}"
+            commandLine "git", "push", "--quiet", "${remote}", "gh-pages"
+            standardOutput pushNullFile
+        }
+
+        exec {
+            workingDir "${rootDir}"
+            commandLine "git", "checkout", "${releaseVersion}"
+        }
+    }
 }

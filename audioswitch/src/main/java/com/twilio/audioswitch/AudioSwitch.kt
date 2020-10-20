@@ -26,7 +26,12 @@ private const val TAG = "AudioSwitch"
  * should be routed to. It is strongly recommended that instances of this class are created and
  * accessed from a single application thread. Accessing an instance from multiple threads may cause
  * synchronization problems.
- */
+ *
+ * @property loggingEnabled A property to configure AudioSwitch logging behavior. AudioSwitch logging is disabled by
+ * default.
+ * @property selectedAudioDevice Retrieves the selected [AudioDevice] from [AudioSwitch.selectDevice].
+ * @property availableAudioDevices Retrieves the current list of available [AudioDevice]s.
+**/
 class AudioSwitch {
 
     private var logger: Logger = ProductionLogger()
@@ -67,58 +72,30 @@ class AudioSwitch {
         }
     }
 
-    /**
-     * A property to configure AudioSwitch logging behavior. AudioSwitch logging is disabled by
-     * default.
-     */
     var loggingEnabled: Boolean
-        /**
-         * Returns `true` if logging is enabled. Returns `false` by default.
-         */
         get() = logger.loggingEnabled
 
-        /**
-         * Toggle whether logging is enabled.
-         */
         set(value) {
             logger.loggingEnabled = value
         }
-
-    /**
-     * Retrieves the selected [AudioDevice] from [AudioSwitch.selectDevice].
-     *
-     * @return the selected [AudioDevice]
-     */
     val selectedAudioDevice: AudioDevice? get() = selectedDevice
-
-    /**
-     * Retrieves the current list of available [AudioDevice]s.
-     *
-     * @return the current list of [AudioDevice]s
-     */
     val availableAudioDevices: List<AudioDevice> = mutableAudioDevices
 
     /**
      * Constructs a new AudioSwitch instance.
-     *
-     * @param context An Android Context.
-     * @param loggingEnabled Toggle whether logging is enabled. This argument is false by default.
-     * @param audioFocusChangeListener A listener that is invoked when the system audio focus is updated.
+     * - [context] - An Android Context.
+     * - [loggingEnabled] - Toggle whether logging is enabled. This argument is false by default.
+     * - [audioFocusChangeListener] - A listener that is invoked when the system audio focus is updated.
      * Note that updates are only sent to the listener after [activate] has been called.
-     * @param preferredDeviceList The order in which [AudioSwitch] automatically selects and activates
+     * - [preferredDeviceList] - The order in which [AudioSwitch] automatically selects and activates
      * an [AudioDevice]. This parameter is ignored if the [selectedAudioDevice] is not `null`.
-     *
      * The default preferred [AudioDevice] order is the following:
-     *
      * [BluetoothHeadset], [WiredHeadset], [Earpiece], [Speakerphone]
-     *
-     * [preferredDeviceList] is added to the front of the default list. For example, if [preferredDeviceList]
+     * . The [preferredDeviceList] is added to the front of the default list. For example, if [preferredDeviceList]
      * is [Speakerphone] and [BluetoothHeadset], then the new preferred audio
      * device list will be:
-     *
      * [Speakerphone], [BluetoothHeadset], [WiredHeadset], [Earpiece].
-     *
-     * @throws IllegalArgumentException if the [preferredDeviceList] contains duplicate [AudioDevice] elements.
+     * An [IllegalArgumentException] is thrown if the [preferredDeviceList] contains duplicate [AudioDevice] elements.
      */
     @JvmOverloads
     constructor(
@@ -171,11 +148,9 @@ class AudioSwitch {
     }
 
     /**
-     * Starts listening for audio device changes. **Note:** When audio device listening is no
-     * longer needed, [AudioSwitch.stop] should be called in order to prevent a
-     * memory leak.
-     *
-     * @param listener receives audio device change events
+     * Starts listening for audio device changes and calls the [listener] upon each change.
+     * **Note:** When audio device listening is no longer needed, [AudioSwitch.stop] should be
+     * called in order to prevent a memory leak.
      */
     fun start(listener: AudioDeviceChangeListener) {
         audioDeviceChangeListener = listener
@@ -253,11 +228,10 @@ class AudioSwitch {
     }
 
     /**
-     * Selects the desired [AudioDevice]. If the provided [AudioDevice] is not
-     * available, no changes are made. If the provided [AudioDevice] is null, an [AudioDevice] is
-     * chosen based on the following preference: Bluetooth, Wired Headset, Earpiece, Speakerphone.
-     *
-     * @param audioDevice The [AudioDevice] to use
+     * Selects the desired [audioDevice]. If the provided [AudioDevice] is not
+     * available, no changes are made. If the provided device is null, one is chosen based on the
+     * specified preferred device list or the following default list:
+     * [BluetoothHeadset], [WiredHeadset], [Earpiece], [Speakerphone].
      */
     fun selectDevice(audioDevice: AudioDevice?) {
         if (selectedDevice != audioDevice) {

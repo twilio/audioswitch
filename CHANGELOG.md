@@ -1,5 +1,11 @@
 # Changelog
 
+### 1.1.1
+
+Enhancements
+
+- Added public KDoc documentation for each release. The latest documentation release can be found at https://twilio.github.io/audioswitch/latest
+
 ### 1.1.0
 
 Enhancements
