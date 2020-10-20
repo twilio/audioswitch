@@ -246,8 +246,8 @@ task bintrayAudioSwitchReleaseUpload(type: RootGradleBuild) {
 task publishDocs {
     description = 'Publish AudioSwitch KDocs to gh-pages branch'
     group = 'Publishing'
+    dependsOn 'audioswitch:dokkaHtml'
     dependsOn validateReleaseTag
-    dependsOn dokkaHtml
     def releaseVersion = System.getenv("CIRCLE_TAG") == null ?
             ("") :
             (System.getenv("CIRCLE_TAG"))
@@ -259,6 +259,11 @@ task publishDocs {
     def pushNullFile = new FileOutputStream("/dev/null")
 
     doLast {
+        exec {
+            workingDir "${rootDir}"
+            commandLine "cp", "audioswitch/index.html", "audioswitch/build"
+        }
+
         exec {
             workingDir "${rootDir}"
             commandLine "git", "remote", "add", "${remote}", "${gitRef}"
@@ -278,12 +283,18 @@ task publishDocs {
 
         exec {
             workingDir "${rootDir}"
-            commandLine "mv", "audioswitch/build/dokka/html", "docs/${releaseVersion}"
+            commandLine "mkdir", "docs"
+            ignoreExitValue true
         }
 
         exec {
             workingDir "${rootDir}"
-            commandLine "cp", "docs/index.html", "docs/${releaseVersion}"
+            commandLine "cp", "-r", "audioswitch/build/dokka/html/.", "docs/${releaseVersion}"
+        }
+
+        exec {
+            workingDir "${rootDir}"
+            commandLine "cp", "audioswitch/build/index.html", "docs/${releaseVersion}"
         }
 
         exec {
