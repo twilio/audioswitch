@@ -261,7 +261,7 @@ class AudioSwitch {
         }
     }
 
-    private fun enumerateDevices(bluetoothHeadsetName: String? = null) {
+    private fun enumerateDevices(bluetoothHeadsetName: String? = null, error: AudioDeviceError? = null) {
         addAvailableAudioDevices(bluetoothHeadsetName)
 
         if (!userSelectedDevicePresent(mutableAudioDevices)) {
@@ -292,15 +292,7 @@ class AudioSwitch {
         if (state == ACTIVATED) {
             activate()
         }
-        audioDeviceChangeListener?.let { listener ->
-            selectedDevice?.let { selectedDevice ->
-                listener.invoke(
-                        mutableAudioDevices,
-                        selectedDevice)
-            } ?: run {
-                listener.invoke(mutableAudioDevices, null)
-            }
-        }
+        audioDeviceChangeListener?.invoke(mutableAudioDevices, selectedDevice, error)
     }
 
     private fun addAvailableAudioDevices(bluetoothHeadsetName: String?) {

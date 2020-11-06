@@ -20,3 +20,7 @@ sealed class AudioDevice {
     /** An [AudioDevice] representing the Speakerphone.*/
     data class Speakerphone internal constructor(override val name: String = "Speakerphone") : AudioDevice()
 }
+
+sealed class AudioDeviceError {
+    object BluetoothHeadsetSelectionError: AudioDeviceError()
+}
