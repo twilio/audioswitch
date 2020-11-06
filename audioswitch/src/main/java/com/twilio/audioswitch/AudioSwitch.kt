@@ -9,7 +9,6 @@ import com.twilio.audioswitch.AudioDevice.BluetoothHeadset
 import com.twilio.audioswitch.AudioDevice.Earpiece
 import com.twilio.audioswitch.AudioDevice.Speakerphone
 import com.twilio.audioswitch.AudioDevice.WiredHeadset
-import com.twilio.audioswitch.AudioSwitch.AudioSwitchError.BluetoothAudioConnectionError
 import com.twilio.audioswitch.AudioSwitch.State.ACTIVATED
 import com.twilio.audioswitch.AudioSwitch.State.STARTED
 import com.twilio.audioswitch.AudioSwitch.State.STOPPED
@@ -45,7 +44,6 @@ class AudioSwitch {
     private val mutableAudioDevices = ArrayList<AudioDevice>()
     private var bluetoothHeadsetManager: BluetoothHeadsetManager? = null
     private val preferredDeviceList: List<Class<out AudioDevice>>
-    private var audioSwitchErrorListener: ((AudioSwitchError) -> Unit)? = null
 
     internal var state: State = STOPPED
     internal enum class State {
@@ -57,7 +55,6 @@ class AudioSwitch {
         }
 
         override fun onBluetoothHeadsetActivationError() {
-            audioSwitchErrorListener?.invoke(BluetoothAudioConnectionError)
             if (userSelectedDevice is BluetoothHeadset) userSelectedDevice = null
             enumerateDevices()
         }
@@ -105,10 +102,9 @@ class AudioSwitch {
         context: Context,
         loggingEnabled: Boolean = false,
         audioFocusChangeListener: OnAudioFocusChangeListener = OnAudioFocusChangeListener {},
-        preferredDeviceList: List<Class<out AudioDevice>> = defaultPreferredDeviceList,
-        audioSwitchErrorListener: ((AudioSwitchError) -> Unit)? = null
+        preferredDeviceList: List<Class<out AudioDevice>> = defaultPreferredDeviceList
     ) : this(context.applicationContext, ProductionLogger(loggingEnabled), audioFocusChangeListener,
-            preferredDeviceList, audioSwitchErrorListener)
+            preferredDeviceList)
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     internal constructor(
@@ -116,7 +112,6 @@ class AudioSwitch {
         logger: Logger,
         audioFocusChangeListener: OnAudioFocusChangeListener,
         preferredDeviceList: List<Class<out AudioDevice>>,
-        audioSwitchErrorListener: ((AudioSwitchError) -> Unit)?,
         audioDeviceManager: AudioDeviceManager = AudioDeviceManager(context,
             logger,
             context.getSystemService(Context.AUDIO_SERVICE) as AudioManager,
@@ -132,7 +127,6 @@ class AudioSwitch {
         this.wiredHeadsetReceiver = wiredHeadsetReceiver
         this.bluetoothHeadsetManager = headsetManager
         this.preferredDeviceList = getPreferredDeviceList(preferredDeviceList)
-        this.audioSwitchErrorListener = audioSwitchErrorListener
         logger.d(TAG, "AudioSwitch($VERSION)")
         logger.d(TAG, "Preferred device list = ${this.preferredDeviceList.map { it.simpleName }}")
     }
@@ -375,9 +369,5 @@ class AudioSwitch {
             listOf(BluetoothHeadset::class.java,
                     WiredHeadset::class.java, Earpiece::class.java, Speakerphone::class.java)
         }
-    }
-
-    sealed class AudioSwitchError {
-        object BluetoothAudioConnectionError : AudioSwitchError()
     }
 }
