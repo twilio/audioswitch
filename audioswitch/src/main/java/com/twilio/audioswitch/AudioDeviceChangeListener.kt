@@ -8,6 +8,11 @@ package com.twilio.audioswitch
  */
 typealias AudioDeviceChangeListener = (
     audioDevices: List<AudioDevice>,
-    selectedAudioDevice: AudioDevice?,
-    error: AudioDeviceError?,
+    selectedAudioDevice: AudioDevice?
+) -> Unit
+
+typealias AudioDeviceChangeListenerWithError = (
+        audioDevices: List<AudioDevice>,
+        selectedAudioDevice: AudioDevice?,
+        error: AudioDeviceError?
 ) -> Unit

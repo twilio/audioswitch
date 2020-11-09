@@ -18,6 +18,7 @@ import com.twilio.audioswitch.bluetooth.BluetoothHeadsetConnectionListener
 import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager
 import com.twilio.audioswitch.wired.WiredDeviceConnectionListener
 import com.twilio.audioswitch.wired.WiredHeadsetReceiver
+import javax.xml.transform.ErrorListener
 
 private const val TAG = "AudioSwitch"
 
@@ -37,7 +38,7 @@ class AudioSwitch {
     private var logger: Logger = ProductionLogger()
     private val audioDeviceManager: AudioDeviceManager
     private val wiredHeadsetReceiver: WiredHeadsetReceiver
-    internal var audioDeviceChangeListener: AudioDeviceChangeListener? = null
+    internal var audioDeviceChangeListener: AudioDeviceChangeListenerWithError? = null
     private var selectedDevice: AudioDevice? = null
     private var userSelectedDevice: AudioDevice? = null
     private var wiredHeadsetAvailable = false
@@ -152,8 +153,14 @@ class AudioSwitch {
      * **Note:** When audio device listening is no longer needed, [AudioSwitch.stop] should be
      * called in order to prevent a memory leak.
      */
-    fun start(listener: AudioDeviceChangeListener) {
-        audioDeviceChangeListener = listener
+    fun start(audioDeviceChangeListener: AudioDeviceChangeListener) =
+        start { availableDevices, audioDevice, _ ->
+            audioDeviceChangeListener.invoke(availableDevices, audioDevice)
+        }
+
+
+    fun start(listener: AudioDeviceChangeListenerWithError) {
+        this.audioDeviceChangeListener = listener
         when (state) {
             STOPPED -> {
                 bluetoothHeadsetManager?.start(bluetoothDeviceConnectionListener)
