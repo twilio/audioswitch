@@ -5,14 +5,12 @@ import android.media.AudioManager
 import androidx.test.annotation.UiThreadTest
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import com.twilio.audioswitch.AudioDeviceError.BluetoothHeadsetSelectionError
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertFalse
 import junit.framework.TestCase.assertNotNull
 import junit.framework.TestCase.assertTrue
-import org.junit.Assert.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -51,7 +49,7 @@ class AudioSwitchIntegrationTest {
         val audioSwitch = AudioSwitch(getInstrumentationContext())
         audioSwitch.loggingEnabled = true
         assertTrue(audioSwitch.loggingEnabled)
-        audioSwitch.start({_,_,_ -> })
+        audioSwitch.start { _, _, _ -> }
         val earpiece = audioSwitch.availableAudioDevices
             .find { it is AudioDevice.Earpiece }
         assertNotNull(earpiece)
@@ -134,8 +132,8 @@ class AudioSwitchIntegrationTest {
     fun it_should_call_the_error_listener_when_a_bluetooth_audio_connection_error_occurs() {
         val (audioSwitch, bluetoothHeadsetManager) = setupFakeAudioSwitch(getTargetContext())
         val bluetoothConnectionErrorLatch = CountDownLatch(1)
-        audioSwitch.start { audioDevices, selectedAudioDevice, error ->
-            if(error == BluetoothHeadsetSelectionError) bluetoothConnectionErrorLatch.countDown()
+        audioSwitch.start { _, _, exception ->
+            if (exception != null) bluetoothConnectionErrorLatch.countDown()
         }
         simulateBluetoothSystemIntent(getInstrumentationContext(), bluetoothHeadsetManager)
         bluetoothHeadsetManager.enableBluetoothScoJob.scoTimeOutAction()

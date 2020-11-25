@@ -18,7 +18,6 @@ import com.twilio.audioswitch.bluetooth.BluetoothHeadsetConnectionListener
 import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager
 import com.twilio.audioswitch.wired.WiredDeviceConnectionListener
 import com.twilio.audioswitch.wired.WiredHeadsetReceiver
-import javax.xml.transform.ErrorListener
 
 private const val TAG = "AudioSwitch"
 
@@ -57,7 +56,7 @@ class AudioSwitch {
 
         override fun onBluetoothHeadsetActivationError() {
             if (userSelectedDevice is BluetoothHeadset) userSelectedDevice = null
-            enumerateDevices()
+            enumerateDevices(exception = AudioDeviceException("Failed to activate bluetooth audio"))
         }
     }
 
@@ -157,7 +156,6 @@ class AudioSwitch {
         start { availableDevices, audioDevice, _ ->
             audioDeviceChangeListener.invoke(availableDevices, audioDevice)
         }
-
 
     fun start(listener: AudioDeviceChangeListenerWithError) {
         this.audioDeviceChangeListener = listener
@@ -268,7 +266,7 @@ class AudioSwitch {
         }
     }
 
-    private fun enumerateDevices(bluetoothHeadsetName: String? = null, error: AudioDeviceError? = null) {
+    private fun enumerateDevices(bluetoothHeadsetName: String? = null, exception: AudioDeviceException? = null) {
         addAvailableAudioDevices(bluetoothHeadsetName)
 
         if (!userSelectedDevicePresent(mutableAudioDevices)) {
@@ -299,7 +297,7 @@ class AudioSwitch {
         if (state == ACTIVATED) {
             activate()
         }
-        audioDeviceChangeListener?.invoke(mutableAudioDevices, selectedDevice, error)
+        audioDeviceChangeListener?.invoke(mutableAudioDevices, selectedDevice, exception)
     }
 
     private fun addAvailableAudioDevices(bluetoothHeadsetName: String?) {

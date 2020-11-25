@@ -12,7 +12,7 @@ typealias AudioDeviceChangeListener = (
 ) -> Unit
 
 typealias AudioDeviceChangeListenerWithError = (
-        audioDevices: List<AudioDevice>,
-        selectedAudioDevice: AudioDevice?,
-        error: AudioDeviceError?
+    audioDevices: List<AudioDevice>,
+    selectedAudioDevice: AudioDevice?,
+    exception: AudioDeviceException?
 ) -> Unit
