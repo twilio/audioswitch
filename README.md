@@ -114,7 +114,7 @@ val audioSwitch = AudioSwitch(context, loggingEnabled = true)
 audioSwitch.start { _, _ -> }
 ```
 
-## Manifest Configuration
+## Permissions
 No manifest permissions are required by your application since the required permissions get merged from the [manifest file](audioswitch/src/main/AndroidManifest.xml) in this library.
 
 ## Contributing
