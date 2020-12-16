@@ -32,15 +32,18 @@ A clear and concise description of what you expected to happen.
 **Actual behavior**
 A clear and concise description of what actually happens.
 
-**Screenshots**
-If applicable, add screenshots to help explain your problem.
+**Application Logs**
+- Logcat logs with [logging enabled](https://twilio.github.io/audioswitch/latest/audioswitch/com.twilio.audioswitch/-audio-switch/-audio-switch.html) and `AS/` logcat filter applied.
+
+**AudioSwitch Version**
+- Version: (e.g. 1.0.0)
 
 **Android Device (please complete the following information):**
  - Device: (e.g. Pixel 4)
  - API Version: (e.g. API 29)
 
-**Version**
-- Version: (e.g. 0.1.0)
+**Screenshots**
+If applicable, add screenshots to help explain your problem.
 
 **Additional context**
 Add any other context about the problem here.
