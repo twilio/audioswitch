@@ -1,5 +1,12 @@
 # Changelog
 
+### 1.1.2
+
+Enhancements
+
+- Updated the library to use Android Gradle Plugin 4.1.1
+
+
 ### 1.1.1
 
 Enhancements
