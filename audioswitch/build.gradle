@@ -1,6 +1,7 @@
 apply plugin: 'com.android.library'
 apply plugin: 'maven'
 apply plugin: 'maven-publish'
+apply plugin: 'signing'
 apply plugin: "com.jfrog.artifactory"
 apply plugin: 'kotlin-android'
 apply plugin: "org.jetbrains.dokka"
@@ -76,8 +77,7 @@ def audioSwitchGroupId = 'com.twilio'
 def audioSwitchArtifactId = 'audioswitch'
 
 /*
- * The publishing and artifactory blocks enable publishing AudioSwitch as snapshot to
- * JFrog OSS.
+ * The publishing block enables publishing to both Artifactory and MavenCentral
  */
 publishing {
     publications {
@@ -92,15 +92,54 @@ publishing {
             artifactId = audioSwitchArtifactId
             version = audioSwitchVersion
 
-            pom.withXml {
-                def root = asNode()
-                root.appendNode('name', 'Audioswitch')
-                root.appendNode('url', 'https://github.com/twilio/audioswitch')
+            // Mostly self-explanatory metadata
+            pom {
+                name = audioSwitchArtifactId
+                description = 'An Android audio management library for real-time communication apps.'
+                url = 'https://github.com/twilio/audioswitch'
+                licenses {
+                    license {
+                        name = 'Apache 2.0'
+                        url = 'https://github.com/twilio/audioswitch/blob/master/LICENSE.txt'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'Twilio'
+                        name = 'Twilio'
+                    }
+                }
+                // Version control info - if you're using GitHub, follow the format as seen here
+                scm {
+                    connection = 'scm:git:github.com/twilio/audioswitch.git'
+                    developerConnection = 'scm:git:ssh://github.com/twilio/audioswitch.git'
+                    url = 'https://github.com/twilio/audioswitch/tree/main'
+                }
+                // A slightly hacky fix so that your POM will include any transitive dependencies
+                // that your library builds upon
+                withXml {
+                    def dependenciesNode = asNode().appendNode('dependencies')
+
+                    project.configurations.implementation.allDependencies.each {
+                        def dependencyNode = dependenciesNode.appendNode('dependency')
+                        dependencyNode.appendNode('groupId', it.group)
+                        dependencyNode.appendNode('artifactId', it.name)
+                        dependencyNode.appendNode('version', it.version)
+                    }
+                }
             }
         }
     }
 }
 
+signing {
+    sign publishing.publications
+}
+
+/*
+ * The artifactory block enables publishing AudioSwitch as snapshot to
+ * JFrog OSS.
+ */
 artifactory {
     contextUrl = 'https://oss.jfrog.org'
     publish {
@@ -118,22 +157,3 @@ artifactory {
     clientConfig.info.setBuildNumber(getShortCommitSha())
 }
 
-/*
- * The uploadArchives block is used to publish to Bintray
- */
-uploadArchives {
-    repositories {
-        mavenDeployer {
-            repository(url: "${mavenRepo}") {
-                authentication(
-                        userName: mavenUsername,
-                        password: mavenPassword
-                )
-            }
-            pom.version = audioSwitchVersion
-            pom.groupId = audioSwitchGroupId
-            pom.artifactId = audioSwitchArtifactId
-            pom.packaging = 'aar'
-        }
-    }
-}
