@@ -193,6 +193,7 @@ workflows:
             branches:
               only:
                 - "master"
+                - "RCP/task/maven_central"
           requires:
             - unit-tests
             - integration-tests
