@@ -135,8 +135,7 @@ signing {
 }
 
 /*
- * The artifactory block enables publishing AudioSwitch as snapshot to
- * JFrog OSS.
+ * The artifactory block enables publishing AudioSwitch as a snapshot to JFrog OSS.
  */
 artifactory {
     contextUrl = 'https://oss.jfrog.org'
