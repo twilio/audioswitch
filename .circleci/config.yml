@@ -180,39 +180,39 @@ jobs:
       - save_cache: *save_cache-gradle
 
 workflows:
-  # build-test-publish:
-  #   jobs:
-  #     - lint
-  #     - check-format
-  #     - build-audioswitch
-  #     - unit-tests:
-  #         requires:
-  #           - build-audioswitch
-  #           - lint
-  #           - check-format
-  #     - integration-tests:
-  #         requires:
-  #           - build-audioswitch
-  #           - lint
-  #           - check-format
-  #     - publish-pre-release:
-  #         filters:
-  #           branches:
-  #             only:
-  #               - "master"
-  #         requires:
-  #           - unit-tests
-  #           - integration-tests
+  build-test-publish:
+    jobs:
+      - lint
+      - check-format
+      - build-audioswitch
+      - unit-tests:
+          requires:
+            - build-audioswitch
+            - lint
+            - check-format
+      - integration-tests:
+          requires:
+            - build-audioswitch
+            - lint
+            - check-format
+      - publish-pre-release:
+          filters:
+            branches:
+              only:
+                - "master"
+          requires:
+            - unit-tests
+            - integration-tests
 
   release:
     jobs:
       - publish-release
-      #     <<: *release-filter
-      # - publish-docs:
-      #     <<: *release-filter
-      #     requires:
-      #       - publish-release
-      # - bump-version:
-      #     <<: *release-filter
-      #     requires:
-      #       - publish-docs
+          <<: *release-filter
+      - publish-docs:
+          <<: *release-filter
+          requires:
+            - publish-release
+      - bump-version:
+          <<: *release-filter
+          requires:
+            - publish-docs
