@@ -101,7 +101,7 @@ allprojects {
 
 nexusPublishing {
     repositories {
-        sonatype {   //or custom repository name
+        sonatype {
             username = ossrhUsername
             password = ossrhPassword
             stagingProfileId = sonatypeStagingProfileId
@@ -237,12 +237,9 @@ task jfrogOssSnapshotsAudioSwitchUpload(type: RootGradleBuild) {
 task sonatypeAudioSwitchReleaseUpload(type: RootGradleBuild) {
     description = 'Publish an AudioSwitch release'
     group = 'Publishing'
-// Return this when we add the release bit below
-//    dependsOn validateReleaseTag
+    dependsOn validateReleaseTag
     buildFile = file('build.gradle')
-    tasks = ['assembleRelease', 'publishAudioSwitchReleasePublicationToSonatypeRepository', 'closeSonatypeStagingRepository']
-// Below is what we will truly want for releasing. Uncomment when we are ready to ship!
-//    tasks = ['assembleRelease', 'publishAudioSwitchReleasePublicationToSonatypeRepository', 'closeAndReleaseSonatypeStagingRepository']
+    tasks = ['assembleRelease', 'publishAudioSwitchReleasePublicationToSonatypeRepository', 'closeAndReleaseSonatypeStagingRepository']
     startParameter.projectProperties += gradle.startParameter.projectProperties + [
             'signing.keyId': "${getPropertyValue("SIGNING_KEY_ID")}",
             'signing.password' : "${getPropertyValue("SIGNING_PASSWORD")}",
