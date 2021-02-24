@@ -183,11 +183,11 @@ workflows:
             - build-audioswitch
             - lint
             - check-format
-      - integration-tests:
-          requires:
-            - build-audioswitch
-            - lint
-            - check-format
+      # - integration-tests:
+      #     requires:
+      #       - build-audioswitch
+      #       - lint
+      #       - check-format
       - publish-pre-release:
           filters:
             branches:
@@ -196,7 +196,7 @@ workflows:
                 - "RCP/task/maven_central"
           requires:
             - unit-tests
-            - integration-tests
+            # - integration-tests
 
   release:
     jobs:
