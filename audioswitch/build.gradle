@@ -93,7 +93,7 @@ publishing {
             version = audioSwitchVersion
 
             pom {
-                name = audioSwitchArtifactId
+                name = 'Audioswitch'
                 description = 'An Android audio management library for real-time communication apps.'
                 url = 'https://github.com/twilio/audioswitch'
                 licenses {
