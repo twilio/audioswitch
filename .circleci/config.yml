@@ -41,6 +41,11 @@ aliases:
     command: >
       echo $GCP_KEY | base64 -d | gcloud auth activate-service-account --key-file=-
 
+  - &signing-key
+    name: Install signing key
+    command: >
+      echo $SIGNING_KEY | base64 -d >> $SIGNING_SECRET_KEY_RING_FILE
+
   - &release-filter
     filters:
       tags:
@@ -126,6 +131,7 @@ jobs:
       - attach_workspace:
           at: *workspace
       - restore_cache: *restore_cache-gradle
+      - run: *signing-key
       - run:
           name: Publish AudioSwitch pre release
           command: ./gradlew -q jfrogOssSnapshotsAudioSwitchUpload
@@ -139,9 +145,10 @@ jobs:
       - attach_workspace:
           at: *workspace
       - restore_cache: *restore_cache-gradle
+      - run: *signing-key
       - run:
           name: Publish AudioSwitch release
-          command: ./gradlew -q bintrayAudioSwitchReleaseUpload
+          command: ./gradlew -q sonatypeAudioSwitchReleaseUpload
       - save_cache: *save_cache-gradle
 
   bump-version:

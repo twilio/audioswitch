@@ -5,7 +5,7 @@
 Enhancements
 
 - Updated the library to use Android Gradle Plugin 4.1.1
-
+- Now published to MavenCentral
 
 ### 1.1.1
 

@@ -3,18 +3,24 @@ buildscript {
     ext.dokka_version = '1.4.10'
 
     /**
-     * Properties and environment variables needed to publish to Bintray.
+     * Properties and environment variables needed to publish.
      */
-    ext.mavenRepo = (project.hasProperty('maven.repo') ?
-            project.property("maven.repo") : '')
-    ext.mavenUsername = (project.hasProperty('maven.username') ?
-            project.property("maven.username") : '')
-    ext.mavenPassword = (project.hasProperty('maven.password') ?
-            project.property("maven.password") : '')
     ext.jfrogUsername = (project.hasProperty('jfrog.username') ?
             project.property("jfrog.username") : '')
     ext.jfrogPassword = (project.hasProperty('jfrog.password') ?
             project.property("jfrog.password") : '')
+    ext["signing.keyId"] = (project.hasProperty('signing.keyId') ?
+            project.property("signing.keyId") : '')
+    ext["signing.password"] = (project.hasProperty('signing.password') ?
+            project.property("signing.password") : '')
+    ext["signing.secretKeyRingFile"] = (project.hasProperty('signing.secretKeyRingFile') ?
+            project.property("signing.secretKeyRingFile") : '')
+    ext["ossrhUsername"] = (project.hasProperty('ossrhUsername') ?
+            project.property("ossrhUsername") : '')
+    ext["ossrhPassword"] = (project.hasProperty('ossrhPassword') ?
+            project.property("ossrhPassword") : '')
+    ext["sonatypeStagingProfileId"] = (project.hasProperty('sonatypeStagingProfileId') ?
+            project.property("sonatypeStagingProfileId") : '')
 
     ext.getPropertyValue =  { propertyKey ->
         def property  = System.getenv(propertyKey)
@@ -34,26 +40,6 @@ buildscript {
         }
 
         return property
-    }
-
-    ext.getAudioSwitchJfrogOssPassword = {
-        def audioSwitchJfrogOssPassword  = System.getenv("AUDIOSWITCH_JFROG_OSS_PASSWORD");
-
-        if (audioSwitchJfrogOssPassword == null) {
-            logger.log(LogLevel.INFO, "Could not locate AUDIOSWITCH_JFROG_OSS_PASSWORD environment variable. " +
-                    "Trying local.properties")
-            Properties properties = new Properties()
-            if (project.rootProject.file('local.properties').exists()) {
-                properties.load(project.rootProject.file('local.properties').newDataInputStream())
-                audioSwitchJfrogOssPassword = properties.getProperty('AUDIOSWITCH_JFROG_OSS_PASSWORD')
-            }
-        }
-
-        if (audioSwitchJfrogOssPassword == null) {
-            logger.log(LogLevel.WARN, "AudioSwitch Jfrog OSS password unavailable.")
-        }
-
-        return audioSwitchJfrogOssPassword;
     }
 
     ext.getShortCommitSha = {
@@ -82,7 +68,9 @@ buildscript {
 plugins {
     id "com.diffplug.spotless" version "5.6.1"
     id "com.jfrog.artifactory" version "4.15.2"
-    id "org.jetbrains.dokka" version "1.4.10"
+    id "org.jetbrains.dokka" version "$dokka_version"
+    id "io.github.gradle-nexus.publish-plugin" version "1.0.0"
+    id "maven-publish"
 }
 apply plugin: "com.diffplug.spotless"
 spotless {
@@ -109,6 +97,19 @@ allprojects {
         google()
         jcenter()
     }
+}
+
+nexusPublishing {
+    repositories {
+        sonatype {
+            username = ossrhUsername
+            password = ossrhPassword
+            stagingProfileId = sonatypeStagingProfileId
+        }
+    }
+
+    clientTimeout = Duration.ofSeconds(300)
+    connectTimeout = Duration.ofSeconds(60)
 }
 
 /*
@@ -226,20 +227,26 @@ task jfrogOssSnapshotsAudioSwitchUpload(type: RootGradleBuild) {
     startParameter.projectProperties += gradle.startParameter.projectProperties + [
             'preRelease': true,
             'jfrog.username': "${getPropertyValue("AUDIOSWITCH_JFROG_OSS_USERNAME")}",
-            'jfrog.password': "${getPropertyValue("AUDIOSWITCH_JFROG_OSS_PASSWORD")}"
+            'jfrog.password': "${getPropertyValue("AUDIOSWITCH_JFROG_OSS_PASSWORD")}",
+            'signing.keyId': "${getPropertyValue("SIGNING_KEY_ID")}",
+            'signing.password' : "${getPropertyValue("SIGNING_PASSWORD")}",
+            'signing.secretKeyRingFile' : "${getPropertyValue("SIGNING_SECRET_KEY_RING_FILE")}"
     ]
 }
 
-task bintrayAudioSwitchReleaseUpload(type: RootGradleBuild) {
+task sonatypeAudioSwitchReleaseUpload(type: RootGradleBuild) {
     description = 'Publish an AudioSwitch release'
     group = 'Publishing'
     dependsOn validateReleaseTag
-    buildFile = file('audioswitch/build.gradle')
-    tasks = ['assembleRelease', 'uploadArchives']
+    buildFile = file('build.gradle')
+    tasks = ['assembleRelease', 'publishAudioSwitchReleasePublicationToSonatypeRepository', 'closeAndReleaseSonatypeStagingRepository']
     startParameter.projectProperties += gradle.startParameter.projectProperties + [
-            'maven.repo': 'https://api.bintray.com/maven/twilio/releases/audioswitch/;publish=1',
-            'maven.username': "${getPropertyValue("AUDIOSWITCH_BINTRAY_USERNAME")}",
-            'maven.password': "${getPropertyValue("AUDIOSWITCH_BINTRAY_PASSWORD")}"
+            'signing.keyId': "${getPropertyValue("SIGNING_KEY_ID")}",
+            'signing.password' : "${getPropertyValue("SIGNING_PASSWORD")}",
+            'signing.secretKeyRingFile' : "${getPropertyValue("SIGNING_SECRET_KEY_RING_FILE")}",
+            'ossrhUsername' : "${getPropertyValue("OSSRH_USERNAME")}",
+            'ossrhPassword' : "${getPropertyValue("OSSRH_PASSWORD")}",
+            'sonatypeStagingProfileId' : "${getPropertyValue("SONATYPE_STAGING_PROFILE_ID")}"
     ]
 }
 
