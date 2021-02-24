@@ -92,7 +92,6 @@ publishing {
             artifactId = audioSwitchArtifactId
             version = audioSwitchVersion
 
-            // Mostly self-explanatory metadata
             pom {
                 name = audioSwitchArtifactId
                 description = 'An Android audio management library for real-time communication apps.'
@@ -109,7 +108,6 @@ publishing {
                         name = 'Twilio'
                     }
                 }
-                // Version control info - if you're using GitHub, follow the format as seen here
                 scm {
                     connection = 'scm:git:github.com/twilio/audioswitch.git'
                     developerConnection = 'scm:git:ssh://github.com/twilio/audioswitch.git'
