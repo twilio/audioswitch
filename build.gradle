@@ -227,7 +227,10 @@ task jfrogOssSnapshotsAudioSwitchUpload(type: RootGradleBuild) {
     startParameter.projectProperties += gradle.startParameter.projectProperties + [
             'preRelease': true,
             'jfrog.username': "${getPropertyValue("AUDIOSWITCH_JFROG_OSS_USERNAME")}",
-            'jfrog.password': "${getPropertyValue("AUDIOSWITCH_JFROG_OSS_PASSWORD")}"
+            'jfrog.password': "${getPropertyValue("AUDIOSWITCH_JFROG_OSS_PASSWORD")}",
+            'signing.keyId': "${getPropertyValue("SIGNING_KEY_ID")}",
+            'signing.password' : "${getPropertyValue("SIGNING_PASSWORD")}",
+            'signing.secretKeyRingFile' : "${getPropertyValue("SIGNING_SECRET_KEY_RING_FILE")}"
     ]
 }
 
