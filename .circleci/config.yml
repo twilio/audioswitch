@@ -206,7 +206,7 @@ workflows:
 
   release:
     jobs:
-      - publish-release
+      - publish-release:
           <<: *release-filter
       - publish-docs:
           <<: *release-filter
