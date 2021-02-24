@@ -44,7 +44,7 @@ aliases:
   - &signing-key
     name: Install signing key
     command: >
-      echo $SIGNING_KEY | base64 -D -o $SIGNING_SECRET_KEY_RING_FILE
+      echo $SIGNING_KEY | base64 -d >> $SIGNING_SECRET_KEY_RING_FILE
 
   - &release-filter
     filters:
