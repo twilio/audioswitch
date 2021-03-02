@@ -4,7 +4,7 @@ integration-tests:
   app: audioswitch/ftl/app-debug.apk
   test: audioswitch/build/outputs/apk/androidTest/debug/audioswitch-debug-androidTest.apk
   device:
-    - {model: a5y17lte, version: 24}
+    - {model: griffin, version: 24}
     - {model: G8142, version: 25}
     - {model: c5proltechn, version: 26}
     - {model: crownqlteue, version: 27}
