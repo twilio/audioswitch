@@ -155,7 +155,17 @@ To get started using this library, follow the steps below.
 
 ### Gradle Setup
 
-[![Download](https://api.bintray.com/packages/twilio/releases/audioswitch/images/download.svg) ](https://bintray.com/twilio/releases/audioswitch/_latestVersion)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.twilio/audioswitch/badge.svg) ](https://maven-badges.herokuapp.com/maven-central/com.twilio/audioswitch)
+
+Ensure that you have `mavenCentral` listed in your project's buildscript repositories section:
+```groovy
+buildscript {
+    repositories {
+        mavenCentral()
+        ...                
+    }
+}
+```
 
 Add this line as a new Gradle dependency:
 ```groovy
