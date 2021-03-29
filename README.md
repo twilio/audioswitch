@@ -37,7 +37,7 @@ Ensure that you have `mavenCentral` listed in your project's buildscript reposit
 buildscript {
     repositories {
         mavenCentral()
-        ...                
+        ...
     }
 }
 ```
