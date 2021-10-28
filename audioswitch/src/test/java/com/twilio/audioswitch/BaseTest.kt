@@ -16,6 +16,7 @@ import com.twilio.audioswitch.AudioDevice.Speakerphone
 import com.twilio.audioswitch.AudioDevice.WiredHeadset
 import com.twilio.audioswitch.android.BuildWrapper
 import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager
+import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManagerDefault
 import com.twilio.audioswitch.wired.WiredHeadsetReceiver
 import org.hamcrest.CoreMatchers
 import org.hamcrest.MatcherAssert.assertThat
@@ -45,7 +46,7 @@ open class BaseTest {
     internal val preferredDeviceList = listOf(AudioDevice.BluetoothHeadset::class.java, WiredHeadset::class.java,
             Earpiece::class.java, Speakerphone::class.java)
     internal var headsetManager =
-        BluetoothHeadsetManager(
+        BluetoothHeadsetManagerDefault(
             context, logger, bluetoothAdapter,
             audioDeviceManager, bluetoothScoHandler = handler,
             systemClockWrapper = systemClockWrapper, headsetProxy = headsetProxy
