@@ -1,5 +1,6 @@
 package com.twilio.audioswitch.bluetooth
 
+import android.Manifest
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothClass
 import android.bluetooth.BluetoothHeadset
@@ -14,6 +15,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.pm.PackageManager.PERMISSION_GRANTED
 import android.os.Handler
 import android.os.Looper
 import androidx.annotation.VisibleForTesting
@@ -24,20 +26,46 @@ import com.twilio.audioswitch.android.BluetoothIntentProcessor
 import com.twilio.audioswitch.android.BluetoothIntentProcessorImpl
 import com.twilio.audioswitch.android.Logger
 import com.twilio.audioswitch.android.SystemClockWrapper
-import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager.HeadsetState.AudioActivated
-import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager.HeadsetState.AudioActivating
-import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager.HeadsetState.AudioActivationError
-import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager.HeadsetState.Connected
-import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager.HeadsetState.Disconnected
+
 
 private const val TAG = "BluetoothHeadsetManager"
 
-internal class BluetoothHeadsetManager
+
+internal interface BluetoothHeadsetManager {
+    fun start(headsetListener: BluetoothHeadsetConnectionListener)
+    fun stop()
+    fun activate()
+    fun deactivate()
+    fun hasActivationError() : Boolean
+    fun getHeadset(bluetoothHeadsetName: String?) : AudioDevice.BluetoothHeadset?
+
+    companion object {
+        fun newInstance(
+            context: Context,
+            logger: Logger,
+            bluetoothAdapter: BluetoothAdapter?,
+            audioDeviceManager: AudioDeviceManager
+        ): BluetoothHeadsetManager? {
+            return bluetoothAdapter?.let { adapter ->
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+                    BluetoothHeadsetManager_v31plus(context, logger, adapter, audioDeviceManager)
+                } else {
+                    BluetoothHeadsetManagerDefault(context, logger, adapter, audioDeviceManager)
+                }
+            } ?: run {
+                logger.d(TAG, "Bluetooth is not supported on this device")
+                null
+            }
+        }
+    }
+}
+
+internal open class BluetoothHeadsetManagerDefault
 
 @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
 internal constructor(
-    private val context: Context,
-    private val logger: Logger,
+    internal val context: Context,
+    internal val logger: Logger,
     private val bluetoothAdapter: BluetoothAdapter,
     audioDeviceManager: AudioDeviceManager,
     var headsetListener: BluetoothHeadsetConnectionListener? = null,
@@ -46,15 +74,17 @@ internal constructor(
     private val bluetoothIntentProcessor: BluetoothIntentProcessor =
             BluetoothIntentProcessorImpl(),
     private var headsetProxy: BluetoothHeadset? = null
-) : BluetoothProfile.ServiceListener, BroadcastReceiver() {
+) : BluetoothHeadsetManager,
+    BluetoothProfile.ServiceListener,
+    BroadcastReceiver() {
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-    internal var headsetState: HeadsetState = Disconnected
+    internal var headsetState: HeadsetState = HeadsetState.Disconnected
         set(value) {
             if (field != value) {
                 field = value
                 logger.d(TAG, "Headset state changed to ${field::class.simpleName}")
-                if (value == Disconnected) enableBluetoothScoJob.cancelBluetoothScoJob()
+                if (value == HeadsetState.Disconnected) enableBluetoothScoJob.cancelBluetoothScoJob()
             }
         }
 
@@ -64,22 +94,6 @@ internal constructor(
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     internal val disableBluetoothScoJob: DisableBluetoothScoJob = DisableBluetoothScoJob(logger,
             audioDeviceManager, bluetoothScoHandler, systemClockWrapper)
-
-    companion object {
-        internal fun newInstance(
-            context: Context,
-            logger: Logger,
-            bluetoothAdapter: BluetoothAdapter?,
-            audioDeviceManager: AudioDeviceManager
-        ): BluetoothHeadsetManager? {
-            return bluetoothAdapter?.let { adapter ->
-                BluetoothHeadsetManager(context, logger, adapter, audioDeviceManager)
-            } ?: run {
-                logger.d(TAG, "Bluetooth is not supported on this device")
-                null
-            }
-        }
-    }
 
     override fun onServiceConnected(profile: Int, bluetoothProfile: BluetoothProfile) {
         headsetProxy = bluetoothProfile as BluetoothHeadset
@@ -94,7 +108,7 @@ internal constructor(
 
     override fun onServiceDisconnected(profile: Int) {
         logger.d(TAG, "Bluetooth disconnected")
-        headsetState = Disconnected
+        headsetState = HeadsetState.Disconnected
         headsetListener?.onBluetoothHeadsetStateChanged()
     }
 
@@ -120,7 +134,7 @@ internal constructor(
                         STATE_AUDIO_CONNECTED -> {
                             logger.d(TAG, "Bluetooth audio connected on device $bluetoothDevice")
                             enableBluetoothScoJob.cancelBluetoothScoJob()
-                            headsetState = AudioActivated
+                            headsetState = HeadsetState.AudioActivated
                             headsetListener?.onBluetoothHeadsetStateChanged()
                         }
                         STATE_AUDIO_DISCONNECTED -> {
@@ -143,7 +157,7 @@ internal constructor(
         }
     }
 
-    fun start(headsetListener: BluetoothHeadsetConnectionListener) {
+    override fun start(headsetListener: BluetoothHeadsetConnectionListener) {
         this.headsetListener = headsetListener
 
         bluetoothAdapter.getProfileProxy(
@@ -157,33 +171,33 @@ internal constructor(
                 this, IntentFilter(ACTION_AUDIO_STATE_CHANGED))
     }
 
-    fun stop() {
+    override fun stop() {
         headsetListener = null
         bluetoothAdapter.closeProfileProxy(BluetoothProfile.HEADSET, headsetProxy)
         context.unregisterReceiver(this)
     }
 
-    fun activate() {
-        if (headsetState == Connected || headsetState == AudioActivationError)
+    override fun activate() {
+        if (headsetState == HeadsetState.Connected || headsetState == HeadsetState.AudioActivationError)
             enableBluetoothScoJob.executeBluetoothScoJob()
         else {
             logger.w(TAG, "Cannot activate when in the ${headsetState::class.simpleName} state")
         }
     }
 
-    fun deactivate() {
-        if (headsetState == AudioActivated) {
+    override fun deactivate() {
+        if (headsetState == HeadsetState.AudioActivated) {
             disableBluetoothScoJob.executeBluetoothScoJob()
         } else {
             logger.w(TAG, "Cannot deactivate when in the ${headsetState::class.simpleName} state")
         }
     }
 
-    fun hasActivationError() = headsetState == AudioActivationError
+    override fun hasActivationError() = headsetState == HeadsetState.AudioActivationError
 
     // TODO Remove bluetoothHeadsetName param
-    fun getHeadset(bluetoothHeadsetName: String?) =
-            if (headsetState != Disconnected) {
+    override fun getHeadset(bluetoothHeadsetName: String?) =
+            if (headsetState != HeadsetState.Disconnected) {
                 val headsetName = bluetoothHeadsetName ?: getHeadsetName()
                 headsetName?.let { AudioDevice.BluetoothHeadset(it) }
                         ?: AudioDevice.BluetoothHeadset()
@@ -193,24 +207,24 @@ internal constructor(
             intentAction == ACTION_CONNECTION_STATE_CHANGED || intentAction == ACTION_AUDIO_STATE_CHANGED
 
     private fun connect() {
-        if (!hasActiveHeadset()) headsetState = Connected
+        if (!hasActiveHeadset()) headsetState = HeadsetState.Connected
     }
 
     private fun disconnect() {
         headsetState = when {
             hasActiveHeadset() -> {
-                AudioActivated
+                HeadsetState.AudioActivated
             }
             hasConnectedDevice() -> {
-                Connected
+                HeadsetState.Connected
             }
             else -> {
-                Disconnected
+                HeadsetState.Disconnected
             }
         }
     }
 
-    private fun hasActiveHeadsetChanged() = headsetState == AudioActivated && hasConnectedDevice() && !hasActiveHeadset()
+    private fun hasActiveHeadsetChanged() = headsetState == HeadsetState.AudioActivated && hasConnectedDevice() && !hasActiveHeadset()
 
     private fun getHeadsetName(): String? =
             headsetProxy?.let { proxy ->
@@ -282,11 +296,11 @@ internal constructor(
         override fun scoAction() {
             logger.d(TAG, "Attempting to enable bluetooth SCO")
             audioDeviceManager.enableBluetoothSco(true)
-            headsetState = AudioActivating
+            headsetState = HeadsetState.AudioActivating
         }
 
         override fun scoTimeOutAction() {
-            headsetState = AudioActivationError
+            headsetState = HeadsetState.AudioActivationError
             headsetListener?.onBluetoothHeadsetActivationError()
         }
     }
@@ -302,11 +316,91 @@ internal constructor(
         override fun scoAction() {
             logger.d(TAG, "Attempting to disable bluetooth SCO")
             audioDeviceManager.enableBluetoothSco(false)
-            headsetState = Connected
+            headsetState = HeadsetState.Connected
         }
 
         override fun scoTimeOutAction() {
-            headsetState = AudioActivationError
+            headsetState = HeadsetState.AudioActivationError
         }
+    }
+}
+
+internal class BluetoothHeadsetManager_v31plus
+
+internal constructor(
+    context: Context,
+    logger: Logger,
+    bluetoothAdapter: BluetoothAdapter,
+    audioDeviceManager: AudioDeviceManager,
+    headsetListener: BluetoothHeadsetConnectionListener? = null,
+    bluetoothScoHandler: Handler = Handler(Looper.getMainLooper()),
+    systemClockWrapper: SystemClockWrapper = SystemClockWrapper(),
+    bluetoothIntentProcessor: BluetoothIntentProcessor = BluetoothIntentProcessorImpl(),
+    headsetProxy: BluetoothHeadset? = null
+) : BluetoothHeadsetManagerDefault(
+    context,
+    logger,
+    bluetoothAdapter,
+    audioDeviceManager,
+    headsetListener,
+    bluetoothScoHandler,
+    systemClockWrapper,
+    bluetoothIntentProcessor,
+    headsetProxy
+) {
+    private val ERROR_MSG = "Bluetooth unsupported, permissions denied"
+    override fun start(headsetListener: BluetoothHeadsetConnectionListener) {
+        if (hasPermissions()) {
+            super.start(headsetListener)
+        } else {
+            logger.w(TAG, ERROR_MSG)
+        }
+    }
+
+    override fun stop() {
+        if (hasPermissions()) {
+            super.stop()
+        } else {
+            logger.w(TAG, ERROR_MSG)
+        }
+    }
+
+    override fun activate() {
+        if (hasPermissions()) {
+            super.activate()
+        } else {
+            logger.w(TAG, ERROR_MSG)
+        }
+    }
+
+    override fun deactivate() {
+        if (hasPermissions()) {
+            super.deactivate()
+        } else {
+            logger.w(TAG, ERROR_MSG)
+        }
+    }
+
+    override fun hasActivationError(): Boolean {
+        if (hasPermissions()) {
+            return super.hasActivationError()
+        } else {
+            logger.w(TAG, ERROR_MSG)
+        }
+        return false
+    }
+
+    override fun getHeadset(bluetoothHeadsetName: String?) : AudioDevice.BluetoothHeadset? {
+        if (hasPermissions()) {
+            return super.getHeadset(bluetoothHeadsetName)
+        } else {
+            logger.w(TAG, ERROR_MSG)
+        }
+        return null
+    }
+
+    private fun hasPermissions(): Boolean {
+        return android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S &&
+            PERMISSION_GRANTED == context.checkSelfPermission(Manifest.permission.BLUETOOTH_CONNECT)
     }
 }

@@ -5,6 +5,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
 import com.twilio.audioswitch.android.HEADSET_2_NAME
 import com.twilio.audioswitch.android.HEADSET_NAME
+import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManagerDefault
 import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.CoreMatchers.nullValue
@@ -23,8 +24,13 @@ class MultipleBluetoothHeadsetsTest {
 
         audioSwitch.start { _, _ -> }
         audioSwitch.activate()
-        simulateBluetoothSystemIntent(getInstrumentationContext(), bluetoothHeadsetReceiver)
-        simulateBluetoothSystemIntent(getInstrumentationContext(), bluetoothHeadsetReceiver, HEADSET_2_NAME)
+        simulateBluetoothSystemIntent(
+            getInstrumentationContext(),
+            bluetoothHeadsetReceiver as BluetoothHeadsetManagerDefault)
+        simulateBluetoothSystemIntent(
+            getInstrumentationContext(),
+            bluetoothHeadsetReceiver as BluetoothHeadsetManagerDefault,
+            HEADSET_2_NAME)
 
         assertThat(audioSwitch.selectedAudioDevice!!.name, equalTo(HEADSET_2_NAME))
         assertThat(audioSwitch.availableAudioDevices.first().name, equalTo(HEADSET_2_NAME))

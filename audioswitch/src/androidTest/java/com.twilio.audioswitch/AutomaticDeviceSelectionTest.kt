@@ -6,6 +6,7 @@ import androidx.test.filters.LargeTest
 import com.twilio.audioswitch.AudioDevice.Earpiece
 import com.twilio.audioswitch.AudioDevice.Speakerphone
 import com.twilio.audioswitch.AudioDevice.WiredHeadset
+import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManagerDefault
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Test
@@ -22,7 +23,7 @@ class AutomaticDeviceSelectionTest {
         val (audioSwitch, bluetoothHeadsetReceiver, wiredHeadsetReceiver) = setupFakeAudioSwitch(context)
 
         audioSwitch.start { _, _ -> }
-        simulateBluetoothSystemIntent(context, bluetoothHeadsetReceiver)
+        simulateBluetoothSystemIntent(context, bluetoothHeadsetReceiver as BluetoothHeadsetManagerDefault)
         simulateWiredHeadsetSystemIntent(context, wiredHeadsetReceiver)
 
         assertThat(audioSwitch.selectedAudioDevice!! is AudioDevice.BluetoothHeadset, equalTo(true))
@@ -38,7 +39,7 @@ class AutomaticDeviceSelectionTest {
                 setupFakeAudioSwitch(context, listOf(WiredHeadset::class.java))
 
         audioSwitch.start { _, _ -> }
-        simulateBluetoothSystemIntent(context, bluetoothHeadsetReceiver)
+        simulateBluetoothSystemIntent(context, bluetoothHeadsetReceiver as BluetoothHeadsetManagerDefault)
         simulateWiredHeadsetSystemIntent(context, wiredHeadsetReceiver)
 
         assertThat(audioSwitch.selectedAudioDevice!! is WiredHeadset, equalTo(true))
@@ -51,7 +52,7 @@ class AutomaticDeviceSelectionTest {
         val (audioSwitch, bluetoothHeadsetReceiver) =
                 setupFakeAudioSwitch(context, listOf(Earpiece::class.java))
         audioSwitch.start { _, _ -> }
-        simulateBluetoothSystemIntent(context, bluetoothHeadsetReceiver)
+        simulateBluetoothSystemIntent(context, bluetoothHeadsetReceiver as BluetoothHeadsetManagerDefault)
 
         assertThat(audioSwitch.selectedAudioDevice!! is Earpiece, equalTo(true))
     }
@@ -63,7 +64,7 @@ class AutomaticDeviceSelectionTest {
         val (audioSwitch, bluetoothHeadsetReceiver) =
                 setupFakeAudioSwitch(context, listOf(Speakerphone::class.java))
         audioSwitch.start { _, _ -> }
-        simulateBluetoothSystemIntent(context, bluetoothHeadsetReceiver)
+        simulateBluetoothSystemIntent(context, bluetoothHeadsetReceiver as BluetoothHeadsetManagerDefault)
 
         assertThat(audioSwitch.selectedAudioDevice!! is Speakerphone, equalTo(true))
     }

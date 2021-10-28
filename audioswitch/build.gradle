@@ -7,11 +7,11 @@ apply plugin: 'kotlin-android'
 apply plugin: "org.jetbrains.dokka"
 
 android {
-    compileSdkVersion 30
+    compileSdkVersion 31
 
     defaultConfig {
         minSdkVersion 16
-        targetSdkVersion 30
+        targetSdkVersion 31
         buildConfigField("String", "VERSION_NAME",
                 "\"${audioSwitchVersion}\"")
 
