@@ -348,7 +348,7 @@ internal constructor(
     bluetoothIntentProcessor,
     headsetProxy
 ) {
-    private val ERROR_MSG = "Bluetooth unsupported, permissions denied"
+    private val ERROR_MSG = "Bluetooth unsupported, permissions not granted"
     override fun start(headsetListener: BluetoothHeadsetConnectionListener) {
         if (hasPermissions()) {
             super.start(headsetListener)
