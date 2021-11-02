@@ -27,17 +27,15 @@ import com.twilio.audioswitch.android.BluetoothIntentProcessorImpl
 import com.twilio.audioswitch.android.Logger
 import com.twilio.audioswitch.android.SystemClockWrapper
 
-
 private const val TAG = "BluetoothHeadsetManager"
-
 
 internal interface BluetoothHeadsetManager {
     fun start(headsetListener: BluetoothHeadsetConnectionListener)
     fun stop()
     fun activate()
     fun deactivate()
-    fun hasActivationError() : Boolean
-    fun getHeadset(bluetoothHeadsetName: String?) : AudioDevice.BluetoothHeadset?
+    fun hasActivationError(): Boolean
+    fun getHeadset(bluetoothHeadsetName: String?): AudioDevice.BluetoothHeadset?
 
     companion object {
         fun newInstance(
@@ -390,7 +388,7 @@ internal constructor(
         return false
     }
 
-    override fun getHeadset(bluetoothHeadsetName: String?) : AudioDevice.BluetoothHeadset? {
+    override fun getHeadset(bluetoothHeadsetName: String?): AudioDevice.BluetoothHeadset? {
         if (hasPermissions()) {
             return super.getHeadset(bluetoothHeadsetName)
         } else {

@@ -34,7 +34,7 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class ConnectedBluetoothHeadsetTest {
 
-    private val BLUETOOTH_TIMEOUT:Long = 7
+    private val BLUETOOTH_TIMEOUT: Long = 7
     private val bluetoothAdapter by lazy { BluetoothAdapter.getDefaultAdapter() }
     private val previousBluetoothEnabled by lazy { bluetoothAdapter.isEnabled }
     private val context by lazy { getInstrumentationContext() }
