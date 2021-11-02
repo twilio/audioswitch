@@ -1,4 +1,10 @@
 # Changelog
+### 1.1.3
+
+Enhancements
+
+- Updated the library to support Android 12.
+- Updated internal dependencies related to Android 12 support
 
 ### 1.1.2
 
