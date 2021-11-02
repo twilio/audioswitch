@@ -1,5 +1,6 @@
 package com.twilio.audioswitch
 
+import android.Manifest
 import android.content.Context
 import android.media.AudioManager
 import androidx.test.annotation.UiThreadTest
@@ -13,9 +14,24 @@ import junit.framework.TestCase.assertNotNull
 import junit.framework.TestCase.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
+import androidx.test.rule.GrantPermissionRule
+
+import org.junit.Rule
+
+
+
 
 @RunWith(AndroidJUnit4::class)
 class AudioSwitchIntegrationTest {
+
+    @get:Rule
+    val bluetoothPermissionRules: GrantPermissionRule by lazy {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+            GrantPermissionRule.grant(Manifest.permission.BLUETOOTH_CONNECT)
+        } else {
+            GrantPermissionRule.grant(Manifest.permission.BLUETOOTH)
+        }
+    }
 
     @Test
     @UiThreadTest
@@ -91,7 +107,7 @@ class AudioSwitchIntegrationTest {
         }
 
         val audioManager = getInstrumentationContext()
-                .getSystemService(Context.AUDIO_SERVICE) as AudioManager
+            .getSystemService(Context.AUDIO_SERVICE) as AudioManager
         val audioFocusUtil = AudioFocusUtil(audioManager, audioFocusChangeListener)
         audioFocusUtil.requestFocus()
 
@@ -111,7 +127,7 @@ class AudioSwitchIntegrationTest {
             }
         }
         val audioManager = getInstrumentationContext()
-                .getSystemService(Context.AUDIO_SERVICE) as AudioManager
+            .getSystemService(Context.AUDIO_SERVICE) as AudioManager
         val audioFocusUtil = AudioFocusUtil(audioManager, audioFocusChangeListener)
         audioFocusUtil.requestFocus()
 

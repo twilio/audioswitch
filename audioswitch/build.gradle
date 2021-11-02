@@ -53,11 +53,11 @@ android {
 }
 
 dependencies {
-    implementation "androidx.annotation:annotation:1.1.0"
-    testImplementation 'junit:junit:4.13.1'
+    implementation "androidx.annotation:annotation:1.2.0"
+    testImplementation 'junit:junit:4.13.2'
     testImplementation 'com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0'
     testImplementation 'pl.pragmatists:JUnitParams:1.1.1'
-    def androidXTest = '1.4.0'
+    def androidXTest = '1.4.1-alpha03'
     androidTestUtil "androidx.test:orchestrator:$androidXTest"
     androidTestImplementation "androidx.test:runner:$androidXTest"
     androidTestImplementation "androidx.test:rules:$androidXTest"
