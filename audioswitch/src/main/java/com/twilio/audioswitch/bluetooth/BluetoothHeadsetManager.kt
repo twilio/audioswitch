@@ -28,6 +28,7 @@ import com.twilio.audioswitch.android.Logger
 import com.twilio.audioswitch.android.SystemClockWrapper
 
 private const val TAG = "BluetoothHeadsetManager"
+private const val PERMISSION_ERROR_MESSAGE = "Bluetooth unsupported, permissions not granted"
 
 internal interface BluetoothHeadsetManager {
     fun start(headsetListener: BluetoothHeadsetConnectionListener)
@@ -46,7 +47,7 @@ internal interface BluetoothHeadsetManager {
         ): BluetoothHeadsetManager? {
             return bluetoothAdapter?.let { adapter ->
                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
-                    BluetoothHeadsetManager_v31plus(context, logger, adapter, audioDeviceManager)
+                    BluetoothHeadsetManagerV31plus(context, logger, adapter, audioDeviceManager)
                 } else {
                     BluetoothHeadsetManagerDefault(context, logger, adapter, audioDeviceManager)
                 }
@@ -323,9 +324,7 @@ internal constructor(
     }
 }
 
-internal class BluetoothHeadsetManager_v31plus
-
-internal constructor(
+internal class BluetoothHeadsetManagerV31plus(
     context: Context,
     logger: Logger,
     bluetoothAdapter: BluetoothAdapter,
@@ -346,12 +345,11 @@ internal constructor(
     bluetoothIntentProcessor,
     headsetProxy
 ) {
-    private val ERROR_MSG = "Bluetooth unsupported, permissions not granted"
     override fun start(headsetListener: BluetoothHeadsetConnectionListener) {
         if (hasPermissions()) {
             super.start(headsetListener)
         } else {
-            logger.w(TAG, ERROR_MSG)
+            logger.w(TAG, PERMISSION_ERROR_MESSAGE)
         }
     }
 
@@ -359,7 +357,7 @@ internal constructor(
         if (hasPermissions()) {
             super.stop()
         } else {
-            logger.w(TAG, ERROR_MSG)
+            logger.w(TAG, PERMISSION_ERROR_MESSAGE)
         }
     }
 
@@ -367,7 +365,7 @@ internal constructor(
         if (hasPermissions()) {
             super.activate()
         } else {
-            logger.w(TAG, ERROR_MSG)
+            logger.w(TAG, PERMISSION_ERROR_MESSAGE)
         }
     }
 
@@ -375,7 +373,7 @@ internal constructor(
         if (hasPermissions()) {
             super.deactivate()
         } else {
-            logger.w(TAG, ERROR_MSG)
+            logger.w(TAG, PERMISSION_ERROR_MESSAGE)
         }
     }
 
@@ -383,7 +381,7 @@ internal constructor(
         if (hasPermissions()) {
             return super.hasActivationError()
         } else {
-            logger.w(TAG, ERROR_MSG)
+            logger.w(TAG, PERMISSION_ERROR_MESSAGE)
         }
         return false
     }
@@ -392,7 +390,7 @@ internal constructor(
         if (hasPermissions()) {
             return super.getHeadset(bluetoothHeadsetName)
         } else {
-            logger.w(TAG, ERROR_MSG)
+            logger.w(TAG, PERMISSION_ERROR_MESSAGE)
         }
         return null
     }

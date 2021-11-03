@@ -84,6 +84,15 @@ class ConnectedBluetoothHeadsetTest {
         }
     }
 
+    @get:Rule
+    val bluetoothPermissionRules: GrantPermissionRule by lazy {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+            GrantPermissionRule.grant(Manifest.permission.BLUETOOTH_CONNECT)
+        } else {
+            GrantPermissionRule.grant(Manifest.permission.BLUETOOTH)
+        }
+    }
+
     @Before
     fun setup() {
         assumeNotNull(bluetoothAdapter)
@@ -113,15 +122,6 @@ class ConnectedBluetoothHeadsetTest {
             bluetoothAdapter.closeProfileProxy(BluetoothProfile.HEADSET, bluetoothHeadset)
         }
         context.unregisterReceiver(bluetoothReceiver)
-    }
-
-    @get:Rule
-    val bluetoothPermissionRules: GrantPermissionRule by lazy {
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
-            GrantPermissionRule.grant(Manifest.permission.BLUETOOTH_CONNECT)
-        } else {
-            GrantPermissionRule.grant(Manifest.permission.BLUETOOTH)
-        }
     }
 
     @Test
