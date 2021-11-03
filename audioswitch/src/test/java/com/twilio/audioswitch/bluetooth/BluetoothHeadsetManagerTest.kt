@@ -15,11 +15,11 @@ import com.nhaarman.mockitokotlin2.whenever
 import com.twilio.audioswitch.BaseTest
 import com.twilio.audioswitch.DEVICE_NAME
 import com.twilio.audioswitch.assertBluetoothHeadsetSetup
-import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManagerDefault.HeadsetState.AudioActivated
-import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManagerDefault.HeadsetState.AudioActivating
-import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManagerDefault.HeadsetState.AudioActivationError
-import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManagerDefault.HeadsetState.Connected
-import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManagerDefault.HeadsetState.Disconnected
+import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager.HeadsetState.AudioActivated
+import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager.HeadsetState.AudioActivating
+import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager.HeadsetState.AudioActivationError
+import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager.HeadsetState.Connected
+import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager.HeadsetState.Disconnected
 import junitparams.JUnitParamsRunner
 import junitparams.Parameters
 import org.hamcrest.CoreMatchers.`is`
@@ -341,7 +341,7 @@ class BluetoothHeadsetManagerTest : BaseTest() {
             whenever(mock.elapsedRealtime()).thenReturn(0L, TIMEOUT)
         }
         handler = setupHandlerMock()
-        headsetManager = BluetoothHeadsetManagerDefault(context, logger, bluetoothAdapter,
+        headsetManager = BluetoothHeadsetManager(context, logger, bluetoothAdapter,
                 audioDeviceManager, bluetoothScoHandler = handler,
                 systemClockWrapper = systemClockWrapper, headsetProxy = headsetProxy)
         headsetManager.headsetState = Connected
@@ -453,7 +453,7 @@ class BluetoothHeadsetManagerTest : BaseTest() {
     }
 
     private fun initializeManagerWithMocks() {
-        headsetManager = BluetoothHeadsetManagerDefault(context, logger, bluetoothAdapter,
+        headsetManager = BluetoothHeadsetManager(context, logger, bluetoothAdapter,
                 audioDeviceManager, headsetListener, handler, systemClockWrapper,
                 headsetProxy = headsetProxy)
     }

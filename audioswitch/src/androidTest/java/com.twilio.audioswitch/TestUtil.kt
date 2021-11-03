@@ -15,7 +15,6 @@ import com.twilio.audioswitch.android.FakeBluetoothIntentProcessor
 import com.twilio.audioswitch.android.HEADSET_NAME
 import com.twilio.audioswitch.android.ProductionLogger
 import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager
-import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManagerDefault
 import com.twilio.audioswitch.wired.INTENT_STATE
 import com.twilio.audioswitch.wired.STATE_PLUGGED
 import com.twilio.audioswitch.wired.WiredHeadsetReceiver
@@ -40,7 +39,7 @@ internal fun setupFakeAudioSwitch(
                     {})
     val wiredHeadsetReceiver = WiredHeadsetReceiver(context, logger)
     val headsetManager = BluetoothAdapter.getDefaultAdapter()?.let { bluetoothAdapter ->
-        BluetoothHeadsetManagerDefault(context, logger, bluetoothAdapter, audioDeviceManager,
+        BluetoothHeadsetManager(context, logger, bluetoothAdapter, audioDeviceManager,
                 bluetoothIntentProcessor = FakeBluetoothIntentProcessor())
     } ?: run {
         null
@@ -58,7 +57,7 @@ internal fun setupFakeAudioSwitch(
 
 internal fun simulateBluetoothSystemIntent(
     context: Context,
-    headsetManager: BluetoothHeadsetManagerDefault,
+    headsetManager: BluetoothHeadsetManager,
     deviceName: String = HEADSET_NAME,
     action: String = BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED,
     connectionState: Int = BluetoothHeadset.STATE_CONNECTED
