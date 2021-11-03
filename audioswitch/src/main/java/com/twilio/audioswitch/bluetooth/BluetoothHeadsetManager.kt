@@ -295,16 +295,17 @@ internal constructor(
     @SuppressLint("NewApi")
     private fun hasPermissions(): Boolean {
         return when (android.os.Build.VERSION.SDK_INT) {
-            in android.os.Build.VERSION_CODES.BASE..android.os.Build.VERSION_CODES.LOLLIPOP_MR1 -> {
-                // before android 23/M checkSelfPermission(..) didn't exist
-                true
-            }
-            in android.os.Build.VERSION_CODES.M..android.os.Build.VERSION_CODES.R -> {
-                PERMISSION_GRANTED == context.checkSelfPermission(Manifest.permission.BLUETOOTH)
-            }
-            else -> {
+            in android.os.Build.VERSION_CODES.BASE..android.os.Build.VERSION_CODES.R -> {
+                PERMISSION_GRANTED == context.checkPermission(
+                    Manifest.permission.BLUETOOTH,
+                    android.os.Process.myPid(),
+                    android.os.Process.myUid())
+            } else -> {
                 // for android 12/S or newer
-                PERMISSION_GRANTED == context.checkSelfPermission(Manifest.permission.BLUETOOTH_CONNECT)
+                PERMISSION_GRANTED == context.checkPermission(
+                    Manifest.permission.BLUETOOTH_CONNECT,
+                    android.os.Process.myPid(),
+                    android.os.Process.myUid())
             }
         }
     }
