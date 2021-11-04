@@ -22,11 +22,11 @@ import android.os.Looper
 import androidx.annotation.VisibleForTesting
 import com.twilio.audioswitch.AudioDevice
 import com.twilio.audioswitch.AudioDeviceManager
-import com.twilio.audioswitch.android.*
 import com.twilio.audioswitch.android.BluetoothDeviceWrapper
 import com.twilio.audioswitch.android.BluetoothIntentProcessor
 import com.twilio.audioswitch.android.BluetoothIntentProcessorImpl
 import com.twilio.audioswitch.android.Logger
+import com.twilio.audioswitch.android.PermissionsCheckStrategy
 import com.twilio.audioswitch.android.SystemClockWrapper
 import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager.HeadsetState.AudioActivated
 import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager.HeadsetState.AudioActivating
@@ -343,8 +343,8 @@ internal constructor(
         }
     }
 
-    internal class DefaultPermissionsCheckStrategy(private val context:Context)
-        : PermissionsCheckStrategy {
+    internal class DefaultPermissionsCheckStrategy(private val context: Context) :
+        PermissionsCheckStrategy {
         @SuppressLint("NewApi")
         override fun hasPermissions(): Boolean {
             return when (android.os.Build.VERSION.SDK_INT) {

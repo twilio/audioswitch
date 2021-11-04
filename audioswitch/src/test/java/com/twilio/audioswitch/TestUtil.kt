@@ -51,5 +51,4 @@ internal fun setupPermissionsCheckStrategy() =
         whenever(mock.hasPermissions()).thenReturn(true)
     }
 
-
 fun createHeadset(name: String): AudioDevice.BluetoothHeadset = AudioDevice.BluetoothHeadset(name)

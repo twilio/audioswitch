@@ -20,7 +20,6 @@ import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager.HeadsetState.Aud
 import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager.HeadsetState.AudioActivationError
 import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager.HeadsetState.Connected
 import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager.HeadsetState.Disconnected
-import com.twilio.audioswitch.setupPermissionsCheckStrategy
 import junitparams.JUnitParamsRunner
 import junitparams.Parameters
 import org.hamcrest.CoreMatchers.`is`

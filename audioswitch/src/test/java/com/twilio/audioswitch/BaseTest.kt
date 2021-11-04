@@ -8,7 +8,9 @@ import android.bluetooth.BluetoothProfile
 import android.content.Context
 import android.content.Intent
 import android.media.AudioManager.OnAudioFocusChangeListener
-import com.nhaarman.mockitokotlin2.*
+import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.verify
+import com.nhaarman.mockitokotlin2.whenever
 import com.twilio.audioswitch.AudioDevice.Earpiece
 import com.twilio.audioswitch.AudioDevice.Speakerphone
 import com.twilio.audioswitch.AudioDevice.WiredHeadset
@@ -43,7 +45,7 @@ open class BaseTest {
     internal val preferredDeviceList = listOf(AudioDevice.BluetoothHeadset::class.java, WiredHeadset::class.java,
             Earpiece::class.java, Speakerphone::class.java)
     internal val permissionsStrategyProxy = setupPermissionsCheckStrategy()
-    internal var headsetManager : BluetoothHeadsetManager = BluetoothHeadsetManager(
+    internal var headsetManager: BluetoothHeadsetManager = BluetoothHeadsetManager(
         context,
         logger,
         bluetoothAdapter,
