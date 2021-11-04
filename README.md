@@ -125,7 +125,8 @@ audioSwitch.start { _, _ -> }
 ```
 
 ## Permissions
-No manifest permissions are required by your application since the required permissions get merged from the [manifest file](audioswitch/src/main/AndroidManifest.xml) in this library.
+On Android 12 and greater, the application using this library is expected to request the BLUETOOTH_CONNECT permission. Not doing so will disable the use of bluetooth in the audioswitch library.
+Pre-Android 12, no user permission requests are needed. All other permissions needed are listed in the library's manifest and are automatically merged from the [manifest file](audioswitch/src/main/AndroidManifest.xml) in this library.
 
 ## Contributing
 
