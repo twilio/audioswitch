@@ -1,5 +1,6 @@
 package com.twilio.audioswitch.manual
 
+import android.Manifest
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothHeadset
 import android.bluetooth.BluetoothProfile
@@ -10,6 +11,7 @@ import android.content.IntentFilter
 import android.media.AudioManager
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import androidx.test.rule.GrantPermissionRule
 import com.twilio.audioswitch.AudioDevice
 import com.twilio.audioswitch.AudioSwitch
 import com.twilio.audioswitch.getInstrumentationContext
@@ -25,12 +27,14 @@ import org.junit.After
 import org.junit.Assume.assumeNotNull
 import org.junit.Assume.assumeTrue
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 class ConnectedBluetoothHeadsetTest {
 
+    private val BLUETOOTH_TIMEOUT: Long = 7
     private val bluetoothAdapter by lazy { BluetoothAdapter.getDefaultAdapter() }
     private val previousBluetoothEnabled by lazy { bluetoothAdapter.isEnabled }
     private val context by lazy { getInstrumentationContext() }
@@ -80,6 +84,15 @@ class ConnectedBluetoothHeadsetTest {
         }
     }
 
+    @get:Rule
+    val bluetoothPermissionRules: GrantPermissionRule by lazy {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+            GrantPermissionRule.grant(Manifest.permission.BLUETOOTH_CONNECT)
+        } else {
+            GrantPermissionRule.grant(Manifest.permission.BLUETOOTH)
+        }
+    }
+
     @Before
     fun setup() {
         assumeNotNull(bluetoothAdapter)
@@ -88,9 +101,9 @@ class ConnectedBluetoothHeadsetTest {
             bluetoothAdapter.enable()
         }
         bluetoothAdapter.getProfileProxy(context, bluetoothServiceListener, BluetoothProfile.HEADSET)
-        assumeTrue(bluetoothServiceConnected.await(10, TimeUnit.SECONDS))
+        assumeTrue(bluetoothServiceConnected.await(BLUETOOTH_TIMEOUT, TimeUnit.SECONDS))
         if (!previousBluetoothEnabled) {
-            assumeTrue(bluetoothStateConnected.await(10, TimeUnit.SECONDS))
+            assumeTrue(bluetoothStateConnected.await(BLUETOOTH_TIMEOUT, TimeUnit.SECONDS))
         }
         assumeTrue(bluetoothHeadset.connectedDevices.size == 1)
         expectedBluetoothDevice = AudioDevice.BluetoothHeadset(bluetoothHeadset.connectedDevices.first().name)
@@ -135,13 +148,13 @@ class ConnectedBluetoothHeadsetTest {
             }
         }
 
-        assertTrue(bluetoothDeviceConnected.await(5, TimeUnit.SECONDS))
+        assertTrue(bluetoothDeviceConnected.await(BLUETOOTH_TIMEOUT, TimeUnit.SECONDS))
         assertEquals(expectedBluetoothDevice, actualBluetoothDevice)
 
         noBluetoothDeviceAvailable = CountDownLatch(1)
         bluetoothAdapter.disable()
         retryAssertion { assertFalse(bluetoothAdapter.isEnabled) }
-        assertTrue(noBluetoothDeviceAvailable.await(5, TimeUnit.SECONDS))
+        assertTrue(noBluetoothDeviceAvailable.await(BLUETOOTH_TIMEOUT, TimeUnit.SECONDS))
         InstrumentationRegistry.getInstrumentation().runOnMainSync {
             assertNull(audioSwitch.availableAudioDevices.find { it is AudioDevice.BluetoothHeadset })
             assertFalse(audioSwitch.selectedAudioDevice is AudioDevice.BluetoothHeadset)
@@ -189,7 +202,7 @@ class ConnectedBluetoothHeadsetTest {
             audioSwitch.activate()
         }
         assertFalse(isSpeakerPhoneOn())
-        assertTrue(bluetoothAudioStateConnected.await(10, TimeUnit.SECONDS))
+        assertTrue(bluetoothAudioStateConnected.await(BLUETOOTH_TIMEOUT, TimeUnit.SECONDS))
         assertTrue(bluetoothHeadset.isAudioConnected(bluetoothHeadset.connectedDevices.first()))
         InstrumentationRegistry.getInstrumentation().runOnMainSync {
             assertEquals(expectedBluetoothDevice, audioSwitch.selectedAudioDevice)
@@ -210,7 +223,7 @@ class ConnectedBluetoothHeadsetTest {
         InstrumentationRegistry.getInstrumentation().runOnMainSync {
             audioSwitch.activate()
         }
-        assertFalse(bluetoothAudioStateConnected.await(5, TimeUnit.SECONDS))
+        assertFalse(bluetoothAudioStateConnected.await(BLUETOOTH_TIMEOUT, TimeUnit.SECONDS))
         assertFalse(bluetoothHeadset.isAudioConnected(bluetoothHeadset.connectedDevices.first()))
 
         InstrumentationRegistry.getInstrumentation().runOnMainSync {
@@ -236,12 +249,12 @@ class ConnectedBluetoothHeadsetTest {
             assertTrue(audioSwitch.selectedAudioDevice !is AudioDevice.BluetoothHeadset)
         }
         assertTrue(bluetoothAudioStateConnected.count > 0)
-        assertFalse(bluetoothAudioStateConnected.await(5, TimeUnit.SECONDS))
+        assertFalse(bluetoothAudioStateConnected.await(BLUETOOTH_TIMEOUT, TimeUnit.SECONDS))
         assertTrue(bluetoothHeadset.connectedDevices.isEmpty())
         bluetoothAdapter.enable()
-        assertTrue(bluetoothDeviceConnected.await(5, TimeUnit.SECONDS))
+        assertTrue(bluetoothDeviceConnected.await(BLUETOOTH_TIMEOUT, TimeUnit.SECONDS))
         assertEquals(expectedBluetoothDevice, actualBluetoothDevice)
-        assertTrue(bluetoothAudioStateConnected.await(5, TimeUnit.SECONDS))
+        assertTrue(bluetoothAudioStateConnected.await(BLUETOOTH_TIMEOUT, TimeUnit.SECONDS))
         assertTrue(bluetoothHeadset.isAudioConnected(bluetoothHeadset.connectedDevices.first()))
     }
 
@@ -257,7 +270,7 @@ class ConnectedBluetoothHeadsetTest {
             }
         }
 
-        assertTrue(bluetoothDeviceConnected.await(5, TimeUnit.SECONDS))
+        assertTrue(bluetoothDeviceConnected.await(BLUETOOTH_TIMEOUT, TimeUnit.SECONDS))
 
         return actualBluetoothDevice
     }

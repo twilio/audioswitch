@@ -14,7 +14,7 @@ import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 @LargeTest
-class MultipleBluetoothHeadsetsTest {
+class MultipleBluetoothHeadsetsTest : AndroidTestBase() {
 
     @UiThreadTest
     @Test
@@ -23,13 +23,19 @@ class MultipleBluetoothHeadsetsTest {
 
         audioSwitch.start { _, _ -> }
         audioSwitch.activate()
-        simulateBluetoothSystemIntent(getInstrumentationContext(), bluetoothHeadsetReceiver)
-        simulateBluetoothSystemIntent(getInstrumentationContext(), bluetoothHeadsetReceiver, HEADSET_2_NAME)
+        simulateBluetoothSystemIntent(
+            getInstrumentationContext(),
+            bluetoothHeadsetReceiver)
+        simulateBluetoothSystemIntent(
+            getInstrumentationContext(),
+            bluetoothHeadsetReceiver,
+            HEADSET_2_NAME)
 
         assertThat(audioSwitch.selectedAudioDevice!!.name, equalTo(HEADSET_2_NAME))
         assertThat(audioSwitch.availableAudioDevices.first().name, equalTo(HEADSET_2_NAME))
         assertThat(audioSwitch.availableAudioDevices.find { it.name == HEADSET_NAME },
                 `is`(nullValue()))
         assertThat(isSpeakerPhoneOn(), equalTo(false)) // Best we can do for asserting if a fake BT headset is activated
+        audioSwitch.stop()
     }
 }

@@ -13,7 +13,7 @@ import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 @LargeTest
-class AutomaticDeviceSelectionTest {
+class AutomaticDeviceSelectionTest : AndroidTestBase() {
 
     @UiThreadTest
     @Test
@@ -26,8 +26,7 @@ class AutomaticDeviceSelectionTest {
         simulateWiredHeadsetSystemIntent(context, wiredHeadsetReceiver)
 
         assertThat(audioSwitch.selectedAudioDevice!! is AudioDevice.BluetoothHeadset, equalTo(true))
-
-        audioSwitch.activate()
+        audioSwitch.stop()
     }
 
     @UiThreadTest
@@ -42,6 +41,7 @@ class AutomaticDeviceSelectionTest {
         simulateWiredHeadsetSystemIntent(context, wiredHeadsetReceiver)
 
         assertThat(audioSwitch.selectedAudioDevice!! is WiredHeadset, equalTo(true))
+        audioSwitch.stop()
     }
 
     @UiThreadTest
@@ -54,6 +54,7 @@ class AutomaticDeviceSelectionTest {
         simulateBluetoothSystemIntent(context, bluetoothHeadsetReceiver)
 
         assertThat(audioSwitch.selectedAudioDevice!! is Earpiece, equalTo(true))
+        audioSwitch.stop()
     }
 
     @UiThreadTest
@@ -66,5 +67,6 @@ class AutomaticDeviceSelectionTest {
         simulateBluetoothSystemIntent(context, bluetoothHeadsetReceiver)
 
         assertThat(audioSwitch.selectedAudioDevice!! is Speakerphone, equalTo(true))
+        audioSwitch.stop()
     }
 }

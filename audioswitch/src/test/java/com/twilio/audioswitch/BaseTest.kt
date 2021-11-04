@@ -44,12 +44,18 @@ open class BaseTest {
     internal val headsetProxy = mock<BluetoothHeadset>()
     internal val preferredDeviceList = listOf(AudioDevice.BluetoothHeadset::class.java, WiredHeadset::class.java,
             Earpiece::class.java, Speakerphone::class.java)
-    internal var headsetManager =
-        BluetoothHeadsetManager(
-            context, logger, bluetoothAdapter,
-            audioDeviceManager, bluetoothScoHandler = handler,
-            systemClockWrapper = systemClockWrapper, headsetProxy = headsetProxy
-        )
+    internal val permissionsStrategyProxy = setupPermissionsCheckStrategy()
+    internal var headsetManager: BluetoothHeadsetManager = BluetoothHeadsetManager(
+        context,
+        logger,
+        bluetoothAdapter,
+        audioDeviceManager,
+        bluetoothScoHandler = handler,
+        systemClockWrapper = systemClockWrapper,
+        headsetProxy = headsetProxy,
+        permissionsRequestStrategy = permissionsStrategyProxy
+    )
+
     internal var audioSwitch = AudioSwitch(
         context = context,
         logger = logger,

@@ -15,7 +15,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
-class AudioSwitchIntegrationTest {
+class AudioSwitchIntegrationTest : AndroidTestBase() {
 
     @Test
     @UiThreadTest
@@ -91,7 +91,7 @@ class AudioSwitchIntegrationTest {
         }
 
         val audioManager = getInstrumentationContext()
-                .getSystemService(Context.AUDIO_SERVICE) as AudioManager
+            .getSystemService(Context.AUDIO_SERVICE) as AudioManager
         val audioFocusUtil = AudioFocusUtil(audioManager, audioFocusChangeListener)
         audioFocusUtil.requestFocus()
 
@@ -111,7 +111,7 @@ class AudioSwitchIntegrationTest {
             }
         }
         val audioManager = getInstrumentationContext()
-                .getSystemService(Context.AUDIO_SERVICE) as AudioManager
+            .getSystemService(Context.AUDIO_SERVICE) as AudioManager
         val audioFocusUtil = AudioFocusUtil(audioManager, audioFocusChangeListener)
         audioFocusUtil.requestFocus()
 

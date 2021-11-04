@@ -16,7 +16,7 @@ import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 @LargeTest
-class UserDeviceSelectionTest {
+class UserDeviceSelectionTest : AndroidTestBase() {
 
     private val context = InstrumentationRegistry.getInstrumentation().context
 
@@ -32,6 +32,7 @@ class UserDeviceSelectionTest {
         audioSwitch.selectDevice(earpiece!!)
 
         assertThat(audioSwitch.selectedAudioDevice, equalTo(earpiece))
+        audioSwitch.stop()
     }
 
     @UiThreadTest
@@ -46,6 +47,7 @@ class UserDeviceSelectionTest {
         audioSwitch.selectDevice(speakerphone!!)
 
         assertThat(audioSwitch.selectedAudioDevice, equalTo(speakerphone))
+        audioSwitch.stop()
     }
 
     @UiThreadTest
@@ -61,5 +63,6 @@ class UserDeviceSelectionTest {
         audioSwitch.selectDevice(bluetoothDevice!!)
 
         assertThat(audioSwitch.selectedAudioDevice, equalTo(bluetoothDevice))
+        audioSwitch.stop()
     }
 }

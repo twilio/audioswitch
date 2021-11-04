@@ -7,11 +7,11 @@ apply plugin: 'kotlin-android'
 apply plugin: "org.jetbrains.dokka"
 
 android {
-    compileSdkVersion 30
+    compileSdkVersion 31
 
     defaultConfig {
         minSdkVersion 16
-        targetSdkVersion 30
+        targetSdkVersion 31
         buildConfigField("String", "VERSION_NAME",
                 "\"${audioSwitchVersion}\"")
 
@@ -53,14 +53,15 @@ android {
 }
 
 dependencies {
-    implementation "androidx.annotation:annotation:1.1.0"
-    testImplementation 'junit:junit:4.13.1'
+    implementation "androidx.annotation:annotation:1.2.0"
+    testImplementation 'junit:junit:4.13.2'
     testImplementation 'com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0'
     testImplementation 'pl.pragmatists:JUnitParams:1.1.1'
-    def androidXTest = '1.3.0'
+    def androidXTest = '1.4.1-alpha03'
+    androidTestUtil "androidx.test:orchestrator:$androidXTest"
     androidTestImplementation "androidx.test:runner:$androidXTest"
     androidTestImplementation "androidx.test:rules:$androidXTest"
-    androidTestImplementation 'androidx.test.ext:junit:1.1.2'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.3'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
 }
 

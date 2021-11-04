@@ -341,9 +341,15 @@ class BluetoothHeadsetManagerTest : BaseTest() {
             whenever(mock.elapsedRealtime()).thenReturn(0L, TIMEOUT)
         }
         handler = setupHandlerMock()
-        headsetManager = BluetoothHeadsetManager(context, logger, bluetoothAdapter,
-                audioDeviceManager, bluetoothScoHandler = handler,
-                systemClockWrapper = systemClockWrapper, headsetProxy = headsetProxy)
+        headsetManager = BluetoothHeadsetManager(
+            context,
+            logger,
+            bluetoothAdapter,
+            audioDeviceManager,
+            bluetoothScoHandler = handler,
+            systemClockWrapper = systemClockWrapper, headsetProxy = headsetProxy,
+            permissionsRequestStrategy = permissionsStrategyProxy)
+
         headsetManager.headsetState = Connected
         headsetManager.activate()
 
@@ -453,8 +459,15 @@ class BluetoothHeadsetManagerTest : BaseTest() {
     }
 
     private fun initializeManagerWithMocks() {
-        headsetManager = BluetoothHeadsetManager(context, logger, bluetoothAdapter,
-                audioDeviceManager, headsetListener, handler, systemClockWrapper,
-                headsetProxy = headsetProxy)
+        headsetManager = BluetoothHeadsetManager(
+            context,
+            logger,
+            bluetoothAdapter,
+            audioDeviceManager,
+            headsetListener,
+            handler,
+            systemClockWrapper,
+            headsetProxy = headsetProxy,
+            permissionsRequestStrategy = permissionsStrategyProxy)
     }
 }

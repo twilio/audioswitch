@@ -1,4 +1,12 @@
 # Changelog
+### 1.1.4
+
+Enhancements
+
+- Updated the library to support Android 12.
+- Updated internal dependencies related to Android 12 support
+- Updated compile and target sdk to Android 12 (31)
+- Updated gradle to version 4.2.1
 
 ### 1.1.2
 

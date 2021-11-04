@@ -10,6 +10,7 @@ import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
+import com.twilio.audioswitch.android.PermissionsCheckStrategy
 import com.twilio.audioswitch.android.SystemClockWrapper
 import com.twilio.audioswitch.bluetooth.BluetoothScoJob
 
@@ -44,5 +45,10 @@ internal fun BaseTest.assertBluetoothHeadsetSetup() {
     )
     verify(context, times(2)).registerReceiver(eq(headsetManager), isA())
 }
+
+internal fun setupPermissionsCheckStrategy() =
+    mock<PermissionsCheckStrategy> {
+        whenever(mock.hasPermissions()).thenReturn(true)
+    }
 
 fun createHeadset(name: String): AudioDevice.BluetoothHeadset = AudioDevice.BluetoothHeadset(name)
