@@ -20,6 +20,7 @@ import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager.HeadsetState.Aud
 import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager.HeadsetState.AudioActivationError
 import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager.HeadsetState.Connected
 import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager.HeadsetState.Disconnected
+import com.twilio.audioswitch.setupPermissionsCheckStrategy
 import junitparams.JUnitParamsRunner
 import junitparams.Parameters
 import org.hamcrest.CoreMatchers.`is`
@@ -341,9 +342,15 @@ class BluetoothHeadsetManagerTest : BaseTest() {
             whenever(mock.elapsedRealtime()).thenReturn(0L, TIMEOUT)
         }
         handler = setupHandlerMock()
-        headsetManager = BluetoothHeadsetManager(context, logger, bluetoothAdapter,
-                audioDeviceManager, bluetoothScoHandler = handler,
-                systemClockWrapper = systemClockWrapper, headsetProxy = headsetProxy)
+        headsetManager = BluetoothHeadsetManager(
+            context,
+            logger,
+            bluetoothAdapter,
+            audioDeviceManager,
+            bluetoothScoHandler = handler,
+            systemClockWrapper = systemClockWrapper, headsetProxy = headsetProxy,
+            permissionsRequestStrategy = permissionsStrategyProxy)
+
         headsetManager.headsetState = Connected
         headsetManager.activate()
 
@@ -453,8 +460,15 @@ class BluetoothHeadsetManagerTest : BaseTest() {
     }
 
     private fun initializeManagerWithMocks() {
-        headsetManager = BluetoothHeadsetManager(context, logger, bluetoothAdapter,
-                audioDeviceManager, headsetListener, handler, systemClockWrapper,
-                headsetProxy = headsetProxy)
+        headsetManager = BluetoothHeadsetManager(
+            context,
+            logger,
+            bluetoothAdapter,
+            audioDeviceManager,
+            headsetListener,
+            handler,
+            systemClockWrapper,
+            headsetProxy = headsetProxy,
+            permissionsRequestStrategy = permissionsStrategyProxy)
     }
 }

@@ -22,6 +22,7 @@ import android.os.Looper
 import androidx.annotation.VisibleForTesting
 import com.twilio.audioswitch.AudioDevice
 import com.twilio.audioswitch.AudioDeviceManager
+import com.twilio.audioswitch.android.*
 import com.twilio.audioswitch.android.BluetoothDeviceWrapper
 import com.twilio.audioswitch.android.BluetoothIntentProcessor
 import com.twilio.audioswitch.android.BluetoothIntentProcessorImpl
@@ -36,7 +37,7 @@ import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager.HeadsetState.Dis
 private const val TAG = "BluetoothHeadsetManager"
 private const val PERMISSION_ERROR_MESSAGE = "Bluetooth unsupported, permissions not granted"
 
-internal open class BluetoothHeadsetManager
+internal class BluetoothHeadsetManager
 
 @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
 internal constructor(
@@ -47,9 +48,9 @@ internal constructor(
     var headsetListener: BluetoothHeadsetConnectionListener? = null,
     bluetoothScoHandler: Handler = Handler(Looper.getMainLooper()),
     systemClockWrapper: SystemClockWrapper = SystemClockWrapper(),
-    private val bluetoothIntentProcessor: BluetoothIntentProcessor =
-            BluetoothIntentProcessorImpl(),
-    private var headsetProxy: BluetoothHeadset? = null
+    private val bluetoothIntentProcessor: BluetoothIntentProcessor = BluetoothIntentProcessorImpl(),
+    private var headsetProxy: BluetoothHeadset? = null,
+    private val permissionsRequestStrategy: PermissionsCheckStrategy = DefaultPermissionsCheckStrategy(context)
 ) : BluetoothProfile.ServiceListener, BroadcastReceiver() {
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
@@ -292,23 +293,7 @@ internal constructor(
                         deviceClass == BluetoothClass.Device.Major.UNCATEGORIZED
             } ?: false
 
-    @SuppressLint("NewApi")
-    private fun hasPermissions(): Boolean {
-        return when (android.os.Build.VERSION.SDK_INT) {
-            in android.os.Build.VERSION_CODES.BASE..android.os.Build.VERSION_CODES.R -> {
-                PERMISSION_GRANTED == context.checkPermission(
-                    Manifest.permission.BLUETOOTH,
-                    android.os.Process.myPid(),
-                    android.os.Process.myUid())
-            } else -> {
-                // for android 12/S or newer
-                PERMISSION_GRANTED == context.checkPermission(
-                    Manifest.permission.BLUETOOTH_CONNECT,
-                    android.os.Process.myPid(),
-                    android.os.Process.myUid())
-            }
-        }
-    }
+    internal fun hasPermissions() = permissionsRequestStrategy.hasPermissions()
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     internal sealed class HeadsetState {
@@ -355,6 +340,27 @@ internal constructor(
 
         override fun scoTimeOutAction() {
             headsetState = AudioActivationError
+        }
+    }
+
+    internal class DefaultPermissionsCheckStrategy(private val context:Context)
+        : PermissionsCheckStrategy {
+        @SuppressLint("NewApi")
+        override fun hasPermissions(): Boolean {
+            return when (android.os.Build.VERSION.SDK_INT) {
+                in android.os.Build.VERSION_CODES.BASE..android.os.Build.VERSION_CODES.R -> {
+                    PERMISSION_GRANTED == context.checkPermission(
+                        Manifest.permission.BLUETOOTH,
+                        android.os.Process.myPid(),
+                        android.os.Process.myUid())
+                } else -> {
+                    // for android 12/S or newer
+                    PERMISSION_GRANTED == context.checkPermission(
+                        Manifest.permission.BLUETOOTH_CONNECT,
+                        android.os.Process.myPid(),
+                        android.os.Process.myUid())
+                }
+            }
         }
     }
 }
