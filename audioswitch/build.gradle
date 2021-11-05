@@ -2,7 +2,6 @@ apply plugin: 'com.android.library'
 apply plugin: 'maven'
 apply plugin: 'maven-publish'
 apply plugin: 'signing'
-apply plugin: "com.jfrog.artifactory"
 apply plugin: 'kotlin-android'
 apply plugin: "org.jetbrains.dokka"
 
@@ -78,7 +77,7 @@ def audioSwitchGroupId = 'com.twilio'
 def audioSwitchArtifactId = 'audioswitch'
 
 /*
- * The publishing block enables publishing to both Artifactory and MavenCentral
+ * The publishing block enables publishing to MavenCentral
  */
 publishing {
     publications {
@@ -133,24 +132,4 @@ publishing {
 
 signing {
     sign publishing.publications
-}
-
-/*
- * The artifactory block enables publishing AudioSwitch as a snapshot to JFrog OSS.
- */
-artifactory {
-    contextUrl = 'https://oss.jfrog.org'
-    publish {
-        repository {
-            repoKey = 'oss-snapshot-local'
-            username = jfrogUsername
-            password = jfrogPassword
-        }
-        defaults {
-            publications('audioSwitchRelease')
-            publishArtifacts = true
-            publishPom = true
-        }
-    }
-    clientConfig.info.setBuildNumber(getShortCommitSha())
 }

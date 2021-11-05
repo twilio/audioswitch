@@ -5,46 +5,7 @@ aliases:
       ~/audioswitch
 
   - &gradle-cache-key
-    key: jars-{{ checksum "build.gradle" }}-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
-  - &restore_cache-gradle
-    <<: *gradle-cache-key
-    name: Restore Gradle Cache
-  - &save_cache-gradle
-    <<: *gradle-cache-key
-    name: Save Gradle Cache
-    paths:
-      - ~/.gradle/caches
-      - ~/.gradle/wrapper
-
-  - &configure-git-user
-    name: Configure git user
-    command: |
-      git config --global user.email $GIT_USER_EMAIL
-      git config --global user.name $GIT_USER_NAME
-
-  - &build-defaults
-    working_directory: *workspace
-    docker:
-      - image: circleci/android:api-28-node
-    environment:
-      - _JAVA_OPTIONS: "-XX:+UnlockExperimentalVMOptions -XX:+UseContainerSupport"
-
-  - &integration-test-defaults
-    working_directory: *workspace
-    docker:
-      - image: google/cloud-sdk:latest
-    environment:
-    resource_class: medium+
-
-  - &gcloud-auth
-    name: Google Cloud Auth
-    command: >
-      echo $GCP_KEY | base64 -d | gcloud auth activate-service-account --key-file=-
-
-  - &signing-key
-    name: Install signing key
-    command: >
-      echo $SIGNING_KEY | base64 -d >> $SIGNING_SECRET_KEY_RING_FILE
+      jars-{{ checksum "build.gradle" }}-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
 
   - &release-filter
     filters:
@@ -54,40 +15,107 @@ aliases:
       branches:
         ignore: /.*/
 
+commands:
+  restore_gradle_cache:
+    steps:
+      - restore_cache:
+          key: *gradle-cache-key
+          name: Restore Gradle Cache
+
+  save_gradle_cache:
+    steps:
+      - save_cache:
+          key: *gradle-cache-key
+          name: Save Gradle Cache
+          paths:
+            - ~/.gradle/caches
+            - ~/.gradle/wrapper
+
+  setup_git_user:
+    description: Configure git user
+    steps:
+      - run:
+          name: Configure git user name and email
+          command: |
+            git config --global user.email $GIT_USER_EMAIL
+            git config --global user.name $GIT_USER_NAME
+
+  setup_gcloud:
+    description: Authenticate with Google Cloud
+    steps:
+      - run:
+          name: Setup GCloud Auth
+          command: |
+            echo $GCP_KEY | base64 -d | gcloud auth activate-service-account --key-file=-
+
+  install_signing_key:
+    steps:
+      - run:
+          name: Install signing key
+          command: |
+            echo $SIGNING_KEY | base64 -d >> $SIGNING_SECRET_KEY_RING_FILE
+
+  publish_to_sonatype:
+    description: Publish to Sonatype Repository
+    parameters:
+      pre-release:
+        description: If true, publish a pre-release, otherwise publish a release
+        type: boolean
+    steps:
+      - run:
+          name: Publish AudioSwitch <<# parameters.pre-release >> snapshot <</ parameters.pre-release >><<^ parameters.pre-release >> release <</ parameters.pre-release >>
+          command: |
+            ./gradlew sonatypeAudioSwitchReleaseUpload \
+            -PpreRelease=<< parameters.pre-release >>
+
+
+executors:
+  build-executor:
+    working_directory: *workspace
+    docker:
+      - image: circleci/android:api-31
+    resource_class: large
+    environment:
+      _JAVA_OPTIONS: "-XX:+UnlockExperimentalVMOptions -XX:+UseContainerSupport"
+
+  integration-test-executor:
+    working_directory: *workspace
+    docker:
+      - image: google/cloud-sdk:latest
+    resource_class: medium+
+
 jobs:
   lint:
-    <<: *build-defaults
-    resource_class: large
+    executor: build-executor
     steps:
       - checkout
-      - restore_cache: *restore_cache-gradle
+      - restore_gradle_cache
       - run:
           name: Lint
           command: ./gradlew -q lint
       - store_artifacts:
           path: audioswitch/build/reports/lint-results.html
-          prefix: audioswitch
-      - save_cache: *save_cache-gradle
+          destination: audioswitch
+      - save_gradle_cache
 
   check-format:
-    <<: *build-defaults
+    executor: build-executor
     resource_class: medium+
     steps:
       - checkout
-      - restore_cache: *restore_cache-gradle
+      - restore_gradle_cache
       - run:
           name: Spotless Check
           command: ./gradlew -q spotlessCheck
-      - save_cache: *save_cache-gradle
+      - save_gradle_cache
 
   build-audioswitch:
-    <<: *build-defaults
-    resource_class: large
+    executor: build-executor
     steps:
       - checkout
       - attach_workspace:
           at: *workspace
-      - restore_cache: *restore_cache-gradle
+      - restore_gradle_cache
       - run:
           name: Build AudioSwitch and Tests
           command: ./gradlew -q audioswitch:assemble audioswitch:assembleAndroidTest
@@ -95,28 +123,27 @@ jobs:
           root: .
           paths:
             - audioswitch/build
-      - save_cache: *save_cache-gradle
+      - save_gradle_cache
 
   unit-tests:
-    <<: *build-defaults
-    resource_class: large
+    executor: build-executor
     steps:
       - checkout
       - attach_workspace:
           at: *workspace
-      - restore_cache: *restore_cache-gradle
+      - restore_gradle_cache
       - run:
           name: Unit Tests
           command: ./gradlew audioswitch:testDebugUnitTest
-      - save_cache: *save_cache-gradle
+      - save_gradle_cache
 
   integration-tests:
-    <<: *integration-test-defaults
+    executor: integration-test-executor
     steps:
       - checkout
       - attach_workspace:
           at: *workspace
-      - run: *gcloud-auth
+      - setup_gcloud
       - run:
           name: Integration Tests
           command: >
@@ -124,60 +151,54 @@ jobs:
             ui-test-args.yaml:integration-tests
 
   publish-pre-release:
-    <<: *build-defaults
-    resource_class: large
+    executor: build-executor
     steps:
       - checkout
       - attach_workspace:
           at: *workspace
-      - restore_cache: *restore_cache-gradle
-      - run: *signing-key
-      - run:
-          name: Publish AudioSwitch pre release
-          command: ./gradlew -q jfrogOssSnapshotsAudioSwitchUpload
-      - save_cache: *save_cache-gradle
+      - restore_gradle_cache
+      - install_signing_key
+      - publish_to_sonatype:
+          pre-release: true
+      - save_gradle_cache
 
   publish-release:
-    <<: *build-defaults
-    resource_class: large
+    executor: build-executor
     steps:
       - checkout
       - attach_workspace:
           at: *workspace
-      - restore_cache: *restore_cache-gradle
-      - run: *signing-key
-      - run:
-          name: Publish AudioSwitch release
-          command: ./gradlew -q sonatypeAudioSwitchReleaseUpload
-      - save_cache: *save_cache-gradle
+      - restore_gradle_cache
+      - install_signing_key
+      - publish_to_sonatype:
+          pre-release: false
+      - save_gradle_cache
 
   bump-version:
-    <<: *build-defaults
-    resource_class: large
+    executor: build-executor
     steps:
       - checkout
       - attach_workspace:
           at: *workspace
-      - restore_cache: *restore_cache-gradle
-      - run: *configure-git-user
+      - restore_gradle_cache
+      - setup_git_user
       - run:
           name: Bump Version
           command: ./gradlew incrementVersion
-      - save_cache: *save_cache-gradle
+      - save_gradle_cache
 
   publish-docs:
-    <<: *build-defaults
-    resource_class: large
+    executor: build-executor
     steps:
       - checkout
       - attach_workspace:
           at: *workspace
-      - restore_cache: *restore_cache-gradle
-      - run: *configure-git-user
+      - restore_gradle_cache
+      - setup_git_user
       - run:
           name: Publish Docs
           command: ./gradlew publishDocs
-      - save_cache: *save_cache-gradle
+      - save_gradle_cache
 
 workflows:
   build-test-publish:
@@ -199,7 +220,8 @@ workflows:
           filters:
             branches:
               only:
-                - "master"
+                - master
+                - task/VIDEO-7662-mavencental-snapshots
           requires:
             - unit-tests
             - integration-tests
