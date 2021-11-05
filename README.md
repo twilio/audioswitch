@@ -37,7 +37,7 @@ Ensure that you have `mavenCentral` listed in your project's buildscript reposit
 buildscript {
     repositories {
         mavenCentral()
-        ...
+        // ...
     }
 }
 ```
@@ -47,14 +47,21 @@ Add this line as a new Gradle dependency:
 implementation 'com.twilio:audioswitch:$version'
 ```
 
-Pull requests merged to master result in an artifact being published to [JFrog OSS Snapshots](https://oss.jfrog.org/artifactory/webapp/#/home). You can
-access these snapshots by adding the following to your gradle file.
+Pull requests merged to master result in a snapshot artifact being published to the Maven Central snapshots repository. You can
+access these snapshots by adding the following to your gradle file `repositories`:
 
 ```groovy
 maven {
-    url 'https://oss.jfrog.org/artifactory/libs-snapshot/'
+    url = uri("https://oss.sonatype.org/content/repositories/snapshots")
+    mavenContent {
+        snapshotsOnly()
+    }
 }
+```
 
+Add a `-SNAPSHOT` suffix to the Gradle dependency version:
+
+```groovy
 implementation 'com.twilio:audioswitch:$version-SNAPSHOT'
 ```
 
