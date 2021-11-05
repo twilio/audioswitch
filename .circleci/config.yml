@@ -1,5 +1,18 @@
 version: 2.1
 
+parameters:
+  # this flag allows you to disable the default workflow, e.g. when running the standalone publish-snapshot workflow
+  enable-default-workflow:
+    description: "enables the main workflow that builds and tests on all branches and publishes a snapshot on master"
+    type: boolean
+    default: true
+
+  # this flag allows you to publish a snapshot from any branch, using a standalone workflow
+  enable-publish-snapshot-workflow:
+    description: "enables the standalone workflow to build and publish a snapshot from any branch"
+    type: boolean
+    default: false
+
 aliases:
   - &workspace
       ~/audioswitch
@@ -14,6 +27,12 @@ aliases:
           - /^\d+\.\d+\.\d+$/
       branches:
         ignore: /.*/
+
+  - &snapshot-filter
+    filters:
+      branches:
+        only:
+          - master
 
 commands:
   restore_gradle_cache:
@@ -65,9 +84,8 @@ commands:
       - run:
           name: Publish AudioSwitch <<# parameters.pre-release >> snapshot <</ parameters.pre-release >><<^ parameters.pre-release >> release <</ parameters.pre-release >>
           command: |
-            ./gradlew sonatypeAudioSwitchReleaseUpload \
+            ./gradlew -q sonatypeAudioSwitchReleaseUpload \
             -PpreRelease=<< parameters.pre-release >>
-
 
 executors:
   build-executor:
@@ -145,7 +163,7 @@ jobs:
           at: *workspace
       - setup_gcloud
       - run:
-          name: Integration Tests
+          name: Run Integration Tests
           command: >
             gcloud firebase test android run --use-orchestrator --environment-variables clearPackageData=true --no-record-video --project video-app-79418
             ui-test-args.yaml:integration-tests
@@ -201,7 +219,9 @@ jobs:
       - save_gradle_cache
 
 workflows:
+  # default workflow, runs check and tests on all branches and publishes a snapshot on master
   build-test-publish:
+    when: << pipeline.parameters.enable-default-workflow >>
     jobs:
       - lint
       - check-format
@@ -217,15 +237,12 @@ workflows:
             - lint
             - check-format
       - publish-pre-release:
-          filters:
-            branches:
-              only:
-                - master
-                - task/VIDEO-7662-mavencental-snapshots
+          <<: *snapshot-filter
           requires:
             - unit-tests
             - integration-tests
 
+  # workflow to publish a release, triggered by new git tags that match a version number, e.g. '1.2.3'
   release:
     jobs:
       - publish-release:
@@ -238,3 +255,9 @@ workflows:
           <<: *release-filter
           requires:
             - publish-docs
+
+  # workflow to explicitly build and publish a snapshot from any branch
+  publish-snapshot:
+    when: << pipeline.parameters.enable-publish-snapshot-workflow >>
+    jobs:
+      - publish-pre-release
