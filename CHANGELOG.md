@@ -1,4 +1,5 @@
 # Changelog
+
 ### 1.1.3
 
 Enhancements
@@ -7,6 +8,7 @@ Enhancements
 - Updated internal dependencies related to Android 12 support
 - Updated compile and target sdk to Android 12 (31)
 - Updated gradle to version 4.2.1
+- Snapshots are now published to the Maven Central snapshots repository
 
 ### 1.1.2
 
@@ -65,7 +67,7 @@ audioSwitch.start { _, _ -> }
 ```kotlin
 val audioSwitch = AudioSwitch(context, audioFocusChangeListener = OnAudioFocusChangeListener { focusChange ->
     // Do something with audio focus change
-))}
+})
 
 audioSwitch.start { _, _ -> }
 // Audio focus changes are received after activating
@@ -170,7 +172,7 @@ Ensure that you have `mavenCentral` listed in your project's buildscript reposit
 buildscript {
     repositories {
         mavenCentral()
-        ...
+        // ...
     }
 }
 ```

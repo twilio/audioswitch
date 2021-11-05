@@ -48,15 +48,13 @@ buildscript {
         if(gitSha != null) return gitSha.substring(0, 7) else return ""
     }
 
+    ext.isPreRelease = (project.hasProperty("preRelease") && project.property("preRelease").toBoolean() == true)
     ext.audioSwitchVersion = "${versionMajor}.${versionMinor}.${versionPatch}" +
-            ((project.hasProperty("preRelease") && project.property("preRelease").toBoolean() == true) ?
-                    "-SNAPSHOT" :
-                    '')
+            (isPreRelease ? "-SNAPSHOT" : '')
 
     repositories {
         google()
         mavenCentral()
-        jcenter()
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:4.2.1'
@@ -67,7 +65,6 @@ buildscript {
 
 plugins {
     id "com.diffplug.spotless" version "5.6.1"
-    id "com.jfrog.artifactory" version "4.15.2"
     id "org.jetbrains.dokka" version "$dokka_version"
     id "io.github.gradle-nexus.publish-plugin" version "1.0.0"
     id "maven-publish"
@@ -96,7 +93,6 @@ allprojects {
     repositories {
         google()
         mavenCentral()
-        jcenter()
     }
 }
 
@@ -106,6 +102,7 @@ nexusPublishing {
             username = ossrhUsername
             password = ossrhPassword
             stagingProfileId = sonatypeStagingProfileId
+            useStaging = !isPreRelease
         }
     }
 
@@ -148,7 +145,7 @@ task validateReleaseTag {
 
     doLast {
         def circleTag = System.getenv("CIRCLE_TAG")
-        def tagsMatch = (matchesVersion(circleTag)) ? ("true") : ("false")
+        def tagsMatch = (matchesVersion(circleTag) || isPreRelease) ? ("true") : ("false")
 
         exec {
             workingDir "${rootDir}"
@@ -220,23 +217,8 @@ task incrementVersion(type: RootGradleBuild) {
     }
 }
 
-task jfrogOssSnapshotsAudioSwitchUpload(type: RootGradleBuild) {
-    description = 'Publish an AudioSwitch Snapshot to JFrog OSS'
-    group = 'Publishing'
-    buildFile = file('audioswitch/build.gradle')
-    tasks = ['assembleRelease', 'artifactoryPublish']
-    startParameter.projectProperties += gradle.startParameter.projectProperties + [
-            'preRelease': true,
-            'jfrog.username': "${getPropertyValue("AUDIOSWITCH_JFROG_OSS_USERNAME")}",
-            'jfrog.password': "${getPropertyValue("AUDIOSWITCH_JFROG_OSS_PASSWORD")}",
-            'signing.keyId': "${getPropertyValue("SIGNING_KEY_ID")}",
-            'signing.password' : "${getPropertyValue("SIGNING_PASSWORD")}",
-            'signing.secretKeyRingFile' : "${getPropertyValue("SIGNING_SECRET_KEY_RING_FILE")}"
-    ]
-}
-
 task sonatypeAudioSwitchReleaseUpload(type: RootGradleBuild) {
-    description = 'Publish an AudioSwitch release'
+    description = 'Publish an AudioSwitch release or pre-release'
     group = 'Publishing'
     dependsOn validateReleaseTag
     buildFile = file('build.gradle')
