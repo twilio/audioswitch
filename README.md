@@ -53,9 +53,6 @@ access these snapshots by adding the following to your gradle file `repositories
 ```groovy
 maven {
     url = uri("https://oss.sonatype.org/content/repositories/snapshots")
-    mavenContent {
-        snapshotsOnly()
-    }
 }
 ```
 
