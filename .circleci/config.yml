@@ -219,7 +219,7 @@ jobs:
       - save_gradle_cache
 
 workflows:
-  # default workflow, runs check and tests on all branches and publishes a snapshot on master
+  # Default workflow. Triggered by all commits. Runs checks and tests on all branches. For master, also publishes a snapshot.
   build-test-publish:
     when: << pipeline.parameters.enable-default-workflow >>
     jobs:
@@ -242,7 +242,7 @@ workflows:
             - unit-tests
             - integration-tests
 
-  # workflow to publish a release, triggered by new git tags that match a version number, e.g. '1.2.3'
+  # Workflow to publish a release. Triggered by new git tags that match a version number, e.g. '1.2.3'.
   release:
     jobs:
       - publish-release:
@@ -256,7 +256,7 @@ workflows:
           requires:
             - publish-docs
 
-  # workflow to explicitly build and publish a snapshot from any branch
+  # Workflow to explicitly build and publish a snapshot. Triggered manually by setting the parameter to true.
   publish-snapshot:
     when: << pipeline.parameters.enable-publish-snapshot-workflow >>
     jobs:
