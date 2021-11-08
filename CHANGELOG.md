@@ -1,5 +1,8 @@
 # Changelog
 
+### 1.1.4
+- Dokka dependency upgraded such that documents can be generated successfully again.
+
 ### 1.1.3
 
 Enhancements
