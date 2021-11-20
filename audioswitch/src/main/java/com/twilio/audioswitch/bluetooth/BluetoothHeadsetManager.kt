@@ -170,7 +170,10 @@ internal constructor(
         if (hasPermissions()) {
             headsetListener = null
             bluetoothAdapter.closeProfileProxy(BluetoothProfile.HEADSET, headsetProxy)
-            context.unregisterReceiver(this)
+            // because start may have been called before bluetooth permissions were enabled
+            try {
+                context.unregisterReceiver(this)
+            } catch (_: IllegalArgumentException) { /* silently fall though */ }
         } else {
             logger.w(TAG, PERMISSION_ERROR_MESSAGE)
         }
