@@ -84,4 +84,17 @@ open class BaseTest {
         }
         headsetManager.onReceive(context, intent)
     }
+
+    internal fun simulateDisconnectedBluetoothHeadsetConnection(
+        bluetoothDevice: BluetoothDevice = expectedBluetoothDevice
+    ) {
+        val intent = mock<Intent> {
+            whenever(mock.action).thenReturn(BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED)
+            whenever(mock.getIntExtra(BluetoothHeadset.EXTRA_STATE, BluetoothHeadset.STATE_DISCONNECTED))
+                .thenReturn(BluetoothHeadset.STATE_DISCONNECTED)
+            whenever(mock.getParcelableExtra<BluetoothDevice>(BluetoothDevice.EXTRA_DEVICE))
+                .thenReturn(bluetoothDevice)
+        }
+        headsetManager.onReceive(context, intent)
+    }
 }
