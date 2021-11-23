@@ -264,12 +264,12 @@ class AudioSwitch {
 
     internal data class AudioDeviceState(
         val audioDeviceList: List<AudioDevice>,
-        val selectedAudioDevice: AudioDevice?) {
-    }
+        val selectedAudioDevice: AudioDevice?
+    )
 
     private fun enumerateDevices(bluetoothHeadsetName: String? = null) {
         // save off the old state and 'semi'-deep copy the list of audio devices
-        val oldAudioDeviceState = AudioDeviceState(mutableAudioDevices.map { it } , selectedDevice)
+        val oldAudioDeviceState = AudioDeviceState(mutableAudioDevices.map { it }, selectedDevice)
         // update audio device list and selected device
         addAvailableAudioDevices(bluetoothHeadsetName)
 
