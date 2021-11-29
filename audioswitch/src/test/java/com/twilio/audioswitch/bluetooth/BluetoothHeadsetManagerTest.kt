@@ -99,6 +99,8 @@ class BluetoothHeadsetManagerTest : BaseTest() {
 
     @Test
     fun `stop should close close all resources`() {
+        val deviceListener = mock<BluetoothHeadsetConnectionListener>()
+        headsetManager.start(deviceListener);
         headsetManager.stop()
 
         assertBluetoothHeadsetTeardown()
