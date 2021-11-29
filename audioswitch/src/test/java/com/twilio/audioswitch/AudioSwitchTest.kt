@@ -609,6 +609,18 @@ class AudioSwitchTest : BaseTest() {
                     equalTo(true))
         }
     }
+    @Test
+    fun `Upon receiving redundant system events, redundant onAudioChanged events shall not be triggered`() {
+        audioSwitch.start(audioDeviceChangeListener)
+        simulateNewBluetoothHeadsetConnection()
+        audioSwitch.activate()
+        // additional disconnects should not invoke the listener, after the first disconnect,
+        // device list and selected device should not change
+        simulateDisconnectedBluetoothHeadsetConnection()
+        simulateDisconnectedBluetoothHeadsetConnection()
+        verify(audioDeviceChangeListener, times(2)).invoke(
+            listOf(Earpiece(), Speakerphone()), Earpiece())
+    }
 
     private fun simulateNewWiredHeadsetConnection() {
         val intent = mock<Intent> {

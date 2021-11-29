@@ -50,7 +50,8 @@ internal constructor(
     systemClockWrapper: SystemClockWrapper = SystemClockWrapper(),
     private val bluetoothIntentProcessor: BluetoothIntentProcessor = BluetoothIntentProcessorImpl(),
     private var headsetProxy: BluetoothHeadset? = null,
-    private val permissionsRequestStrategy: PermissionsCheckStrategy = DefaultPermissionsCheckStrategy(context)
+    private val permissionsRequestStrategy: PermissionsCheckStrategy = DefaultPermissionsCheckStrategy(context),
+    private var hasRegisteredReceivers: Boolean = false
 ) : BluetoothProfile.ServiceListener, BroadcastReceiver() {
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
@@ -155,12 +156,17 @@ internal constructor(
             bluetoothAdapter.getProfileProxy(
                 context,
                 this,
-                BluetoothProfile.HEADSET)
-
-            context.registerReceiver(
-                this, IntentFilter(ACTION_CONNECTION_STATE_CHANGED))
-            context.registerReceiver(
-                this, IntentFilter(ACTION_AUDIO_STATE_CHANGED))
+                BluetoothProfile.HEADSET
+            )
+            if (!hasRegisteredReceivers) {
+                context.registerReceiver(
+                    this, IntentFilter(ACTION_CONNECTION_STATE_CHANGED)
+                )
+                context.registerReceiver(
+                    this, IntentFilter(ACTION_AUDIO_STATE_CHANGED)
+                )
+                hasRegisteredReceivers = true
+            }
         } else {
             logger.w(TAG, PERMISSION_ERROR_MESSAGE)
         }
@@ -170,7 +176,10 @@ internal constructor(
         if (hasPermissions()) {
             headsetListener = null
             bluetoothAdapter.closeProfileProxy(BluetoothProfile.HEADSET, headsetProxy)
-            context.unregisterReceiver(this)
+            if (hasRegisteredReceivers) {
+                context.unregisterReceiver(this)
+                hasRegisteredReceivers = false
+            }
         } else {
             logger.w(TAG, PERMISSION_ERROR_MESSAGE)
         }

@@ -49,6 +49,7 @@ class AudioSwitch {
     internal enum class State {
         STARTED, ACTIVATED, STOPPED
     }
+
     internal val bluetoothDeviceConnectionListener = object : BluetoothHeadsetConnectionListener {
         override fun onBluetoothHeadsetStateChanged(headsetName: String?) {
             enumerateDevices(headsetName)
@@ -261,7 +262,15 @@ class AudioSwitch {
         }
     }
 
+    internal data class AudioDeviceState(
+        val audioDeviceList: List<AudioDevice>,
+        val selectedAudioDevice: AudioDevice?
+    )
+
     private fun enumerateDevices(bluetoothHeadsetName: String? = null) {
+        // save off the old state and 'semi'-deep copy the list of audio devices
+        val oldAudioDeviceState = AudioDeviceState(mutableAudioDevices.map { it }, selectedDevice)
+        // update audio device list and selected device
         addAvailableAudioDevices(bluetoothHeadsetName)
 
         if (!userSelectedDevicePresent(mutableAudioDevices)) {
@@ -292,13 +301,17 @@ class AudioSwitch {
         if (state == ACTIVATED) {
             activate()
         }
-        audioDeviceChangeListener?.let { listener ->
-            selectedDevice?.let { selectedDevice ->
-                listener.invoke(
+        // trigger audio device change listener if there has been a change
+        val newAudioDeviceState = AudioDeviceState(mutableAudioDevices, selectedDevice)
+        if (newAudioDeviceState != oldAudioDeviceState) {
+            audioDeviceChangeListener?.let { listener ->
+                selectedDevice?.let { selectedDevice ->
+                    listener.invoke(
                         mutableAudioDevices,
                         selectedDevice)
-            } ?: run {
-                listener.invoke(mutableAudioDevices, null)
+                } ?: run {
+                    listener.invoke(mutableAudioDevices, null)
+                }
             }
         }
     }

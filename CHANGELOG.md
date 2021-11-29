@@ -1,7 +1,15 @@
 # Changelog
 
 ### 1.1.4
+
+Enhancements
+
 - Dokka dependency upgraded such that documents can be generated successfully again.
+
+Bug Fixes
+
+- Fixed issue with spurious `AudioDeviceChangedListener` invocations.
+- Fixed issue where `InvalidStateException` would be triggered durring `audioswitch.stop(..)` if bluetooth permissions were granted after 'AudioSwitch.start()`.
 
 ### 1.1.3
 
