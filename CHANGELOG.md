@@ -11,30 +11,30 @@ Bug Fixes
 - Fixed issue with spurious `AudioDeviceChangedListener` invocations.
 - Fixed issue where `InvalidStateException` would be triggered durring `audioswitch.stop(..)` if bluetooth permissions were granted after 'AudioSwitch.start()`.
 
-### 1.1.3
+### 1.1.3 (November 5, 2021)
 
 Enhancements
 
 - Updated the library to support Android 12.
-- Updated internal dependencies related to Android 12 support
-- Updated compile and target sdk to Android 12 (31)
-- Updated gradle to version 4.2.1
-- Snapshots are now published to the Maven Central snapshots repository
+- Updated internal dependencies related to Android 12 support.
+- Updated compile and target sdk to Android 12 (31).
+- Updated gradle to version 4.2.1.
+- Snapshots are now published to the Maven Central snapshots repository.
 
-### 1.1.2
+### 1.1.2 (February 24, 2021)
 
 Enhancements
 
-- Updated the library to use Android Gradle Plugin 4.1.1
-- Now published to MavenCentral
+- Updated the library to use Android Gradle Plugin 4.1.1.
+- Now published to MavenCentral.
 
-### 1.1.1
+### 1.1.1 (October 20, 2020)
 
 Enhancements
 
 - Added public KDoc documentation for each release. The latest documentation release can be found at https://twilio.github.io/audioswitch/latest
 
-### 1.1.0
+### 1.1.0 (October 8, 2020)
 
 Enhancements
 
@@ -45,7 +45,7 @@ val audioSwitch = AudioSwitch(application, preferredDeviceList = listOf(Speakerp
 - Updated `compileSdkVersion` and `targetSdkVersion` to Android API version `30`.
 
 
-### 1.0.1
+### 1.0.1 (September 11, 2020)
 
 Enhancements
 
@@ -57,11 +57,11 @@ Bug Fixes
 
 - Added the internal access modifier to the `SystemClockWrapper` class since it is not meant to be exposed publicly.
 
-### 1.0.0
+### 1.0.0 (August 17, 2020)
 
 - Promotes 0.4.0 to the first stable release of this library.
 
-### 0.4.0
+### 0.4.0 (August 14, 2020)
 
 Enhancements
 
@@ -85,7 +85,7 @@ audioSwitch.start { _, _ -> }
 audioSwitch.activate()
 ```
 
-### 0.3.0
+### 0.3.0 (August 12, 2020)
 
 Enhancements
 
@@ -102,13 +102,13 @@ audioSwitch.loggingEnabled = true
 audioSwitch.start { _, _ -> }
 ```
 
-### 0.2.1
+### 0.2.1 (July 29, 2020)
 
 Bug Fixes
 
 - Fixed a bug where the audio focus wasn't being returned to the previous audio focus owner on pre Oreo devices.
 
-### 0.2.0
+### 0.2.0 (July 28, 2020)
 
 Enhancements
 - Added support for multiple connected bluetooth headsets.
@@ -122,13 +122,13 @@ Bug Fixes
 
 - Improved the accuracy of the `BluetoothHeadset` within the `availableAudioDevices` returned from the `AudioDeviceSelector` when multiple Bluetooth Headsets are connected.
 
-### 0.1.5
+### 0.1.5 (July 1, 2020)
 
 Bug Fixes
 
 - Disabled AAR minification to fix Android Studio issues such as getting stuck in code analysis and not being able to find declarations of AudioSwitch code.
 
-### 0.1.4
+### 0.1.4 (June 15, 2020)
 
 Enhancements
 - AAR minification is now enabled for release artifacts.
@@ -138,13 +138,13 @@ Bug Fixes
 - Fixed a bug where the audio output doesn't automatically route to a newly connected bluetooth headset.
 - Fixed a bug where the selected audio device doesn't get routed back to the default audio device when an error occurs when attempting to connect to a headset.
 
-### 0.1.3
+### 0.1.3 (May 27, 2020)
 
 Bug Fixes
 
 - Fixed crash by adding a default bluetooth device name.
 
-### 0.1.2
+### 0.1.2 (May 22, 2020)
 
 Enhancements
 
@@ -154,11 +154,11 @@ Bug Fixes
 
 - Added a fix for certain valid bluetooth device classes not being considered as headset devices as reported in [issue #16](https://github.com/twilio/audioswitch/issues/16).
 
-### 0.1.1
+### 0.1.1 (May 19, 2020)
 
 - Fixes bug that did not correctly abandon audio request after deactivate
 
-### 0.1.0
+### 0.1.0 (April 28, 2020)
 
 This release marks the first iteration of the AudioSwitch library: an Android audio management library for real-time communication apps.
 
