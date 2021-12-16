@@ -91,7 +91,7 @@ executors:
   build-executor:
     working_directory: *workspace
     docker:
-      - image: circleci/android:api-30
+      - image: cimg/android:2021.10.2-node
     resource_class: large
     environment:
       _JAVA_OPTIONS: "-XX:+UnlockExperimentalVMOptions -XX:+UseContainerSupport"
