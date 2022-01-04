@@ -1,6 +1,6 @@
 # Changelog
 
-### 1.1.4
+### 1.1.4 (January 4, 2022)
 
 Enhancements
 
