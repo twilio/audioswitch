@@ -1,10 +1,12 @@
 # Changelog
 
-### 1.1.4
+### 1.1.4 (January 4, 2022)
 
 Enhancements
 
 - Dokka dependency upgraded such that documents can be generated successfully again.
+- Updated gradle version to 7.0.2
+- Updated gradle plugin to 7.0.3
 
 Bug Fixes
 
