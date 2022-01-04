@@ -5,7 +5,8 @@
 Enhancements
 
 - Dokka dependency upgraded such that documents can be generated successfully again.
-- Updated gradle version 7.0.3
+- Updated gradle version to 7.0.2
+- Updated gradle plugin to 7.0.3
 
 Bug Fixes
 
