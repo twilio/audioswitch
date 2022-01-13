@@ -11,7 +11,7 @@ Enhancements
 Bug Fixes
 
 - Fixed issue with spurious `AudioDeviceChangedListener` invocations.
-- Fixed issue where `InvalidStateException` would be triggered durring `audioswitch.stop(..)` if bluetooth permissions were granted after 'AudioSwitch.start()`.
+- Fixed issue where `InvalidStateException` would be triggered during `audioswitch.stop(..)` if bluetooth permissions were granted after 'AudioSwitch.start()`.
 
 ### 1.1.3 (November 5, 2021)
 
