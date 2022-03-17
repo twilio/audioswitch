@@ -5,8 +5,8 @@ integration-tests:
   test: audioswitch/build/outputs/apk/androidTest/debug/audioswitch-debug-androidTest.apk
   device:
     - {model: griffin, version: 24}
-    - {model: G8142, version: 25}
-    - {model: c5proltechn, version: 26}
-    - {model: crownqlteue, version: 27}
-    - {model: crownlteks, version: 28}
-    - {model: flame, version: 29}
+    - {model: G8441, version: 26}
+    - {model: heroqltetfnvzw, version: 26}
+    - {model: j7popltevzw, version: 27}
+    - {model: oriole, version: 31}
+    - {model: redfin, version: 30}
