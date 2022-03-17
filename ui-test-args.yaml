@@ -8,5 +8,5 @@ integration-tests:
     - {model: G8441, version: 26}
     - {model: heroqltetfnvzw, version: 26}
     - {model: j7popltevzw, version: 27}
-    - {model: crownlteks, version: 28}
+    - {model: oriole, version: 31}
     - {model: redfin, version: 30}
