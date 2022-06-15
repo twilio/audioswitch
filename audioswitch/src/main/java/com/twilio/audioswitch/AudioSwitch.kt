@@ -304,15 +304,7 @@ class AudioSwitch {
         // trigger audio device change listener if there has been a change
         val newAudioDeviceState = AudioDeviceState(mutableAudioDevices, selectedDevice)
         if (newAudioDeviceState != oldAudioDeviceState) {
-            audioDeviceChangeListener?.let { listener ->
-                selectedDevice?.let { selectedDevice ->
-                    listener.invoke(
-                        mutableAudioDevices,
-                        selectedDevice)
-                } ?: run {
-                    listener.invoke(mutableAudioDevices, null)
-                }
-            }
+            audioDeviceChangeListener?.invoke(mutableAudioDevices, selectedDevice)
         }
     }
 
