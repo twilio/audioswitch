@@ -24,6 +24,9 @@ internal abstract class BluetoothScoJob(
     open fun scoTimeOutAction() {}
 
     fun executeBluetoothScoJob() {
+        // cancel existing runnable
+        bluetoothScoRunnable?.let { bluetoothScoHandler.removeCallbacks(it) }
+
         BluetoothScoRunnable().apply {
             bluetoothScoRunnable = this
             bluetoothScoHandler.post(this)
