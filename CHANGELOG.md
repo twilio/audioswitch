@@ -4,7 +4,7 @@
 
 Bug Fixes
 
-- Fixed issue with lingering EnableBluetoothSCOJob object causing spurious AudioDeviceChangeListener calls after routing switch. 
+- Fixed issue with lingering EnableBluetoothSCOJob object causing spurious AudioDeviceChangeListener calls after routing switch.
 
 ### 1.1.4 (January 4, 2022)
 
