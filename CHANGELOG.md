@@ -1,5 +1,11 @@
 # Changelog
 
+### 1.1.5 (June 17, 2022)
+
+Bug Fixes
+
+- Fixed issue with lingering EnableBluetoothSCOJob object causing spurious AudioDeviceChangeListener calls after routing switch.
+
 ### 1.1.4 (January 4, 2022)
 
 Enhancements
