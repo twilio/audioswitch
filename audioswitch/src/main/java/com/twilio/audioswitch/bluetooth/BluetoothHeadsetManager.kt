@@ -356,7 +356,7 @@ internal constructor(
         PermissionsCheckStrategy {
         @SuppressLint("NewApi")
         override fun hasPermissions(): Boolean {
-            return when (android.os.Build.VERSION.SDK_INT) {
+            return when (context.applicationInfo.targetSdkVersion) {
                 in android.os.Build.VERSION_CODES.BASE..android.os.Build.VERSION_CODES.R -> {
                     PERMISSION_GRANTED == context.checkPermission(
                         Manifest.permission.BLUETOOTH,
