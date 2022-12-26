@@ -4,7 +4,10 @@ import android.bluetooth.BluetoothAdapter
 import android.content.Context
 import android.media.AudioManager
 import androidx.annotation.VisibleForTesting
-import com.twilio.audioswitch.AudioDevice.*
+import com.twilio.audioswitch.AudioDevice.BluetoothHeadset
+import com.twilio.audioswitch.AudioDevice.Earpiece
+import com.twilio.audioswitch.AudioDevice.Speakerphone
+import com.twilio.audioswitch.AudioDevice.WiredHeadset
 import com.twilio.audioswitch.android.Logger
 import com.twilio.audioswitch.android.ProductionLogger
 import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager
@@ -24,7 +27,8 @@ import com.twilio.audioswitch.wired.WiredHeadsetReceiver
  * @property availableAudioDevices Retrieves the current list of available [AudioDevice]s.
  **/
 class LegacyAudioSwitch : AbstractAudioSwitch {
-    private val headsetManager: BluetoothHeadsetManager?
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    internal val headsetManager: BluetoothHeadsetManager?
 
     /**
      * Constructs a new AudioSwitch instance.

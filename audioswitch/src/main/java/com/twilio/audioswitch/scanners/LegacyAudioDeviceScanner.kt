@@ -1,6 +1,7 @@
 package com.twilio.audioswitch.scanners
 
 import android.media.AudioManager
+import androidx.annotation.VisibleForTesting
 import com.twilio.audioswitch.AudioDevice
 import com.twilio.audioswitch.AudioDeviceManager
 import com.twilio.audioswitch.bluetooth.BluetoothHeadsetConnectionListener
@@ -16,7 +17,9 @@ internal class LegacyAudioDeviceScanner(
     private val bluetoothHeadsetManager: BluetoothHeadsetManager?,
 ) : Scanner {
     private val listener = AtomicReference<Scanner.Listener>(null)
-    private val bluetoothDeviceConnectionListener = object : BluetoothHeadsetConnectionListener {
+
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    internal val bluetoothDeviceConnectionListener = object : BluetoothHeadsetConnectionListener {
         private val connectedDevices = AtomicReference<AudioDevice.BluetoothHeadset?>()
 
         @Synchronized
@@ -52,7 +55,8 @@ internal class LegacyAudioDeviceScanner(
         }
     }
 
-    private val wiredDeviceConnectionListener = object : WiredDeviceConnectionListener {
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    internal val wiredDeviceConnectionListener = object : WiredDeviceConnectionListener {
         private val audioDevice = AudioDevice.WiredHeadset()
         override fun onDeviceConnected() {
             this@LegacyAudioDeviceScanner
@@ -72,8 +76,8 @@ internal class LegacyAudioDeviceScanner(
     override fun isDeviceActive(audioDevice: AudioDevice): Boolean =
         when (audioDevice) {
             is AudioDevice.BluetoothHeadset ->
-                this.bluetoothHeadsetManager?.hasActivationError() == false &&
-                        this.bluetoothHeadsetManager.getHeadset(audioDevice.name) != null
+                (this.bluetoothHeadsetManager?.hasActivationError() == false) &&
+                        (this.bluetoothHeadsetManager.getHeadset(audioDevice.name) != null)
             is AudioDevice.Earpiece ->
                 true
             is AudioDevice.Speakerphone ->

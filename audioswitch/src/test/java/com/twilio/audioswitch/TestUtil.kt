@@ -17,31 +17,31 @@ import com.twilio.audioswitch.bluetooth.BluetoothScoJob
 const val DEVICE_NAME = "Bluetooth"
 
 internal fun setupAudioManagerMock() =
-        mock<AudioManager> {
-            whenever(mock.mode).thenReturn(AudioManager.MODE_NORMAL)
-            whenever(mock.isMicrophoneMute).thenReturn(true)
-            whenever(mock.isSpeakerphoneOn).thenReturn(true)
-            whenever(mock.getDevices(AudioManager.GET_DEVICES_OUTPUTS)).thenReturn(emptyArray())
-        }
+    mock<AudioManager> {
+        whenever(mock.mode).thenReturn(AudioManager.MODE_NORMAL)
+        whenever(mock.isMicrophoneMute).thenReturn(true)
+        whenever(mock.isSpeakerphoneOn).thenReturn(true)
+        whenever(mock.getDevices(AudioManager.GET_DEVICES_OUTPUTS)).thenReturn(emptyArray())
+    }
 
 internal fun setupScoHandlerMock() =
-        mock<Handler> {
-            whenever(mock.post(any())).thenAnswer {
-                (it.arguments[0] as BluetoothScoJob.BluetoothScoRunnable).run()
-                true
-            }
+    mock<Handler> {
+        whenever(mock.post(any())).thenAnswer {
+            (it.arguments[0] as BluetoothScoJob.BluetoothScoRunnable).run()
+            true
         }
+    }
 
 internal fun setupSystemClockMock() =
-        mock<SystemClockWrapper> {
-            whenever(mock.elapsedRealtime()).thenReturn(0)
-        }
+    mock<SystemClockWrapper> {
+        whenever(mock.elapsedRealtime()).thenReturn(0)
+    }
 
 internal fun BaseTest.assertBluetoothHeadsetSetup() {
     verify(bluetoothAdapter).getProfileProxy(
-            context,
-            headsetManager,
-            BluetoothProfile.HEADSET
+        context,
+        headsetManager,
+        BluetoothProfile.HEADSET
     )
     verify(context, times(2)).registerReceiver(eq(headsetManager), isA())
 }

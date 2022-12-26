@@ -6,15 +6,16 @@ import android.media.AudioManager
 import android.os.Build
 import android.os.Handler
 import androidx.annotation.RequiresApi
+import androidx.annotation.VisibleForTesting
 import com.twilio.audioswitch.AudioDevice
-import java.util.concurrent.atomic.AtomicReference
 
 @RequiresApi(Build.VERSION_CODES.M)
 internal class AudioDeviceScanner(
     private val audioManager: AudioManager,
     private val handler: Handler,
 ) : AudioDeviceCallback(), Scanner {
-    private val listener = AtomicReference<Scanner.Listener>(null)
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    internal var listener: Scanner.Listener? = null
 
     override fun isDeviceActive(audioDevice: AudioDevice): Boolean =
         this.audioManager
@@ -25,13 +26,14 @@ internal class AudioDeviceScanner(
             }
 
     override fun start(listener: Scanner.Listener): Boolean {
-        this.listener.set(listener)
+        this.listener = listener
         this.audioManager.registerAudioDeviceCallback(this, this.handler)
         return true
     }
 
     override fun stop(): Boolean {
         this.audioManager.unregisterAudioDeviceCallback(this)
+        this.listener = null
         return true
     }
 
@@ -42,7 +44,7 @@ internal class AudioDeviceScanner(
         }
             ?.toSet()
             ?.forEach {
-                this.listener.get().onDeviceConnected(it)
+                this.listener?.onDeviceConnected(it)
             }
     }
 
@@ -53,7 +55,7 @@ internal class AudioDeviceScanner(
         }
             ?.toSet()
             ?.forEach {
-                this.listener.get().onDeviceDisconnected(it)
+                this.listener?.onDeviceDisconnected(it)
             }
     }
 

@@ -58,7 +58,9 @@ abstract class AbstractAudioSwitch
 ) : Scanner.Listener {
     internal var audioDeviceChangeListener: AudioDeviceChangeListener? = null
     internal var state: State = STOPPED
-    private val deviceScanner: Scanner = scanner
+
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    internal val deviceScanner: Scanner = scanner
     private val preferredDeviceList: List<Class<out AudioDevice>>
     protected var userSelectedAudioDevice: AudioDevice? = null
 
