@@ -8,38 +8,59 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import android.content.pm.PackageManager;
+import android.os.Build;
+
 import com.twilio.audioswitch.AudioDevice.BluetoothHeadset;
 import com.twilio.audioswitch.AudioDevice.Earpiece;
 import com.twilio.audioswitch.AudioDevice.Speakerphone;
 import com.twilio.audioswitch.AudioDevice.WiredHeadset;
-import java.util.ArrayList;
-import java.util.List;
-import kotlin.Unit;
-import kotlin.jvm.functions.Function2;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import kotlin.Unit;
+import kotlin.jvm.functions.Function2;
+
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class AudioSwitchJavaTest extends BaseTest {
-    private AudioSwitch javaAudioSwitch;
-    @Mock PackageManager packageManager;
+    private AbstractAudioSwitch javaAudioSwitch;
+    @Mock
+    PackageManager packageManager;
 
     @Before
     public void setUp() {
         when(packageManager.hasSystemFeature(any())).thenReturn(true);
         when(getContext$audioswitch_debug().getPackageManager()).thenReturn(packageManager);
-        javaAudioSwitch =
-                new AudioSwitch(
-                        getContext$audioswitch_debug(),
-                        new UnitTestLogger(false),
-                        getDefaultAudioFocusChangeListener$audioswitch_debug(),
-                        getPreferredDeviceList$audioswitch_debug(),
-                        getAudioDeviceManager$audioswitch_debug(),
-                        getWiredHeadsetReceiver$audioswitch_debug(),
-                        getHeadsetManager$audioswitch_debug());
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            javaAudioSwitch = new AudioSwitch(
+                    getContext$audioswitch_debug(),
+                    getDefaultAudioFocusChangeListener$audioswitch_debug(),
+                    new UnitTestLogger(false),
+                    getPreferredDeviceList$audioswitch_debug(),
+                    getAudioManager$audioswitch_debug(),
+                    getAudioDeviceManager$audioswitch_debug(),
+                    getHandler$audioswitch_debug(),
+                    getScanner$audioswitch_debug()
+            );
+        } else {
+            javaAudioSwitch = new LegacyAudioSwitch(
+                    getContext$audioswitch_debug(),
+                    getDefaultAudioFocusChangeListener$audioswitch_debug(),
+                    new UnitTestLogger(false),
+                    getPreferredDeviceList$audioswitch_debug(),
+                    getAudioManager$audioswitch_debug(),
+                    getAudioDeviceManager$audioswitch_debug(),
+                    getWiredHeadsetReceiver$audioswitch_debug(),
+                    getHeadsetManager$audioswitch_debug(),
+                    getScanner$audioswitch_debug()
+            );
+        }
     }
 
     @Test
@@ -127,15 +148,30 @@ public class AudioSwitchJavaTest extends BaseTest {
         preferredDeviceList.add(Earpiece.class);
         preferredDeviceList.add(WiredHeadset.class);
         preferredDeviceList.add(BluetoothHeadset.class);
-        javaAudioSwitch =
-                new AudioSwitch(
-                        getContext$audioswitch_debug(),
-                        getLogger$audioswitch_debug(),
-                        getDefaultAudioFocusChangeListener$audioswitch_debug(),
-                        preferredDeviceList,
-                        getAudioDeviceManager$audioswitch_debug(),
-                        getWiredHeadsetReceiver$audioswitch_debug(),
-                        getHeadsetManager$audioswitch_debug());
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            javaAudioSwitch = new AudioSwitch(
+                    getContext$audioswitch_debug(),
+                    getDefaultAudioFocusChangeListener$audioswitch_debug(),
+                    new UnitTestLogger(false),
+                    preferredDeviceList,
+                    getAudioManager$audioswitch_debug(),
+                    getAudioDeviceManager$audioswitch_debug(),
+                    getHandler$audioswitch_debug(),
+                    getScanner$audioswitch_debug()
+            );
+        } else {
+            javaAudioSwitch = new LegacyAudioSwitch(
+                    getContext$audioswitch_debug(),
+                    getDefaultAudioFocusChangeListener$audioswitch_debug(),
+                    new UnitTestLogger(false),
+                    preferredDeviceList,
+                    getAudioManager$audioswitch_debug(),
+                    getAudioDeviceManager$audioswitch_debug(),
+                    getWiredHeadsetReceiver$audioswitch_debug(),
+                    getHeadsetManager$audioswitch_debug(),
+                    getScanner$audioswitch_debug()
+            );
+        }
 
         startAudioSwitch();
 
