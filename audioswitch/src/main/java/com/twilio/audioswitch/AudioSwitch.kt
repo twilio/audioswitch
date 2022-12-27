@@ -100,6 +100,9 @@ class AudioSwitch : AbstractAudioSwitch {
             this.userSelectedAudioDevice = null
         }
 
+        if (audioDevice is WiredHeadset && this.audioDeviceManager.hasEarpiece()) {
+            this.availableUniqueAudioDevices.add(Earpiece())
+        }
         this.selectAudioDevice()
     }
 

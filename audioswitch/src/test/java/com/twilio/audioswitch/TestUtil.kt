@@ -12,7 +12,9 @@ import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import com.twilio.audioswitch.android.PermissionsCheckStrategy
 import com.twilio.audioswitch.android.SystemClockWrapper
+import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager
 import com.twilio.audioswitch.bluetooth.BluetoothScoJob
+import com.twilio.audioswitch.scanners.LegacyAudioDeviceScanner
 
 const val DEVICE_NAME = "Bluetooth"
 
@@ -21,6 +23,7 @@ internal fun setupAudioManagerMock() =
         whenever(mock.mode).thenReturn(AudioManager.MODE_NORMAL)
         whenever(mock.isMicrophoneMute).thenReturn(true)
         whenever(mock.isSpeakerphoneOn).thenReturn(true)
+        whenever(mock.isWiredHeadsetOn).thenReturn(true)
         whenever(mock.getDevices(AudioManager.GET_DEVICES_OUTPUTS)).thenReturn(emptyArray())
     }
 
@@ -37,13 +40,13 @@ internal fun setupSystemClockMock() =
         whenever(mock.elapsedRealtime()).thenReturn(0)
     }
 
-internal fun BaseTest.assertBluetoothHeadsetSetup() {
-    verify(bluetoothAdapter).getProfileProxy(
+internal fun BaseTest.assertBluetoothHeadsetSetup(bluetoothHeadsetManager: BluetoothHeadsetManager?) {
+    verify(bluetoothHeadsetManager?.bluetoothAdapter)?.getProfileProxy(
         context,
-        headsetManager,
+        bluetoothHeadsetManager,
         BluetoothProfile.HEADSET
     )
-    verify(context, times(2)).registerReceiver(eq(headsetManager), isA())
+    verify(context, times(2)).registerReceiver(eq(bluetoothHeadsetManager), isA())
 }
 
 internal fun setupPermissionsCheckStrategy() =

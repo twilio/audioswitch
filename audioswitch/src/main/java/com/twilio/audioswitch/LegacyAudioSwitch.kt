@@ -95,19 +95,22 @@ class LegacyAudioSwitch : AbstractAudioSwitch {
     }
 
     override fun onDeviceDisconnected(audioDevice: AudioDevice) {
-        if (audioDevice is BluetoothHeadset) {
-            this.availableUniqueAudioDevices.removeAll { it is BluetoothHeadset }
+        val wasRemoved = if (audioDevice is BluetoothHeadset) {
             if (this.userSelectedAudioDevice is BluetoothHeadset) {
                 this.userSelectedAudioDevice = null
             }
+            this.availableUniqueAudioDevices.removeAll { it is BluetoothHeadset }
         } else {
-            this.availableUniqueAudioDevices.remove(audioDevice)
             if (this.userSelectedAudioDevice == audioDevice) {
                 this.userSelectedAudioDevice = null
             }
+            this.availableUniqueAudioDevices.remove(audioDevice)
         }
 
-        this.selectAudioDevice()
+        if (audioDevice is WiredHeadset && this.audioDeviceManager.hasEarpiece()) {
+            this.availableUniqueAudioDevices.add(Earpiece())
+        }
+        this.selectAudioDevice(wasListChanged = wasRemoved)
     }
 
     override fun onActivate(audioDevice: AudioDevice) {

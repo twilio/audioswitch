@@ -104,8 +104,11 @@ abstract class AbstractAudioSwitch
     }
 
     override fun onDeviceConnected(audioDevice: AudioDevice) {
-        this.availableUniqueAudioDevices.add(audioDevice)
-        this.selectAudioDevice()
+        val wasAdded = this.availableUniqueAudioDevices.add(audioDevice)
+        if (audioDevice is WiredHeadset) {
+            this.availableUniqueAudioDevices.removeAll { it is Earpiece }
+        }
+        this.selectAudioDevice(wasListChanged = wasAdded)
     }
 
     /**
@@ -195,11 +198,14 @@ abstract class AbstractAudioSwitch
         logger.d(TAG, "Selected AudioDevice = $audioDevice")
         userSelectedAudioDevice = audioDevice
 
-        this.selectAudioDevice(audioDevice)
+        this.selectAudioDevice(audioDevice = audioDevice)
     }
 
-    protected fun selectAudioDevice(audioDevice: AudioDevice? = this.getBestDevice()) {
+    protected fun selectAudioDevice(wasListChanged: Boolean = false, audioDevice: AudioDevice? = this.getBestDevice()) {
         if (selectedAudioDevice == audioDevice) {
+            if (wasListChanged) {
+                audioDeviceChangeListener?.invoke(availableUniqueAudioDevices.toList(), selectedAudioDevice)
+            }
             return
         }
 

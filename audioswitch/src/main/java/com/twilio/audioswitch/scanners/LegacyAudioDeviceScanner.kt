@@ -24,9 +24,7 @@ internal class LegacyAudioDeviceScanner(
 
         @Synchronized
         override fun onBluetoothHeadsetStateChanged(headsetName: String?) {
-            val listener = this@LegacyAudioDeviceScanner
-                .listener
-                .get()
+            val listener = this@LegacyAudioDeviceScanner.listener.get()
 
             if (headsetName == null) {
                 val bluetoothHeadset = this.connectedDevices.get()
