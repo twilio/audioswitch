@@ -45,17 +45,6 @@ class ModernAudioSwitchTest : BaseTest() {
     }
 
     @Test
-    fun `start should invoke the audio device change listener with the default audio devices`() {
-        val audioSwitch = getModernAudioSwitch()
-        audioSwitch.start(audioDeviceChangeListener)
-
-        verify(audioDeviceChangeListener).invoke(
-            listOf(AudioDevice.Earpiece(), AudioDevice.Speakerphone()),
-            AudioDevice.Earpiece()
-        )
-    }
-
-    @Test
     fun `stop should stop listeners if the current state is started`() {
         val audioSwitch = getModernAudioSwitch()
         val scanner = audioSwitch.deviceScanner as AudioDeviceScanner
