@@ -14,7 +14,7 @@ import com.twilio.audioswitch.android.PermissionsCheckStrategy
 import com.twilio.audioswitch.android.SystemClockWrapper
 import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager
 import com.twilio.audioswitch.bluetooth.BluetoothScoJob
-import com.twilio.audioswitch.scanners.LegacyAudioDeviceScanner
+import com.twilio.audioswitch.scanners.AudioDeviceScanner
 
 const val DEVICE_NAME = "Bluetooth"
 
@@ -25,6 +25,21 @@ internal fun setupAudioManagerMock() =
         whenever(mock.isSpeakerphoneOn).thenReturn(true)
         whenever(mock.isWiredHeadsetOn).thenReturn(true)
         whenever(mock.getDevices(AudioManager.GET_DEVICES_OUTPUTS)).thenReturn(emptyArray())
+    }
+
+internal fun setupAudioDeviceScannerMock() =
+    setupAudioDeviceScannerMock(
+        AudioDevice.BluetoothHeadset(),
+        AudioDevice.WiredHeadset(),
+        AudioDevice.Earpiece(),
+        AudioDevice.Speakerphone(),
+    )
+
+internal fun <T : AudioDevice> setupAudioDeviceScannerMock(vararg allow: T) =
+    mock<AudioDeviceScanner> {
+        allow.forEach {
+            whenever(mock.isDeviceActive(it)).thenReturn(true)
+        }
     }
 
 internal fun setupScoHandlerMock() =

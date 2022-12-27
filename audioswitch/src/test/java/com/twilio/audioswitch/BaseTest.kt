@@ -90,13 +90,13 @@ open class BaseTest {
 
     internal val audioSwitch: AbstractAudioSwitch
         get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            modernAudioSwitch
+            getModernAudioSwitch()
         } else {
             legacyAudioSwitch
         }
 
-    internal val modernAudioSwitch
-        get() = AudioSwitch(
+    internal fun getModernAudioSwitch(scanner: AudioDeviceScanner = audioDeviceScanner) =
+        AudioSwitch(
             context = context,
             logger = logger,
             audioDeviceManager = audioDeviceManager,
@@ -104,7 +104,7 @@ open class BaseTest {
             preferredDeviceList = preferredDeviceList,
             audioManager = audioManager,
             handler = handler,
-            scanner = audioDeviceScanner,
+            scanner = scanner,
         )
 
     internal val legacyAudioSwitch: LegacyAudioSwitch

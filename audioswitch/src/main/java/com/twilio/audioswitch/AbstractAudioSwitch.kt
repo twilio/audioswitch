@@ -104,6 +104,9 @@ abstract class AbstractAudioSwitch
     }
 
     override fun onDeviceConnected(audioDevice: AudioDevice) {
+        if (audioDevice is Earpiece && this.availableAudioDevices.contains(WiredHeadset())) {
+            return
+        }
         val wasAdded = this.availableUniqueAudioDevices.add(audioDevice)
         if (audioDevice is WiredHeadset) {
             this.availableUniqueAudioDevices.removeAll { it is Earpiece }
