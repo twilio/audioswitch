@@ -47,7 +47,7 @@ class AudioSwitch : AbstractAudioSwitch {
     @JvmOverloads
     constructor(
         context: Context,
-        loggingEnabled: Boolean = true,
+        loggingEnabled: Boolean = false,
         audioFocusChangeListener: AudioManager.OnAudioFocusChangeListener = AudioManager.OnAudioFocusChangeListener {},
         preferredDeviceList: List<Class<out AudioDevice>> = defaultPreferredDeviceList
     ) : this(
@@ -95,15 +95,15 @@ class AudioSwitch : AbstractAudioSwitch {
     )
 
     override fun onDeviceDisconnected(audioDevice: AudioDevice) {
-        this.availableUniqueAudioDevices.remove(audioDevice)
+        var wasChanged = this.availableUniqueAudioDevices.remove(audioDevice)
         if (this.userSelectedAudioDevice == audioDevice) {
             this.userSelectedAudioDevice = null
         }
 
         if (audioDevice is WiredHeadset && this.audioDeviceManager.hasEarpiece()) {
-            this.availableUniqueAudioDevices.add(Earpiece())
+            wasChanged = wasChanged || this.availableUniqueAudioDevices.add(Earpiece())
         }
-        this.selectAudioDevice()
+        this.selectAudioDevice(wasChanged)
     }
 
     override fun onActivate(audioDevice: AudioDevice) {

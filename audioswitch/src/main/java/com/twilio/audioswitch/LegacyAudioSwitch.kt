@@ -49,7 +49,7 @@ class LegacyAudioSwitch : AbstractAudioSwitch {
     @JvmOverloads
     constructor(
         context: Context,
-        loggingEnabled: Boolean = true,
+        loggingEnabled: Boolean = false,
         audioFocusChangeListener: AudioManager.OnAudioFocusChangeListener = AudioManager.OnAudioFocusChangeListener {},
         preferredDeviceList: List<Class<out AudioDevice>> = defaultPreferredDeviceList
     ) : this(
@@ -94,8 +94,15 @@ class LegacyAudioSwitch : AbstractAudioSwitch {
         this.headsetManager = headsetManager
     }
 
+    override fun onDeviceConnected(audioDevice: AudioDevice) {
+        if (audioDevice is BluetoothHeadset) {
+            this.availableUniqueAudioDevices.removeAll { it is BluetoothHeadset }
+        }
+        super.onDeviceConnected(audioDevice)
+    }
+
     override fun onDeviceDisconnected(audioDevice: AudioDevice) {
-        val wasRemoved = if (audioDevice is BluetoothHeadset) {
+        var wasRemoved = if (audioDevice is BluetoothHeadset) {
             if (this.userSelectedAudioDevice is BluetoothHeadset) {
                 this.userSelectedAudioDevice = null
             }
@@ -108,7 +115,7 @@ class LegacyAudioSwitch : AbstractAudioSwitch {
         }
 
         if (audioDevice is WiredHeadset && this.audioDeviceManager.hasEarpiece()) {
-            this.availableUniqueAudioDevices.add(Earpiece())
+            wasRemoved = wasRemoved || this.availableUniqueAudioDevices.add(Earpiece())
         }
         this.selectAudioDevice(wasListChanged = wasRemoved)
     }

@@ -20,7 +20,7 @@ class AudioSwitchIntegrationTest : AndroidTestBase() {
     @Test
     @UiThreadTest
     fun it_should_disable_logging_by_default() {
-        val audioSwitch = AudioSwitch(getInstrumentationContext())
+        val audioSwitch = LegacyAudioSwitch(getInstrumentationContext())
 
         assertFalse(audioSwitch.loggingEnabled)
     }
@@ -28,7 +28,7 @@ class AudioSwitchIntegrationTest : AndroidTestBase() {
     @Test
     @UiThreadTest
     fun it_should_allow_enabling_logging() {
-        val audioSwitch = AudioSwitch(getInstrumentationContext())
+        val audioSwitch = LegacyAudioSwitch(getInstrumentationContext())
 
         audioSwitch.loggingEnabled = true
 
@@ -38,7 +38,7 @@ class AudioSwitchIntegrationTest : AndroidTestBase() {
     @Test
     @UiThreadTest
     fun it_should_allow_enabling_logging_at_construction() {
-        val audioSwitch = AudioSwitch(getInstrumentationContext(), loggingEnabled = true)
+        val audioSwitch = LegacyAudioSwitch(getInstrumentationContext(), loggingEnabled = true)
 
         assertTrue(audioSwitch.loggingEnabled)
     }
@@ -46,7 +46,7 @@ class AudioSwitchIntegrationTest : AndroidTestBase() {
     @Test
     @UiThreadTest
     fun it_should_allow_toggling_logging_while_in_use() {
-        val audioSwitch = AudioSwitch(getInstrumentationContext())
+        val audioSwitch = LegacyAudioSwitch(getInstrumentationContext())
         audioSwitch.loggingEnabled = true
         assertTrue(audioSwitch.loggingEnabled)
         audioSwitch.start { _, _ -> }
@@ -67,9 +67,11 @@ class AudioSwitchIntegrationTest : AndroidTestBase() {
     @Test
     @UiThreadTest
     fun `it_should_return_valid_semver_formatted_version`() {
-        val semVerRegex = Regex("^([0-9]+)\\.([0-9]+)\\.([0-9]+)(?:-([0-9A-" +
-                "Za-z-]+(?:\\.[0-9A-Za-z-]+)*))?(?:\\+[0-9A-Za-z-]+)?$")
-        val version: String = AudioSwitch.VERSION
+        val semVerRegex = Regex(
+            "^([0-9]+)\\.([0-9]+)\\.([0-9]+)(?:-([0-9A-" +
+                    "Za-z-]+(?:\\.[0-9A-Za-z-]+)*))?(?:\\+[0-9A-Za-z-]+)?$"
+        )
+        val version: String = AbstractAudioSwitch.VERSION
         assertNotNull(version)
         assertTrue(version.matches(semVerRegex))
     }
@@ -85,7 +87,7 @@ class AudioSwitchIntegrationTest : AndroidTestBase() {
             }
         }
         InstrumentationRegistry.getInstrumentation().runOnMainSync {
-            val audioSwitch = AudioSwitch(getTargetContext(), true, audioFocusChangeListener)
+            val audioSwitch = LegacyAudioSwitch(getTargetContext(), true, audioFocusChangeListener)
             audioSwitch.start { _, _ -> }
             audioSwitch.activate()
         }
@@ -115,7 +117,7 @@ class AudioSwitchIntegrationTest : AndroidTestBase() {
         val audioFocusUtil = AudioFocusUtil(audioManager, audioFocusChangeListener)
         audioFocusUtil.requestFocus()
 
-        val audioSwitch = AudioSwitch(getTargetContext(), true)
+        val audioSwitch = LegacyAudioSwitch(getTargetContext(), true)
         InstrumentationRegistry.getInstrumentation().runOnMainSync {
             audioSwitch.start { _, _ -> }
             audioSwitch.activate()

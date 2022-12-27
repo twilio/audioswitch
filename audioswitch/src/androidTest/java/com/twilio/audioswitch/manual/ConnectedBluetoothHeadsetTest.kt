@@ -14,6 +14,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.rule.GrantPermissionRule
 import com.twilio.audioswitch.AudioDevice
 import com.twilio.audioswitch.AudioSwitch
+import com.twilio.audioswitch.LegacyAudioSwitch
 import com.twilio.audioswitch.getInstrumentationContext
 import com.twilio.audioswitch.isSpeakerPhoneOn
 import com.twilio.audioswitch.retryAssertion
@@ -38,7 +39,7 @@ class ConnectedBluetoothHeadsetTest {
     private val bluetoothAdapter by lazy { BluetoothAdapter.getDefaultAdapter() }
     private val previousBluetoothEnabled by lazy { bluetoothAdapter.isEnabled }
     private val context by lazy { getInstrumentationContext() }
-    private val audioSwitch by lazy { AudioSwitch(context) }
+    private val audioSwitch by lazy { LegacyAudioSwitch(context) }
     private lateinit var bluetoothHeadset: BluetoothHeadset
     private lateinit var expectedBluetoothDevice: AudioDevice.BluetoothHeadset
     private val bluetoothServiceConnected = CountDownLatch(1)

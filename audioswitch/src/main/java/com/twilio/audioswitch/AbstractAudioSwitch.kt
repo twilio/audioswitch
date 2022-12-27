@@ -201,10 +201,10 @@ abstract class AbstractAudioSwitch
         logger.d(TAG, "Selected AudioDevice = $audioDevice")
         userSelectedAudioDevice = audioDevice
 
-        this.selectAudioDevice(audioDevice = audioDevice)
+        this.selectAudioDevice(wasListChanged = false, audioDevice = audioDevice)
     }
 
-    protected fun selectAudioDevice(wasListChanged: Boolean = false, audioDevice: AudioDevice? = this.getBestDevice()) {
+    protected fun selectAudioDevice(wasListChanged: Boolean, audioDevice: AudioDevice? = this.getBestDevice()) {
         if (selectedAudioDevice == audioDevice) {
             if (wasListChanged) {
                 audioDeviceChangeListener?.invoke(availableUniqueAudioDevices.toList(), selectedAudioDevice)
@@ -230,10 +230,9 @@ abstract class AbstractAudioSwitch
         return if (userSelectedAudioDevice != null && this.deviceScanner.isDeviceActive(userSelectedAudioDevice)) {
             userSelectedAudioDevice
         } else {
-            val device = this.availableUniqueAudioDevices.firstOrNull {
+            this.availableUniqueAudioDevices.firstOrNull {
                 this.deviceScanner.isDeviceActive(it)
             }
-            device
         }
     }
 
