@@ -20,39 +20,50 @@ import com.twilio.audioswitch.wired.STATE_PLUGGED
 import com.twilio.audioswitch.wired.WiredHeadsetReceiver
 import java.util.concurrent.TimeoutException
 
-internal fun setupFakeAudioSwitch(
+internal fun setupFakeLegacyAudioSwitch(
     context: Context,
     preferredDevicesList: List<Class<out AudioDevice>> =
-            listOf(AudioDevice.BluetoothHeadset::class.java, WiredHeadset::class.java,
-                    Earpiece::class.java, Speakerphone::class.java)
+        listOf(
+            AudioDevice.BluetoothHeadset::class.java,
+            WiredHeadset::class.java,
+            Earpiece::class.java,
+            Speakerphone::class.java,
+        )
 ):
-        Triple<AudioSwitch, BluetoothHeadsetManager, WiredHeadsetReceiver> {
+        Triple<LegacyAudioSwitch, BluetoothHeadsetManager, WiredHeadsetReceiver> {
 
     val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
     val logger = ProductionLogger(true)
     val audioDeviceManager =
-            AudioDeviceManager(context,
-                    logger,
-                    audioManager,
-                    BuildWrapper(),
-                    AudioFocusRequestWrapper(),
-                    {})
+        AudioDeviceManager(context,
+            logger,
+            audioManager,
+            BuildWrapper(),
+            AudioFocusRequestWrapper(),
+            {})
     val wiredHeadsetReceiver = WiredHeadsetReceiver(context, logger)
     val headsetManager = BluetoothAdapter.getDefaultAdapter()?.let { bluetoothAdapter ->
-        BluetoothHeadsetManager(context, logger, bluetoothAdapter, audioDeviceManager,
-                bluetoothIntentProcessor = FakeBluetoothIntentProcessor())
+        BluetoothHeadsetManager(
+            context, logger, bluetoothAdapter, audioDeviceManager,
+            bluetoothIntentProcessor = FakeBluetoothIntentProcessor()
+        )
     } ?: run {
         null
     }
-    return Triple(AudioSwitch(context,
-        logger,
+    return Triple(
+        LegacyAudioSwitch(
+            context,
             {},
+            logger,
             preferredDevicesList,
-        audioDeviceManager,
-        wiredHeadsetReceiver,
-        headsetManager),
+            audioManager,
+            audioDeviceManager,
+            wiredHeadsetReceiver,
+            headsetManager,
+        ),
         headsetManager!!,
-        wiredHeadsetReceiver)
+        wiredHeadsetReceiver
+    )
 }
 
 internal fun simulateBluetoothSystemIntent(
@@ -84,9 +95,9 @@ fun getTargetContext(): Context = getInstrumentation().targetContext
 fun getInstrumentationContext(): Context = getInstrumentation().context
 
 fun isSpeakerPhoneOn() =
-        (getTargetContext().getSystemService(Context.AUDIO_SERVICE) as AudioManager?)?.let {
-            it.isSpeakerphoneOn
-        } ?: false
+    (getTargetContext().getSystemService(Context.AUDIO_SERVICE) as AudioManager?)?.let {
+        it.isSpeakerphoneOn
+    } ?: false
 
 fun retryAssertion(
     timeoutInMilliseconds: Long = 10000L,

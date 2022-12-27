@@ -26,41 +26,38 @@ import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.CoreMatchers.nullValue
 import org.hamcrest.MatcherAssert.assertThat
-import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(JUnitParamsRunner::class)
 class BluetoothHeadsetManagerTest : BaseTest() {
 
-    private val headsetListener = mock<BluetoothHeadsetConnectionListener>()
     private val bluetoothDevices = listOf(expectedBluetoothDevice)
-
-    @Before
-    fun setUp() {
-        initializeManagerWithMocks()
-    }
 
     @Test
     fun `onServiceConnected should notify the deviceListener if there are connected devices`() {
-        setupConnectedState()
+        val headsetManager = headsetManager
+        setupConnectedState(headsetManager)
 
-        verify(headsetListener).onBluetoothHeadsetStateChanged(DEVICE_NAME)
+        verify(headsetManager.headsetListener)?.onBluetoothHeadsetStateChanged(DEVICE_NAME)
     }
 
     @Test
     fun `onServiceConnected should set the headset state to Connected if there are connected devices`() {
-        setupConnectedState()
+        val headsetManager = headsetManager
+        setupConnectedState(headsetManager)
 
         assertThat(headsetManager.headsetState is Connected, equalTo(true))
     }
 
     @Test
     fun `onServiceConnected should not notify the deviceListener if the deviceListener is null`() {
+        val headsetManager = headsetManager
+        val previousListener = headsetManager.headsetListener!!
         headsetManager.headsetListener = null
-        setupConnectedState()
+        setupConnectedState(headsetManager)
 
-        verifyZeroInteractions(headsetListener)
+        verifyZeroInteractions(previousListener)
     }
 
     @Test
@@ -69,21 +66,24 @@ class BluetoothHeadsetManagerTest : BaseTest() {
             whenever(mock.connectedDevices).thenReturn(emptyList())
         }
 
+        val headsetManager = headsetManager
         headsetManager.onServiceConnected(0, bluetoothProfile)
 
-        verifyZeroInteractions(headsetListener)
+        verifyZeroInteractions(headsetManager.headsetListener!!)
     }
 
     @Test
     fun `onServiceDisconnected should notify the deviceListener`() {
+        val headsetManager = headsetManager
         headsetManager.onServiceDisconnected(0)
 
-        verify(headsetListener).onBluetoothHeadsetStateChanged()
+        verify(headsetManager.headsetListener!!).onBluetoothHeadsetStateChanged()
     }
 
     @Test
     fun `onServiceDisconnected should set the headset state to Disconnected`() {
-        setupConnectedState()
+        val headsetManager = headsetManager
+        setupConnectedState(headsetManager)
         headsetManager.onServiceDisconnected(0)
 
         assertThat(headsetManager.headsetState is Disconnected, equalTo(true))
@@ -91,31 +91,37 @@ class BluetoothHeadsetManagerTest : BaseTest() {
 
     @Test
     fun `onServiceDisconnected should not notify the deviceListener if deviceListener is null`() {
+        val headsetManager = headsetManager
+        val previousListener = headsetManager.headsetListener!!
         headsetManager.headsetListener = null
         headsetManager.onServiceDisconnected(0)
 
-        verifyZeroInteractions(headsetListener)
+        verifyZeroInteractions(previousListener)
     }
 
     @Test
     fun `stop should close close all resources`() {
         val deviceListener = mock<BluetoothHeadsetConnectionListener>()
+        val headsetManager = headsetManager
+        headsetManager.headsetListener = deviceListener
         headsetManager.start(deviceListener)
         headsetManager.stop()
 
-        assertBluetoothHeadsetTeardown()
+        assertBluetoothHeadsetTeardown(headsetManager)
     }
 
     @Test
     fun `start should successfully setup headset manager`() {
         val deviceListener = mock<BluetoothHeadsetConnectionListener>()
+        val headsetManager = headsetManager
         headsetManager.start(deviceListener)
 
-        assertBluetoothHeadsetSetup()
+        assertBluetoothHeadsetSetup(headsetManager)
     }
 
     @Test
     fun `activate should start bluetooth device audio routing if state is Connected`() {
+        val headsetManager = headsetManager
         headsetManager.headsetState = Connected
         headsetManager.activate()
 
@@ -124,6 +130,7 @@ class BluetoothHeadsetManagerTest : BaseTest() {
 
     @Test
     fun `activate should start bluetooth device audio routing if state is AudioActivationError`() {
+        val headsetManager = headsetManager
         headsetManager.headsetState = AudioActivationError
 
         headsetManager.activate()
@@ -133,6 +140,7 @@ class BluetoothHeadsetManagerTest : BaseTest() {
 
     @Test
     fun `activate should not start bluetooth device audio routing if state is Disconnected`() {
+        val headsetManager = headsetManager
         headsetManager.headsetState = Disconnected
 
         headsetManager.activate()
@@ -142,6 +150,7 @@ class BluetoothHeadsetManagerTest : BaseTest() {
 
     @Test
     fun `deactivate should stop bluetooth device audio routing`() {
+        val headsetManager = headsetManager
         headsetManager.headsetState = AudioActivated
 
         headsetManager.deactivate()
@@ -151,6 +160,7 @@ class BluetoothHeadsetManagerTest : BaseTest() {
 
     @Test
     fun `deactivate should not stop bluetooth device audio routing if state is AudioActivating`() {
+        val headsetManager = headsetManager
         headsetManager.headsetState = AudioActivating
 
         headsetManager.deactivate()
@@ -178,13 +188,13 @@ class BluetoothHeadsetManagerTest : BaseTest() {
             whenever(mock.deviceClass).thenReturn(BluetoothClass.Device.AUDIO_VIDEO_VIDEO_MONITOR)
         }
         return arrayOf(
-                arrayOf(handsFreeDevice, true),
-                arrayOf(audioVideoHeadsetDevice, true),
-                arrayOf(audioVideoCarDevice, true),
-                arrayOf(headphonesDevice, true),
-                arrayOf(uncategorizedDevice, true),
-                arrayOf(wrongDevice, false),
-                arrayOf(null, false)
+            arrayOf(handsFreeDevice, true),
+            arrayOf(audioVideoHeadsetDevice, true),
+            arrayOf(audioVideoCarDevice, true),
+            arrayOf(headphonesDevice, true),
+            arrayOf(uncategorizedDevice, true),
+            arrayOf(wrongDevice, false),
+            arrayOf(null, false)
         )
     }
 
@@ -198,14 +208,15 @@ class BluetoothHeadsetManagerTest : BaseTest() {
         val intent = mock<Intent> {
             whenever(mock.action).thenReturn(BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED)
             whenever(mock.getIntExtra(BluetoothHeadset.EXTRA_STATE, BluetoothHeadset.STATE_DISCONNECTED))
-                    .thenReturn(BluetoothHeadset.STATE_CONNECTED)
+                .thenReturn(BluetoothHeadset.STATE_CONNECTED)
             whenever(mock.getParcelableExtra<BluetoothDevice>(BluetoothDevice.EXTRA_DEVICE))
-                    .thenReturn(expectedBluetoothDevice)
+                .thenReturn(expectedBluetoothDevice)
         }
+        val headsetManager = headsetManager
         headsetManager.onReceive(context, intent)
 
         val invocationCount = if (isNewDeviceConnected) 1 else 0
-        verify(headsetListener, times(invocationCount)).onBluetoothHeadsetStateChanged(DEVICE_NAME)
+        verify(headsetManager.headsetListener!!, times(invocationCount)).onBluetoothHeadsetStateChanged(DEVICE_NAME)
     }
 
     @Parameters(method = "parameters")
@@ -218,30 +229,34 @@ class BluetoothHeadsetManagerTest : BaseTest() {
         val intent = mock<Intent> {
             whenever(mock.action).thenReturn(BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED)
             whenever(mock.getIntExtra(BluetoothHeadset.EXTRA_STATE, BluetoothHeadset.STATE_DISCONNECTED))
-                    .thenReturn(BluetoothHeadset.STATE_DISCONNECTED)
+                .thenReturn(BluetoothHeadset.STATE_DISCONNECTED)
             whenever(mock.getParcelableExtra<BluetoothDevice>(BluetoothDevice.EXTRA_DEVICE))
-                    .thenReturn(expectedBluetoothDevice)
+                .thenReturn(expectedBluetoothDevice)
         }
+        val headsetManager = headsetManager
         headsetManager.onReceive(context, intent)
 
         val invocationCount = if (isDeviceDisconnected) 1 else 0
-        verify(headsetListener, times(invocationCount)).onBluetoothHeadsetStateChanged()
+        verify(headsetManager.headsetListener!!, times(invocationCount)).onBluetoothHeadsetStateChanged()
     }
 
     @Test
     fun `onReceive should not register a new device when an ACL connected event is received with a null bluetooth device`() {
+        val headsetManager = headsetManager
         whenever(expectedBluetoothDevice.bluetoothClass).thenReturn(null)
-        simulateNewBluetoothHeadsetConnection()
+        simulateNewBluetoothHeadsetConnection(headsetManager)
 
-        verifyZeroInteractions(headsetListener)
+        verifyZeroInteractions(headsetManager.headsetListener!!)
     }
 
     @Test
     fun `onReceive should not register a new device when the deviceListener is null`() {
+        val headsetManager = headsetManager
+        val previous = headsetManager.headsetListener!!
         headsetManager.headsetListener = null
-        simulateNewBluetoothHeadsetConnection()
+        simulateNewBluetoothHeadsetConnection(headsetManager)
 
-        verifyZeroInteractions(headsetListener)
+        verifyZeroInteractions(previous)
     }
 
     @Test
@@ -249,45 +264,50 @@ class BluetoothHeadsetManagerTest : BaseTest() {
         val intent = mock<Intent> {
             whenever(mock.action).thenReturn(BluetoothDevice.ACTION_ACL_DISCONNECTED)
             whenever(mock.getParcelableExtra<BluetoothDevice>(BluetoothDevice.EXTRA_DEVICE))
-                    .thenReturn(null)
+                .thenReturn(null)
         }
 
+        val headsetManager = headsetManager
         headsetManager.onReceive(mock(), intent)
 
-        verifyZeroInteractions(headsetListener)
+        verifyZeroInteractions(headsetManager.headsetListener!!)
     }
 
     @Test
     fun `onReceive should not disconnect a device when the deviceListener is null`() {
+        val headsetManager = headsetManager
+        val previous = headsetManager.headsetListener!!
         headsetManager.headsetListener = null
         val intent = mock<Intent> {
             whenever(mock.action).thenReturn(BluetoothDevice.ACTION_ACL_DISCONNECTED)
             whenever(mock.getParcelableExtra<BluetoothDevice>(BluetoothDevice.EXTRA_DEVICE))
-                    .thenReturn(expectedBluetoothDevice)
+                .thenReturn(expectedBluetoothDevice)
         }
 
         headsetManager.onReceive(mock(), intent)
 
-        verifyZeroInteractions(headsetListener)
+        verifyZeroInteractions(previous)
     }
 
     @Test
     fun `onReceive should receive no headset listener callbacks if the intent action is null`() {
+        val headsetManager = headsetManager
         headsetManager.onReceive(mock(), mock())
 
-        verifyZeroInteractions(headsetListener)
+        verifyZeroInteractions(headsetManager.headsetListener!!)
     }
 
     @Test
     fun `a headset audio connection should cancel a running enableBluetoothScoJob`() {
-        setupConnectedState()
+        val headsetManager = headsetManager
+        setupConnectedState(headsetManager)
         headsetManager.activate()
         val intent = mock<Intent> {
             whenever(mock.action).thenReturn(BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED)
             whenever(mock.getIntExtra(BluetoothHeadset.EXTRA_STATE, BluetoothHeadset.STATE_DISCONNECTED))
-                    .thenReturn(BluetoothHeadset.STATE_AUDIO_CONNECTED)
+                .thenReturn(BluetoothHeadset.STATE_AUDIO_CONNECTED)
             whenever(mock.getParcelableExtra<BluetoothDevice>(BluetoothDevice.EXTRA_DEVICE))
-                    .thenReturn(expectedBluetoothDevice)
+                .thenReturn(expectedBluetoothDevice)
         }
         headsetManager.onReceive(context, intent)
 
@@ -296,15 +316,20 @@ class BluetoothHeadsetManagerTest : BaseTest() {
 
     @Test
     fun `a bluetooth headset audio disconnection should cancel a running disableBluetoothScoJob`() {
+        val headsetManager = headsetManager
         headsetManager.headsetState = AudioActivated
         headsetManager.deactivate()
         val intent = mock<Intent> {
             whenever(mock.action).thenReturn(BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED)
-            whenever(mock.getIntExtra(BluetoothHeadset.EXTRA_STATE,
-                    BluetoothHeadset.STATE_DISCONNECTED))
-                    .thenReturn(BluetoothHeadset.STATE_AUDIO_DISCONNECTED)
+            whenever(
+                mock.getIntExtra(
+                    BluetoothHeadset.EXTRA_STATE,
+                    BluetoothHeadset.STATE_DISCONNECTED
+                )
+            )
+                .thenReturn(BluetoothHeadset.STATE_AUDIO_DISCONNECTED)
             whenever(mock.getParcelableExtra<BluetoothDevice>(BluetoothDevice.EXTRA_DEVICE))
-                    .thenReturn(expectedBluetoothDevice)
+                .thenReturn(expectedBluetoothDevice)
         }
         headsetManager.onReceive(mock(), intent)
 
@@ -317,7 +342,7 @@ class BluetoothHeadsetManagerTest : BaseTest() {
             whenever(mock.elapsedRealtime()).thenReturn(0L, TIMEOUT)
         }
         handler = setupHandlerMock()
-        initializeManagerWithMocks()
+        val headsetManager = headsetManager
         headsetManager.headsetState = Connected
         headsetManager.activate()
 
@@ -330,11 +355,12 @@ class BluetoothHeadsetManagerTest : BaseTest() {
             whenever(mock.elapsedRealtime()).thenReturn(0L, TIMEOUT)
         }
         handler = setupHandlerMock()
-        initializeManagerWithMocks()
+        val headsetManager = headsetManager
+
         headsetManager.headsetState = Connected
         headsetManager.activate()
 
-        verify(headsetListener).onBluetoothHeadsetActivationError()
+        verify(headsetManager.headsetListener!!).onBluetoothHeadsetActivationError()
     }
 
     @Test
@@ -343,19 +369,19 @@ class BluetoothHeadsetManagerTest : BaseTest() {
             whenever(mock.elapsedRealtime()).thenReturn(0L, TIMEOUT)
         }
         handler = setupHandlerMock()
-        headsetManager = BluetoothHeadsetManager(
+        val headsetManager = BluetoothHeadsetManager(
             context,
             logger,
             bluetoothAdapter,
             audioDeviceManager,
             bluetoothScoHandler = handler,
-            systemClockWrapper = systemClockWrapper, headsetProxy = headsetProxy,
-            permissionsRequestStrategy = permissionsStrategyProxy)
+            systemClockWrapper = systemClockWrapper,
+            headsetProxy = headsetProxy,
+            permissionsRequestStrategy = permissionsStrategyProxy,
+        )
 
         headsetManager.headsetState = Connected
         headsetManager.activate()
-
-        verifyZeroInteractions(headsetListener)
     }
 
     @Test
@@ -375,7 +401,8 @@ class BluetoothHeadsetManagerTest : BaseTest() {
                 true
             }
         }
-        initializeManagerWithMocks()
+        val headsetManager = headsetManager
+
         headsetManager.headsetState = Connected
         headsetManager.activate()
 
@@ -388,7 +415,8 @@ class BluetoothHeadsetManagerTest : BaseTest() {
             whenever(mock.elapsedRealtime()).thenReturn(0L, TIMEOUT)
         }
         handler = setupHandlerMock()
-        initializeManagerWithMocks()
+        val headsetManager = headsetManager
+
         headsetManager.headsetState = Connected
         headsetManager.activate()
 
@@ -401,7 +429,8 @@ class BluetoothHeadsetManagerTest : BaseTest() {
             whenever(mock.elapsedRealtime()).thenReturn(0L, TIMEOUT + 1000)
         }
         handler = setupHandlerMock()
-        initializeManagerWithMocks()
+        val headsetManager = headsetManager
+
         headsetManager.headsetState = Connected
         headsetManager.activate()
 
@@ -420,15 +449,16 @@ class BluetoothHeadsetManagerTest : BaseTest() {
         val bluetoothProfile = mock<BluetoothHeadset> {
             whenever(mock.connectedDevices).thenReturn(bluetoothDevices, bluetoothDevices, emptyList())
         }
+        val headsetManager = headsetManager
         headsetManager.onServiceConnected(0, bluetoothProfile)
         headsetManager.activate()
 
         val intent = mock<Intent> {
             whenever(mock.action).thenReturn(BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED)
             whenever(mock.getIntExtra(BluetoothHeadset.EXTRA_STATE, BluetoothHeadset.STATE_DISCONNECTED))
-                    .thenReturn(BluetoothHeadset.STATE_DISCONNECTED)
+                .thenReturn(BluetoothHeadset.STATE_DISCONNECTED)
             whenever(mock.getParcelableExtra<BluetoothDevice>(BluetoothDevice.EXTRA_DEVICE))
-                    .thenReturn(expectedBluetoothDevice)
+                .thenReturn(expectedBluetoothDevice)
         }
         headsetManager.onReceive(context, intent)
 
@@ -436,40 +466,27 @@ class BluetoothHeadsetManagerTest : BaseTest() {
     }
 
     private fun setupHandlerMock() =
-            mock<Handler> {
-                whenever(mock.post(any())).thenAnswer {
-                    (it.arguments[0] as BluetoothScoJob.BluetoothScoRunnable).run()
-                    true
-                }
-
-                whenever(mock.postDelayed(isA(), isA())).thenAnswer {
-                    (it.arguments[0] as BluetoothScoJob.BluetoothScoRunnable).run()
-                    true
-                }
+        mock<Handler> {
+            whenever(mock.post(any())).thenAnswer {
+                (it.arguments[0] as BluetoothScoJob.BluetoothScoRunnable).run()
+                true
             }
 
-    private fun setupConnectedState() {
+            whenever(mock.postDelayed(isA(), isA())).thenAnswer {
+                (it.arguments[0] as BluetoothScoJob.BluetoothScoRunnable).run()
+                true
+            }
+        }
+
+    private fun setupConnectedState(headsetManager: BluetoothHeadsetManager?) {
         val bluetoothProfile = mock<BluetoothHeadset> {
             whenever(mock.connectedDevices).thenReturn(bluetoothDevices)
         }
-        headsetManager.onServiceConnected(0, bluetoothProfile)
+        headsetManager?.onServiceConnected(0, bluetoothProfile)
     }
 
     private fun assertScoJobIsCanceled(handler: Handler, scoJob: BluetoothScoJob) {
         verify(handler).removeCallbacks(isA())
         assertThat(scoJob.bluetoothScoRunnable, `is`(nullValue()))
-    }
-
-    private fun initializeManagerWithMocks() {
-        headsetManager = BluetoothHeadsetManager(
-            context,
-            logger,
-            bluetoothAdapter,
-            audioDeviceManager,
-            headsetListener,
-            handler,
-            systemClockWrapper,
-            headsetProxy = headsetProxy,
-            permissionsRequestStrategy = permissionsStrategyProxy)
     }
 }

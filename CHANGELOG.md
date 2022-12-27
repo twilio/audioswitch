@@ -1,4 +1,10 @@
 # Changelog
+### 1.2.0 (December 29, 2022)
+Enhancements
+
+- Dokka dependency upgraded such that documents can be generated successfully again.
+- Updated gradle version to 7.0.2
+- Updated gradle plugin to 7.0.3
 
 ### 1.1.5 (June 17, 2022)
 

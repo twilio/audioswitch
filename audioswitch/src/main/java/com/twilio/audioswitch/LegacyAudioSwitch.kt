@@ -1,19 +1,19 @@
 package com.twilio.audioswitch
 
+import android.bluetooth.BluetoothAdapter
 import android.content.Context
 import android.media.AudioManager
-import android.os.Build
-import android.os.Handler
-import android.os.Looper
-import androidx.annotation.RequiresApi
 import androidx.annotation.VisibleForTesting
-import com.twilio.audioswitch.AbstractAudioSwitch.State.*
-import com.twilio.audioswitch.AudioDevice.*
+import com.twilio.audioswitch.AudioDevice.BluetoothHeadset
+import com.twilio.audioswitch.AudioDevice.Earpiece
+import com.twilio.audioswitch.AudioDevice.Speakerphone
+import com.twilio.audioswitch.AudioDevice.WiredHeadset
 import com.twilio.audioswitch.android.Logger
 import com.twilio.audioswitch.android.ProductionLogger
-import com.twilio.audioswitch.scanners.AudioDeviceScanner
+import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager
+import com.twilio.audioswitch.scanners.LegacyAudioDeviceScanner
 import com.twilio.audioswitch.scanners.Scanner
-import java.util.*
+import com.twilio.audioswitch.wired.WiredHeadsetReceiver
 
 /**
  * This class enables developers to enumerate available audio devices and select which device audio
@@ -26,8 +26,10 @@ import java.util.*
  * @property selectedAudioDevice Retrieves the selected [AudioDevice] from [AudioSwitch.selectDevice].
  * @property availableAudioDevices Retrieves the current list of available [AudioDevice]s.
  **/
-@RequiresApi(Build.VERSION_CODES.M)
-class AudioSwitch : AbstractAudioSwitch {
+class LegacyAudioSwitch : AbstractAudioSwitch {
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    internal val headsetManager: BluetoothHeadsetManager?
+
     /**
      * Constructs a new AudioSwitch instance.
      * - [context] - An Android Context.
@@ -54,22 +56,6 @@ class AudioSwitch : AbstractAudioSwitch {
         context, audioFocusChangeListener, ProductionLogger(loggingEnabled), preferredDeviceList
     )
 
-    /**
-     * Constructs a new AudioSwitch instance.
-     * - [context] - An Android Context.
-     * - [loggingEnabled] - Toggle whether logging is enabled. This argument is false by default.
-     * - [audioFocusChangeListener] - A listener that is invoked when the system audio focus is updated.
-     * Note that updates are only sent to the listener after [activate] has been called.
-     * - [preferredDeviceList] - The order in which [AudioSwitch] automatically selects and activates
-     * an [AudioDevice]. This parameter is ignored if the [selectedAudioDevice] is not `null`.
-     * The default preferred [AudioDevice] order is the following:
-     * [BluetoothHeadset], [WiredHeadset], [Earpiece], [Speakerphone]
-     * . The [preferredDeviceList] is added to the front of the default list. For example, if [preferredDeviceList]
-     * is [Speakerphone] and [BluetoothHeadset], then the new preferred audio
-     * device list will be:
-     * [Speakerphone], [BluetoothHeadset], [WiredHeadset], [Earpiece].
-     * An [IllegalArgumentException] is thrown if the [preferredDeviceList] contains duplicate [AudioDevice] elements.
-     */
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     internal constructor(
         context: Context,
@@ -83,47 +69,75 @@ class AudioSwitch : AbstractAudioSwitch {
             audioManager,
             audioFocusChangeListener = audioFocusChangeListener
         ),
-        handler: Handler = Handler(Looper.getMainLooper()),
-        scanner: Scanner = AudioDeviceScanner(audioManager, handler),
+        wiredHeadsetReceiver: WiredHeadsetReceiver = WiredHeadsetReceiver(context, logger),
+        headsetManager: BluetoothHeadsetManager? = BluetoothHeadsetManager.newInstance(
+            context,
+            logger,
+            BluetoothAdapter.getDefaultAdapter(),
+            audioDeviceManager
+        ),
+        scanner: Scanner = LegacyAudioDeviceScanner(
+            audioManager,
+            audioDeviceManager,
+            wiredHeadsetReceiver,
+            headsetManager
+        )
     ) : super(
-        context = context,
-        audioFocusChangeListener = audioFocusChangeListener,
-        scanner = scanner,
-        logger = logger,
-        preferredDeviceList = preferredDeviceList,
-        audioDeviceManager = audioDeviceManager,
-    )
+        context,
+        audioFocusChangeListener,
+        scanner,
+        logger.loggingEnabled,
+        logger,
+        preferredDeviceList,
+        audioDeviceManager
+    ) {
+        this.headsetManager = headsetManager
+    }
+
+    override fun onDeviceConnected(audioDevice: AudioDevice) {
+        if (audioDevice is BluetoothHeadset) {
+            this.availableUniqueAudioDevices.removeAll { it is BluetoothHeadset }
+        }
+        super.onDeviceConnected(audioDevice)
+    }
 
     override fun onDeviceDisconnected(audioDevice: AudioDevice) {
-        var wasChanged = this.availableUniqueAudioDevices.remove(audioDevice)
-        if (this.userSelectedAudioDevice == audioDevice) {
-            this.userSelectedAudioDevice = null
+        var wasRemoved = if (audioDevice is BluetoothHeadset) {
+            if (this.userSelectedAudioDevice is BluetoothHeadset) {
+                this.userSelectedAudioDevice = null
+            }
+            this.availableUniqueAudioDevices.removeAll { it is BluetoothHeadset }
+        } else {
+            if (this.userSelectedAudioDevice == audioDevice) {
+                this.userSelectedAudioDevice = null
+            }
+            this.availableUniqueAudioDevices.remove(audioDevice)
         }
 
         if (audioDevice is WiredHeadset && this.audioDeviceManager.hasEarpiece()) {
-            wasChanged = wasChanged || this.availableUniqueAudioDevices.add(Earpiece())
+            wasRemoved = wasRemoved || this.availableUniqueAudioDevices.add(Earpiece())
         }
-        this.selectAudioDevice(wasChanged)
+        this.selectAudioDevice(wasListChanged = wasRemoved)
     }
 
     override fun onActivate(audioDevice: AudioDevice) {
         when (audioDevice) {
             is BluetoothHeadset -> {
                 this.audioDeviceManager.enableSpeakerphone(false)
-                this.audioDeviceManager.enableBluetoothSco(true)
+                this.headsetManager?.activate()
             }
             is Earpiece, is WiredHeadset -> {
                 this.audioDeviceManager.enableSpeakerphone(false)
-                this.audioDeviceManager.enableBluetoothSco(false)
+                this.headsetManager?.deactivate()
             }
             is Speakerphone -> {
                 this.audioDeviceManager.enableSpeakerphone(true)
-                this.audioDeviceManager.enableBluetoothSco(false)
+                this.headsetManager?.deactivate()
             }
         }
     }
 
     override fun onDeactivate() {
-
+        this.headsetManager?.deactivate()
     }
 }

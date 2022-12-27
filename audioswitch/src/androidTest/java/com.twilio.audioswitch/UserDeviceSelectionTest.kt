@@ -23,7 +23,7 @@ class UserDeviceSelectionTest : AndroidTestBase() {
     @UiThreadTest
     @Test
     fun `it_should_select_the_earpiece_audio_device_when_the_user_selects_it`() {
-        val audioSwitch = AudioSwitch(context)
+        val audioSwitch = LegacyAudioSwitch(context)
         audioSwitch.start { _, _ -> }
         val earpiece = audioSwitch.availableAudioDevices
                 .find { it is Earpiece }
@@ -38,7 +38,7 @@ class UserDeviceSelectionTest : AndroidTestBase() {
     @UiThreadTest
     @Test
     fun `it_should_select_the_speakerphone_audio_device_when_the_user_selects_it`() {
-        val audioSwitch = AudioSwitch(context)
+        val audioSwitch = LegacyAudioSwitch(context)
         audioSwitch.start { _, _ -> }
         val speakerphone = audioSwitch.availableAudioDevices
                 .find { it is Speakerphone }
@@ -53,7 +53,7 @@ class UserDeviceSelectionTest : AndroidTestBase() {
     @UiThreadTest
     @Test
     fun `it_should_select_the_bluetooth_audio_device_when_the_user_selects_it`() {
-        val (audioSwitch, bluetoothHeadsetReceiver) = setupFakeAudioSwitch(context)
+        val (audioSwitch, bluetoothHeadsetReceiver) = setupFakeLegacyAudioSwitch(context)
         audioSwitch.start { _, _ -> }
         simulateBluetoothSystemIntent(context, bluetoothHeadsetReceiver)
         val bluetoothDevice = audioSwitch.availableAudioDevices
