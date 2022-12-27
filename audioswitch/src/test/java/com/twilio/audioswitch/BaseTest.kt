@@ -63,7 +63,8 @@ open class BaseTest {
             bluetoothScoHandler = handler,
             systemClockWrapper = systemClockWrapper,
             headsetProxy = headsetProxy,
-            permissionsRequestStrategy = permissionsStrategyProxy
+            permissionsRequestStrategy = permissionsStrategyProxy,
+            headsetListener = mock()
         )
 
     internal val scanner: Scanner
