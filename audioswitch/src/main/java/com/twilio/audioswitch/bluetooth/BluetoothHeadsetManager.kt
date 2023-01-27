@@ -38,7 +38,6 @@ private const val TAG = "BluetoothHeadsetManager"
 private const val PERMISSION_ERROR_MESSAGE = "Bluetooth unsupported, permissions not granted"
 
 internal class BluetoothHeadsetManager
-
 @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
 internal constructor(
     private val context: Context,
@@ -356,19 +355,21 @@ internal constructor(
         PermissionsCheckStrategy {
         @SuppressLint("NewApi")
         override fun hasPermissions(): Boolean {
-            return when (context.applicationInfo.targetSdkVersion) {
-                in android.os.Build.VERSION_CODES.BASE..android.os.Build.VERSION_CODES.R -> {
-                    PERMISSION_GRANTED == context.checkPermission(
-                        Manifest.permission.BLUETOOTH,
-                        android.os.Process.myPid(),
-                        android.os.Process.myUid())
-                } else -> {
-                    // for android 12/S or newer
-                    PERMISSION_GRANTED == context.checkPermission(
-                        Manifest.permission.BLUETOOTH_CONNECT,
-                        android.os.Process.myPid(),
-                        android.os.Process.myUid())
-                }
+            return if (context.applicationInfo.targetSdkVersion <= android.os.Build.VERSION_CODES.R
+                || android.os.Build.VERSION.SDK_INT <= android.os.Build.VERSION_CODES.R
+            ) {
+                PERMISSION_GRANTED == context.checkPermission(
+                    Manifest.permission.BLUETOOTH,
+                    android.os.Process.myPid(),
+                    android.os.Process.myUid()
+                )
+            } else {
+                // for android 12/S or newer
+                PERMISSION_GRANTED == context.checkPermission(
+                    Manifest.permission.BLUETOOTH_CONNECT,
+                    android.os.Process.myPid(),
+                    android.os.Process.myUid()
+                )
             }
         }
     }
