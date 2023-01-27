@@ -38,6 +38,7 @@ private const val TAG = "BluetoothHeadsetManager"
 private const val PERMISSION_ERROR_MESSAGE = "Bluetooth unsupported, permissions not granted"
 
 internal class BluetoothHeadsetManager
+
 @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
 internal constructor(
     private val context: Context,
