@@ -251,11 +251,6 @@ task publishDocs {
     doLast {
         exec {
             workingDir "${rootDir}"
-            commandLine "cp", "audioswitch/index.html", "audioswitch/build"
-        }
-
-        exec {
-            workingDir "${rootDir}"
             commandLine "git", "remote", "add", "${remote}", "${gitRef}"
             // Ignore exit value because remote may have been added in previous task
             ignoreExitValue true
@@ -280,11 +275,6 @@ task publishDocs {
         exec {
             workingDir "${rootDir}"
             commandLine "cp", "-r", "audioswitch/build/dokka/html/.", "docs/${releaseVersion}"
-        }
-
-        exec {
-            workingDir "${rootDir}"
-            commandLine "cp", "audioswitch/build/index.html", "docs/${releaseVersion}"
         }
 
         exec {
