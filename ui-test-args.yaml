@@ -8,5 +8,5 @@ integration-tests:
     - {model: starqlteue, version: 26}
     - {model: crownqlteue, version: 29}
     - {model: cactus, version: 27}
-    - {model: oriole, version: 31}
+    - {model: q2q, version: 31}
     - {model: redfin, version: 30}
