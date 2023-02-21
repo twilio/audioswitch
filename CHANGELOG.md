@@ -1,5 +1,13 @@
 # Changelog
 
+### 1.1.6 (Feb 21, 2023)
+
+Bug Fixes
+
+- Bluetooth permission now  also check device version in case of newer target version than device
+- Documentation is now available again and integration tests now pass
+- Fixed issue where reported Bluetooth device list could be incorrect upon AudioSwitch restart
+
 ### 1.1.5 (June 17, 2022)
 
 Bug Fixes
