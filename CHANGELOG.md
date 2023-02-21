@@ -4,7 +4,7 @@
 
 Bug Fixes
 
-- Bluetooth permission now  also check device version in case of newer target version than device
+- Bluetooth permissions now checks for the device version in case the target version is newer
 - Documentation is now available again and integration tests now pass
 - Fixed issue where reported Bluetooth device list could be incorrect upon AudioSwitch restart
 
