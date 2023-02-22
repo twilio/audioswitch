@@ -157,9 +157,9 @@ class AudioSwitch {
         audioDeviceChangeListener = listener
         when (state) {
             STOPPED -> {
+                enumerateDevices()
                 bluetoothHeadsetManager?.start(bluetoothDeviceConnectionListener)
                 wiredHeadsetReceiver.start(wiredDeviceConnectionListener)
-                enumerateDevices()
                 state = STARTED
             }
             else -> {
