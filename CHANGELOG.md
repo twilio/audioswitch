@@ -1,6 +1,6 @@
 # Changelog
 
-### 1.1.6 (Feb 21, 2023)
+### 1.1.7 (Feb 21, 2023)
 
 Bug Fixes
 
