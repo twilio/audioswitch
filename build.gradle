@@ -168,10 +168,20 @@ task incrementVersion(type: RootGradleBuild) {
 
         def gitBranch = stdOut.toString().replaceAll("\\s","")
         def circleTag = System.getenv("CIRCLE_TAG")
+        def githubToken = System.getenv("GITHUB_TOKEN")
+        def repoSlug = "${System.env.CIRCLE_PROJECT_USERNAME}/${System.env.CIRCLE_PROJECT_REPONAME}"
+        def gitRef = "https://${githubToken}@github.com/${repoSlug}.git"
         def nextVersionPatch = versionPatch.toInteger() + 1
 
         if (!buildDir.exists()) {
             buildDir.mkdir()
+        }
+
+        exec {
+            workingDir "${rootDir}"
+            commandLine "git", "remote", "add", "${remote}", "${gitRef}"
+            // Ignore exit value because remote may have been added in previous task
+            ignoreExitValue true
         }
 
         exec {
@@ -211,7 +221,7 @@ task incrementVersion(type: RootGradleBuild) {
 
             exec {
                 workingDir "${rootDir}"
-                commandLine "git", "push", "origin", "${gitBranch}"
+                commandLine "git", "push", "${remote}", "${gitBranch}"
             }
         }
     }
