@@ -172,6 +172,7 @@ task incrementVersion(type: RootGradleBuild) {
         def repoSlug = "${System.env.CIRCLE_PROJECT_USERNAME}/${System.env.CIRCLE_PROJECT_REPONAME}"
         def gitRef = "https://${githubToken}@github.com/${repoSlug}.git"
         def nextVersionPatch = versionPatch.toInteger() + 1
+        def remote = "upstream"
 
         if (!buildDir.exists()) {
             buildDir.mkdir()
