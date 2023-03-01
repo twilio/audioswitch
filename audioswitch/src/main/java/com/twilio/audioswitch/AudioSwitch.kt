@@ -95,6 +95,7 @@ class AudioSwitch : AbstractAudioSwitch {
     )
 
     override fun onDeviceDisconnected(audioDevice: AudioDevice) {
+        this.logger.d(TAG_AUDIO_SWITCH, "onDeviceDisconnected($audioDevice)")
         var wasChanged = this.availableUniqueAudioDevices.remove(audioDevice)
         if (this.userSelectedAudioDevice == audioDevice) {
             this.userSelectedAudioDevice = null
@@ -107,6 +108,7 @@ class AudioSwitch : AbstractAudioSwitch {
     }
 
     override fun onActivate(audioDevice: AudioDevice) {
+        this.logger.d(TAG_AUDIO_SWITCH, "onActivate($audioDevice)")
         when (audioDevice) {
             is BluetoothHeadset -> {
                 this.audioDeviceManager.enableSpeakerphone(false)
@@ -117,13 +119,13 @@ class AudioSwitch : AbstractAudioSwitch {
                 this.audioDeviceManager.enableBluetoothSco(false)
             }
             is Speakerphone -> {
-                this.audioDeviceManager.enableSpeakerphone(true)
                 this.audioDeviceManager.enableBluetoothSco(false)
+                this.audioDeviceManager.enableSpeakerphone(true)
             }
         }
     }
 
     override fun onDeactivate() {
-
+        this.logger.d(TAG_AUDIO_SWITCH, "onDeactivate")
     }
 }

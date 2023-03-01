@@ -13,7 +13,7 @@ import com.twilio.audioswitch.scanners.Scanner
 import java.util.*
 import java.util.concurrent.ConcurrentSkipListSet
 
-private const val TAG = "AudioSwitch"
+internal const val TAG_AUDIO_SWITCH = "AudioSwitch"
 
 /**
  * This class enables developers to enumerate available audio devices and select which device audio
@@ -47,7 +47,7 @@ abstract class AbstractAudioSwitch
     audioFocusChangeListener: OnAudioFocusChangeListener,
     scanner: Scanner,
     loggingEnabled: Boolean = true,
-    private var logger: Logger = ProductionLogger(loggingEnabled),
+    internal var logger: Logger = ProductionLogger(loggingEnabled),
     preferredDeviceList: List<Class<out AudioDevice>>,
     internal val audioDeviceManager: AudioDeviceManager = AudioDeviceManager(
         context,
@@ -83,8 +83,8 @@ abstract class AbstractAudioSwitch
         this.preferredDeviceList = getPreferredDeviceList(preferredDeviceList)
         this.availableUniqueAudioDevices =
             ConcurrentSkipListSet(AudioDevicePriorityComparator(this.preferredDeviceList))
-        logger.d(TAG, "AudioSwitch($VERSION)")
-        logger.d(TAG, "Preferred device list = ${this.preferredDeviceList.map { it.simpleName }}")
+        logger.d(TAG_AUDIO_SWITCH, "AudioSwitch($VERSION)")
+        logger.d(TAG_AUDIO_SWITCH, "Preferred device list = ${this.preferredDeviceList.map { it.simpleName }}")
     }
 
     private fun getPreferredDeviceList(preferredDeviceList: List<Class<out AudioDevice>>):
@@ -104,6 +104,7 @@ abstract class AbstractAudioSwitch
     }
 
     override fun onDeviceConnected(audioDevice: AudioDevice) {
+        this.logger.d(TAG_AUDIO_SWITCH, "onDeviceConnected($audioDevice)")
         if (audioDevice is Earpiece && this.availableAudioDevices.contains(WiredHeadset())) {
             return
         }
@@ -127,7 +128,7 @@ abstract class AbstractAudioSwitch
                 state = STARTED
             }
             else -> {
-                logger.d(TAG, "Redundant start() invocation while already in the started or activated state")
+                logger.d(TAG_AUDIO_SWITCH, "Redundant start() invocation while already in the started or activated state")
             }
         }
     }
@@ -147,7 +148,7 @@ abstract class AbstractAudioSwitch
                 closeListeners()
             }
             STOPPED -> {
-                logger.d(TAG, "Redundant stop() invocation while already in the stopped state")
+                logger.d(TAG_AUDIO_SWITCH, "Redundant stop() invocation while already in the stopped state")
             }
         }
     }
@@ -198,7 +199,7 @@ abstract class AbstractAudioSwitch
      * [BluetoothHeadset], [WiredHeadset], [Earpiece], [Speakerphone].
      */
     fun selectDevice(audioDevice: AudioDevice?) {
-        logger.d(TAG, "Selected AudioDevice = $audioDevice")
+        logger.d(TAG_AUDIO_SWITCH, "Selected AudioDevice = $audioDevice")
         userSelectedAudioDevice = audioDevice
 
         this.selectAudioDevice(wasListChanged = false, audioDevice = audioDevice)
@@ -213,7 +214,7 @@ abstract class AbstractAudioSwitch
         }
 
         // Select the audio device
-        logger.d(TAG, "Current user selected AudioDevice = $userSelectedAudioDevice")
+        logger.d(TAG_AUDIO_SWITCH, "Current user selected AudioDevice = $userSelectedAudioDevice")
         selectedAudioDevice = audioDevice
 
         // Activate the device if in the active state
