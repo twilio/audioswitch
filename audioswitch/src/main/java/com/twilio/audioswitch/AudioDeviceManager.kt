@@ -10,6 +10,7 @@ import android.media.AudioManager.OnAudioFocusChangeListener
 import android.os.Build
 import com.twilio.audioswitch.android.BuildWrapper
 import com.twilio.audioswitch.android.Logger
+import com.twilio.audioswitch.android.blacklistedDevices
 
 private const val TAG = "AudioDeviceManager"
 
@@ -79,8 +80,23 @@ internal class AudioDeviceManager(
         audioManager.run { if (enable) startBluetoothSco() else stopBluetoothSco() }
     }
 
+    @SuppressLint("NewApi")
     fun enableSpeakerphone(enable: Boolean) {
         audioManager.isSpeakerphoneOn = enable
+
+        /**
+         * Some Samsung devices (reported Galaxy s9, s21) fail to route audio through USB headset
+         * when in MODE_IN_COMMUNICATION
+         */
+        if (!audioManager.isSpeakerphoneOn && blacklistedDevices.contains(Build.MODEL)) {
+            val devices = audioManager.getDevices(AudioManager.GET_DEVICES_OUTPUTS)
+            for (device in devices) {
+                if (device.type == AudioDeviceInfo.TYPE_USB_HEADSET) {
+                    audioManager.mode = AudioManager.MODE_NORMAL
+                    break
+                }
+            }
+        }
     }
 
     fun mute(mute: Boolean) {

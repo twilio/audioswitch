@@ -1,5 +1,11 @@
 # Changelog
 
+### 1.1.8 (Mar 6, 2023)
+
+Bug Fixes
+
+- Fixed issue where some Samsung Galaxy devices (S9, S21) would not route audio through USB headset when MODE_IN_COMMUNICATION is set.
+
 ### 1.1.7 (Feb 21, 2023)
 
 Bug Fixes
