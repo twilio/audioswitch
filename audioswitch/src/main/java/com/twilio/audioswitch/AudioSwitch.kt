@@ -157,10 +157,10 @@ class AudioSwitch {
         audioDeviceChangeListener = listener
         when (state) {
             STOPPED -> {
+                state = STARTED
                 enumerateDevices()
                 bluetoothHeadsetManager?.start(bluetoothDeviceConnectionListener)
                 wiredHeadsetReceiver.start(wiredDeviceConnectionListener)
-                state = STARTED
             }
             else -> {
                 logger.d(TAG, "Redundant start() invocation while already in the started or activated state")
@@ -197,13 +197,13 @@ class AudioSwitch {
     fun activate() {
         when (state) {
             STARTED -> {
+                state = ACTIVATED
                 audioDeviceManager.cacheAudioState()
 
                 // Always set mute to false for WebRTC
                 audioDeviceManager.mute(false)
                 audioDeviceManager.setAudioFocus()
                 selectedDevice?.let { activate(it) }
-                state = ACTIVATED
             }
             ACTIVATED -> selectedDevice?.let { activate(it) }
             STOPPED -> throw IllegalStateException()
@@ -217,11 +217,11 @@ class AudioSwitch {
     fun deactivate() {
         when (state) {
             ACTIVATED -> {
+                state = STARTED
                 bluetoothHeadsetManager?.deactivate()
 
                 // Restore stored audio state
                 audioDeviceManager.restoreAudioState()
-                state = STARTED
             }
             STARTED, STOPPED -> {
             }
@@ -358,10 +358,10 @@ class AudioSwitch {
             } ?: false
 
     private fun closeListeners() {
+        state = STOPPED
         bluetoothHeadsetManager?.stop()
         wiredHeadsetReceiver.stop()
         audioDeviceChangeListener = null
-        state = STOPPED
     }
 
     companion object {

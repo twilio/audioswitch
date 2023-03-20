@@ -1,10 +1,12 @@
 # Changelog
 
-### 1.1.8 (Mar 6, 2023)
+### 1.1.8 (Mar 17, 2023)
 
 Bug Fixes
 
 - Fixed issue where some Samsung Galaxy devices (S9, S21) would not route audio through USB headset when MODE_IN_COMMUNICATION is set.
+- Fixed issue where IllegalStateException would be thrown when activating selected AudioDevice shortly after starting AudioSwitch.
+- Fixed issue where after stopping AudioSwitch while having an active Bluetooth device would result in permanent audio focus gain.
 
 ### 1.1.7 (Feb 21, 2023)
 
