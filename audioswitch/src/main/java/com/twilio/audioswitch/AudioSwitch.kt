@@ -129,7 +129,7 @@ class AudioSwitch {
             logger,
             BluetoothAdapter.getDefaultAdapter(),
             audioDeviceManager,
-            ),
+        ),
     ) {
         this.logger = logger
         this.audioDeviceManager = audioDeviceManager
