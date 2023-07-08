@@ -23,36 +23,49 @@ import java.util.concurrent.TimeoutException
 internal fun setupFakeAudioSwitch(
     context: Context,
     preferredDevicesList: List<Class<out AudioDevice>> =
-            listOf(AudioDevice.BluetoothHeadset::class.java, WiredHeadset::class.java,
-                    Earpiece::class.java, Speakerphone::class.java)
-):
-        Triple<AudioSwitch, BluetoothHeadsetManager, WiredHeadsetReceiver> {
-
+        listOf(
+            AudioDevice.BluetoothHeadset::class.java,
+            WiredHeadset::class.java,
+            Earpiece::class.java,
+            Speakerphone::class.java,
+            ),
+): Triple<AudioSwitch, BluetoothHeadsetManager, WiredHeadsetReceiver> {
     val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
     val logger = ProductionLogger(true)
     val audioDeviceManager =
-            AudioDeviceManager(context,
-                    logger,
-                    audioManager,
-                    BuildWrapper(),
-                    AudioFocusRequestWrapper(),
-                    {})
+        AudioDeviceManager(
+            context,
+            logger,
+            audioManager,
+            BuildWrapper(),
+            AudioFocusRequestWrapper(),
+            {},
+        )
     val wiredHeadsetReceiver = WiredHeadsetReceiver(context, logger)
     val headsetManager = BluetoothAdapter.getDefaultAdapter()?.let { bluetoothAdapter ->
-        BluetoothHeadsetManager(context, logger, bluetoothAdapter, audioDeviceManager,
-                bluetoothIntentProcessor = FakeBluetoothIntentProcessor())
+        BluetoothHeadsetManager(
+            context,
+            logger,
+            bluetoothAdapter,
+            audioDeviceManager,
+            bluetoothIntentProcessor = FakeBluetoothIntentProcessor(),
+        )
     } ?: run {
         null
     }
-    return Triple(AudioSwitch(context,
-        logger,
+    return Triple(
+        AudioSwitch(
+            context,
+            logger,
             {},
             preferredDevicesList,
-        audioDeviceManager,
-        wiredHeadsetReceiver,
-        headsetManager),
+            audioDeviceManager,
+            wiredHeadsetReceiver,
+            headsetManager,
+        ),
         headsetManager!!,
-        wiredHeadsetReceiver)
+        wiredHeadsetReceiver,
+    )
 }
 
 internal fun simulateBluetoothSystemIntent(
@@ -60,7 +73,7 @@ internal fun simulateBluetoothSystemIntent(
     headsetManager: BluetoothHeadsetManager,
     deviceName: String = HEADSET_NAME,
     action: String = BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED,
-    connectionState: Int = BluetoothHeadset.STATE_CONNECTED
+    connectionState: Int = BluetoothHeadset.STATE_CONNECTED,
 ) {
     val intent = Intent(action).apply {
         putExtra(BluetoothHeadset.EXTRA_STATE, connectionState)
@@ -71,7 +84,7 @@ internal fun simulateBluetoothSystemIntent(
 
 internal fun simulateWiredHeadsetSystemIntent(
     context: Context,
-    wiredHeadsetReceiver: WiredHeadsetReceiver
+    wiredHeadsetReceiver: WiredHeadsetReceiver,
 ) {
     val intent = Intent().apply {
         putExtra(INTENT_STATE, STATE_PLUGGED)
@@ -84,13 +97,13 @@ fun getTargetContext(): Context = getInstrumentation().targetContext
 fun getInstrumentationContext(): Context = getInstrumentation().context
 
 fun isSpeakerPhoneOn() =
-        (getTargetContext().getSystemService(Context.AUDIO_SERVICE) as AudioManager?)?.let {
-            it.isSpeakerphoneOn
-        } ?: false
+    (getTargetContext().getSystemService(Context.AUDIO_SERVICE) as AudioManager?)?.let {
+        it.isSpeakerphoneOn
+    } ?: false
 
 fun retryAssertion(
     timeoutInMilliseconds: Long = 10000L,
-    assertionAction: () -> Unit
+    assertionAction: () -> Unit,
 ) {
     val startTime = System.currentTimeMillis()
     var currentTime = 0L

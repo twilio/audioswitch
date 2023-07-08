@@ -8,5 +8,5 @@ package com.twilio.audioswitch
  */
 typealias AudioDeviceChangeListener = (
     audioDevices: List<AudioDevice>,
-    selectedAudioDevice: AudioDevice?
+    selectedAudioDevice: AudioDevice?,
 ) -> Unit

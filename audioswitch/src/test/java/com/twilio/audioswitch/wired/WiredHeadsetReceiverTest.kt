@@ -3,8 +3,8 @@ package com.twilio.audioswitch.wired
 import android.content.Context
 import android.content.Intent
 import com.twilio.audioswitch.android.Logger
-import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.CoreMatchers.equalTo
+import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.CoreMatchers.nullValue
 import org.junit.Assert.assertThat
 import org.junit.Assert.fail
@@ -21,14 +21,15 @@ class WiredHeadsetReceiverTest {
     private val logger = mock<Logger>()
     private val wiredDeviceConnectionListener = mock<WiredDeviceConnectionListener>()
     private val wiredHeadsetReceiver = WiredHeadsetReceiver(
-            context,
-            logger)
+        context,
+        logger,
+    )
 
     @Test
     fun `onReceive should notify listener when a wired headset has been plugged in`() {
         val intent = mock<Intent> {
             whenever(mock.getIntExtra("state", STATE_UNPLUGGED))
-                    .thenReturn(STATE_PLUGGED)
+                .thenReturn(STATE_PLUGGED)
         }
         wiredHeadsetReceiver.start(wiredDeviceConnectionListener)
 
@@ -42,7 +43,7 @@ class WiredHeadsetReceiverTest {
         wiredHeadsetReceiver.deviceListener = null
         val intent = mock<Intent> {
             whenever(mock.getIntExtra("state", STATE_UNPLUGGED))
-                    .thenReturn(STATE_PLUGGED)
+                .thenReturn(STATE_PLUGGED)
         }
 
         try {
@@ -56,7 +57,7 @@ class WiredHeadsetReceiverTest {
     fun `onReceive should notify listener when a wired headset has been unplugged`() {
         val intent = mock<Intent> {
             whenever(mock.getIntExtra("state", STATE_UNPLUGGED))
-                    .thenReturn(STATE_UNPLUGGED)
+                .thenReturn(STATE_UNPLUGGED)
         }
         wiredHeadsetReceiver.start(wiredDeviceConnectionListener)
 
@@ -70,7 +71,7 @@ class WiredHeadsetReceiverTest {
         wiredHeadsetReceiver.deviceListener = null
         val intent = mock<Intent> {
             whenever(mock.getIntExtra("state", STATE_UNPLUGGED))
-                    .thenReturn(STATE_UNPLUGGED)
+                .thenReturn(STATE_UNPLUGGED)
         }
 
         try {

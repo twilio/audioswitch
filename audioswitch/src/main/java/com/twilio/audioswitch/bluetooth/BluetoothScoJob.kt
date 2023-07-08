@@ -12,7 +12,7 @@ private const val TAG = "BluetoothScoJob"
 internal abstract class BluetoothScoJob(
     private val logger: Logger,
     private val bluetoothScoHandler: Handler,
-    private val systemClockWrapper: SystemClockWrapper
+    private val systemClockWrapper: SystemClockWrapper,
 ) {
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)

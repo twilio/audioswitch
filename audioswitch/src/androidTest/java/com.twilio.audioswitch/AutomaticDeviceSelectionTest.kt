@@ -34,7 +34,7 @@ class AutomaticDeviceSelectionTest : AndroidTestBase() {
     fun `it_should_select_the_wired_headset_by_default`() {
         val context = getInstrumentationContext()
         val (audioSwitch, bluetoothHeadsetReceiver, wiredHeadsetReceiver) =
-                setupFakeAudioSwitch(context, listOf(WiredHeadset::class.java))
+            setupFakeAudioSwitch(context, listOf(WiredHeadset::class.java))
 
         audioSwitch.start { _, _ -> }
         simulateBluetoothSystemIntent(context, bluetoothHeadsetReceiver)
@@ -49,7 +49,7 @@ class AutomaticDeviceSelectionTest : AndroidTestBase() {
     fun `it_should_select_the_earpiece_audio_device_by_default`() {
         val context = getInstrumentationContext()
         val (audioSwitch, bluetoothHeadsetReceiver) =
-                setupFakeAudioSwitch(context, listOf(Earpiece::class.java))
+            setupFakeAudioSwitch(context, listOf(Earpiece::class.java))
         audioSwitch.start { _, _ -> }
         simulateBluetoothSystemIntent(context, bluetoothHeadsetReceiver)
 
@@ -62,7 +62,7 @@ class AutomaticDeviceSelectionTest : AndroidTestBase() {
     fun `it_should_select_the_speakerphone_audio_device_by_default`() {
         val context = getInstrumentationContext()
         val (audioSwitch, bluetoothHeadsetReceiver) =
-                setupFakeAudioSwitch(context, listOf(Speakerphone::class.java))
+            setupFakeAudioSwitch(context, listOf(Speakerphone::class.java))
         audioSwitch.start { _, _ -> }
         simulateBluetoothSystemIntent(context, bluetoothHeadsetReceiver)
 

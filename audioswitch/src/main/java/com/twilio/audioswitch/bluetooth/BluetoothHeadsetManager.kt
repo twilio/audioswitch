@@ -38,7 +38,6 @@ private const val TAG = "BluetoothHeadsetManager"
 private const val PERMISSION_ERROR_MESSAGE = "Bluetooth unsupported, permissions not granted"
 
 internal class BluetoothHeadsetManager
-
 @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
 internal constructor(
     private val context: Context,
@@ -51,7 +50,7 @@ internal constructor(
     private val bluetoothIntentProcessor: BluetoothIntentProcessor = BluetoothIntentProcessorImpl(),
     private var headsetProxy: BluetoothHeadset? = null,
     private val permissionsRequestStrategy: PermissionsCheckStrategy = DefaultPermissionsCheckStrategy(context),
-    private var hasRegisteredReceivers: Boolean = false
+    private var hasRegisteredReceivers: Boolean = false,
 ) : BluetoothProfile.ServiceListener, BroadcastReceiver() {
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
@@ -65,18 +64,27 @@ internal constructor(
         }
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-    internal val enableBluetoothScoJob: EnableBluetoothScoJob = EnableBluetoothScoJob(logger,
-            audioDeviceManager, bluetoothScoHandler, systemClockWrapper)
+    internal val enableBluetoothScoJob: EnableBluetoothScoJob = EnableBluetoothScoJob(
+        logger,
+        audioDeviceManager,
+        bluetoothScoHandler,
+        systemClockWrapper,
+    )
+
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-    internal val disableBluetoothScoJob: DisableBluetoothScoJob = DisableBluetoothScoJob(logger,
-            audioDeviceManager, bluetoothScoHandler, systemClockWrapper)
+    internal val disableBluetoothScoJob: DisableBluetoothScoJob = DisableBluetoothScoJob(
+        logger,
+        audioDeviceManager,
+        bluetoothScoHandler,
+        systemClockWrapper,
+    )
 
     companion object {
         internal fun newInstance(
             context: Context,
             logger: Logger,
             bluetoothAdapter: BluetoothAdapter?,
-            audioDeviceManager: AudioDeviceManager
+            audioDeviceManager: AudioDeviceManager,
         ): BluetoothHeadsetManager? {
             return bluetoothAdapter?.let { adapter ->
                 BluetoothHeadsetManager(context, logger, adapter, audioDeviceManager)
@@ -111,15 +119,17 @@ internal constructor(
                     when (state) {
                         STATE_CONNECTED -> {
                             logger.d(
-                                    TAG,
-                                    "Bluetooth headset $bluetoothDevice connected")
+                                TAG,
+                                "Bluetooth headset $bluetoothDevice connected",
+                            )
                             connect()
                             headsetListener?.onBluetoothHeadsetStateChanged(bluetoothDevice.name)
                         }
                         STATE_DISCONNECTED -> {
                             logger.d(
-                                    TAG,
-                                    "Bluetooth headset $bluetoothDevice disconnected")
+                                TAG,
+                                "Bluetooth headset $bluetoothDevice disconnected",
+                            )
                             disconnect()
                             headsetListener?.onBluetoothHeadsetStateChanged()
                         }
@@ -156,14 +166,16 @@ internal constructor(
             bluetoothAdapter.getProfileProxy(
                 context,
                 this,
-                BluetoothProfile.HEADSET
+                BluetoothProfile.HEADSET,
             )
             if (!hasRegisteredReceivers) {
                 context.registerReceiver(
-                    this, IntentFilter(ACTION_CONNECTION_STATE_CHANGED)
+                    this,
+                    IntentFilter(ACTION_CONNECTION_STATE_CHANGED),
                 )
                 context.registerReceiver(
-                    this, IntentFilter(ACTION_AUDIO_STATE_CHANGED)
+                    this,
+                    IntentFilter(ACTION_AUDIO_STATE_CHANGED),
                 )
                 hasRegisteredReceivers = true
             }
@@ -187,9 +199,9 @@ internal constructor(
 
     fun activate() {
         if (hasPermissions()) {
-            if (headsetState == Connected || headsetState == AudioActivationError)
+            if (headsetState == Connected || headsetState == AudioActivationError) {
                 enableBluetoothScoJob.executeBluetoothScoJob()
-            else {
+            } else {
                 logger.w(TAG, "Cannot activate when in the ${headsetState::class.simpleName} state")
             }
         } else {
@@ -221,8 +233,9 @@ internal constructor(
                 val headsetName = bluetoothHeadsetName ?: getHeadsetName()
                 headsetName?.let { AudioDevice.BluetoothHeadset(it) }
                     ?: AudioDevice.BluetoothHeadset()
-            } else
+            } else {
                 null
+            }
         } else {
             logger.w(TAG, PERMISSION_ERROR_MESSAGE)
             null
@@ -230,7 +243,7 @@ internal constructor(
     }
 
     private fun isCorrectIntentAction(intentAction: String?) =
-            intentAction == ACTION_CONNECTION_STATE_CHANGED || intentAction == ACTION_AUDIO_STATE_CHANGED
+        intentAction == ACTION_CONNECTION_STATE_CHANGED || intentAction == ACTION_AUDIO_STATE_CHANGED
 
     private fun connect() {
         if (!hasActiveHeadset()) headsetState = Connected
@@ -253,54 +266,54 @@ internal constructor(
     private fun hasActiveHeadsetChanged() = headsetState == AudioActivated && hasConnectedDevice() && !hasActiveHeadset()
 
     private fun getHeadsetName(): String? =
-            headsetProxy?.let { proxy ->
-                proxy.connectedDevices?.let { devices ->
-                    when {
-                        devices.size > 1 && hasActiveHeadset() -> {
-                            val device = devices.find { proxy.isAudioConnected(it) }?.name
-                            logger.d(TAG, "Device size > 1 with device name: $device")
-                            device
-                        }
-                        devices.size == 1 -> {
-                            val device = devices.first().name
-                            logger.d(TAG, "Device size 1 with device name: $device")
-                            device
-                        }
-                        else -> {
-                            logger.d(TAG, "Device size 0")
-                            null
-                        }
+        headsetProxy?.let { proxy ->
+            proxy.connectedDevices?.let { devices ->
+                when {
+                    devices.size > 1 && hasActiveHeadset() -> {
+                        val device = devices.find { proxy.isAudioConnected(it) }?.name
+                        logger.d(TAG, "Device size > 1 with device name: $device")
+                        device
+                    }
+                    devices.size == 1 -> {
+                        val device = devices.first().name
+                        logger.d(TAG, "Device size 1 with device name: $device")
+                        device
+                    }
+                    else -> {
+                        logger.d(TAG, "Device size 0")
+                        null
                     }
                 }
             }
+        }
 
     private fun hasActiveHeadset() =
-            headsetProxy?.let { proxy ->
-                proxy.connectedDevices?.let { devices ->
-                    devices.any { proxy.isAudioConnected(it) }
-                }
-            } ?: false
+        headsetProxy?.let { proxy ->
+            proxy.connectedDevices?.let { devices ->
+                devices.any { proxy.isAudioConnected(it) }
+            }
+        } ?: false
 
     private fun hasConnectedDevice() =
-            headsetProxy?.let { proxy ->
-                proxy.connectedDevices?.let { devices ->
-                    devices.isNotEmpty()
-                }
-            } ?: false
+        headsetProxy?.let { proxy ->
+            proxy.connectedDevices?.let { devices ->
+                devices.isNotEmpty()
+            }
+        } ?: false
 
     private fun Intent.getHeadsetDevice(): BluetoothDeviceWrapper? =
-            bluetoothIntentProcessor.getBluetoothDevice(this)?.let { device ->
-                if (isHeadsetDevice(device)) device else null
-            }
+        bluetoothIntentProcessor.getBluetoothDevice(this)?.let { device ->
+            if (isHeadsetDevice(device)) device else null
+        }
 
     private fun isHeadsetDevice(deviceWrapper: BluetoothDeviceWrapper): Boolean =
-            deviceWrapper.deviceClass?.let { deviceClass ->
-                deviceClass == BluetoothClass.Device.AUDIO_VIDEO_HANDSFREE ||
-                        deviceClass == BluetoothClass.Device.AUDIO_VIDEO_WEARABLE_HEADSET ||
-                        deviceClass == BluetoothClass.Device.AUDIO_VIDEO_CAR_AUDIO ||
-                        deviceClass == BluetoothClass.Device.AUDIO_VIDEO_HEADPHONES ||
-                        deviceClass == BluetoothClass.Device.Major.UNCATEGORIZED
-            } ?: false
+        deviceWrapper.deviceClass?.let { deviceClass ->
+            deviceClass == BluetoothClass.Device.AUDIO_VIDEO_HANDSFREE ||
+                deviceClass == BluetoothClass.Device.AUDIO_VIDEO_WEARABLE_HEADSET ||
+                deviceClass == BluetoothClass.Device.AUDIO_VIDEO_CAR_AUDIO ||
+                deviceClass == BluetoothClass.Device.AUDIO_VIDEO_HEADPHONES ||
+                deviceClass == BluetoothClass.Device.Major.UNCATEGORIZED
+        } ?: false
 
     internal fun hasPermissions() = permissionsRequestStrategy.hasPermissions()
 
@@ -318,7 +331,7 @@ internal constructor(
         private val logger: Logger,
         private val audioDeviceManager: AudioDeviceManager,
         bluetoothScoHandler: Handler,
-        systemClockWrapper: SystemClockWrapper
+        systemClockWrapper: SystemClockWrapper,
     ) : BluetoothScoJob(logger, bluetoothScoHandler, systemClockWrapper) {
 
         override fun scoAction() {
@@ -338,7 +351,7 @@ internal constructor(
         private val logger: Logger,
         private val audioDeviceManager: AudioDeviceManager,
         bluetoothScoHandler: Handler,
-        systemClockWrapper: SystemClockWrapper
+        systemClockWrapper: SystemClockWrapper,
     ) : BluetoothScoJob(logger, bluetoothScoHandler, systemClockWrapper) {
 
         override fun scoAction() {
@@ -362,14 +375,14 @@ internal constructor(
                 PERMISSION_GRANTED == context.checkPermission(
                     Manifest.permission.BLUETOOTH,
                     android.os.Process.myPid(),
-                    android.os.Process.myUid()
+                    android.os.Process.myUid(),
                 )
             } else {
                 // for android 12/S or newer
                 PERMISSION_GRANTED == context.checkPermission(
                     Manifest.permission.BLUETOOTH_CONNECT,
                     android.os.Process.myPid(),
-                    android.os.Process.myUid()
+                    android.os.Process.myUid(),
                 )
             }
         }

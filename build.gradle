@@ -64,7 +64,7 @@ buildscript {
 }
 
 plugins {
-    id "com.diffplug.spotless" version "5.6.1"
+    id "com.diffplug.spotless" version '6.19.0'
     id "org.jetbrains.dokka" version "$dokka_version"
     id "io.github.gradle-nexus.publish-plugin" version "1.0.0"
     id "maven-publish"

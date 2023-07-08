@@ -103,9 +103,13 @@ class AudioSwitch {
         context: Context,
         loggingEnabled: Boolean = false,
         audioFocusChangeListener: OnAudioFocusChangeListener = OnAudioFocusChangeListener {},
-        preferredDeviceList: List<Class<out AudioDevice>> = defaultPreferredDeviceList
-    ) : this(context.applicationContext, ProductionLogger(loggingEnabled), audioFocusChangeListener,
-            preferredDeviceList)
+        preferredDeviceList: List<Class<out AudioDevice>> = defaultPreferredDeviceList,
+    ) : this(
+        context.applicationContext,
+        ProductionLogger(loggingEnabled),
+        audioFocusChangeListener,
+        preferredDeviceList,
+    )
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     internal constructor(
@@ -113,15 +117,19 @@ class AudioSwitch {
         logger: Logger,
         audioFocusChangeListener: OnAudioFocusChangeListener,
         preferredDeviceList: List<Class<out AudioDevice>>,
-        audioDeviceManager: AudioDeviceManager = AudioDeviceManager(context,
+        audioDeviceManager: AudioDeviceManager = AudioDeviceManager(
+            context,
             logger,
             context.getSystemService(Context.AUDIO_SERVICE) as AudioManager,
-            audioFocusChangeListener = audioFocusChangeListener),
+            audioFocusChangeListener = audioFocusChangeListener,
+        ),
         wiredHeadsetReceiver: WiredHeadsetReceiver = WiredHeadsetReceiver(context, logger),
-        headsetManager: BluetoothHeadsetManager? = BluetoothHeadsetManager.newInstance(context,
+        headsetManager: BluetoothHeadsetManager? = BluetoothHeadsetManager.newInstance(
+            context,
             logger,
             BluetoothAdapter.getDefaultAdapter(),
-            audioDeviceManager)
+            audioDeviceManager,
+            ),
     ) {
         this.logger = logger
         this.audioDeviceManager = audioDeviceManager
@@ -132,8 +140,7 @@ class AudioSwitch {
         logger.d(TAG, "Preferred device list = ${this.preferredDeviceList.map { it.simpleName }}")
     }
 
-    private fun getPreferredDeviceList(preferredDeviceList: List<Class<out AudioDevice>>):
-            List<Class<out AudioDevice>> {
+    private fun getPreferredDeviceList(preferredDeviceList: List<Class<out AudioDevice>>): List<Class<out AudioDevice>> {
         require(hasNoDuplicates(preferredDeviceList))
 
         return if (preferredDeviceList.isEmpty() || preferredDeviceList == defaultPreferredDeviceList) {
@@ -264,7 +271,7 @@ class AudioSwitch {
 
     internal data class AudioDeviceState(
         val audioDeviceList: List<AudioDevice>,
-        val selectedAudioDevice: AudioDevice?
+        val selectedAudioDevice: AudioDevice?,
     )
 
     private fun enumerateDevices(bluetoothHeadsetName: String? = null) {
@@ -288,7 +295,8 @@ class AudioSwitch {
              * be the next valid device in the list.
              */
             if (firstAudioDevice is BluetoothHeadset &&
-                    bluetoothHeadsetManager?.hasActivationError() == true) {
+                bluetoothHeadsetManager?.hasActivationError() == true
+            ) {
                 mutableAudioDevices[1]
             } else {
                 firstAudioDevice
@@ -319,7 +327,7 @@ class AudioSwitch {
                  * headset name received from the ACTION_ACL_CONNECTED intent needs to be passed into this
                  * function.
                  */
-                bluetoothHeadsetManager?.getHeadset(bluetoothHeadsetName)?.let {
+                    bluetoothHeadsetManager?.getHeadset(bluetoothHeadsetName)?.let {
                         mutableAudioDevices.add(it)
                     }
                 }
@@ -345,17 +353,17 @@ class AudioSwitch {
     }
 
     private fun userSelectedDevicePresent(audioDevices: List<AudioDevice>) =
-            userSelectedDevice?.let { selectedDevice ->
-                if (selectedDevice is BluetoothHeadset) {
-                    // Match any bluetooth headset as a new one may have been connected
-                    audioDevices.find { it is BluetoothHeadset }?.let { newHeadset ->
-                        userSelectedDevice = newHeadset
-                        true
-                    } ?: false
-                } else {
-                    audioDevices.contains(selectedDevice)
-                }
-            } ?: false
+        userSelectedDevice?.let { selectedDevice ->
+            if (selectedDevice is BluetoothHeadset) {
+                // Match any bluetooth headset as a new one may have been connected
+                audioDevices.find { it is BluetoothHeadset }?.let { newHeadset ->
+                    userSelectedDevice = newHeadset
+                    true
+                } ?: false
+            } else {
+                audioDevices.contains(selectedDevice)
+            }
+        } ?: false
 
     private fun closeListeners() {
         state = STOPPED
@@ -371,8 +379,12 @@ class AudioSwitch {
         const val VERSION = BuildConfig.VERSION_NAME
 
         private val defaultPreferredDeviceList by lazy {
-            listOf(BluetoothHeadset::class.java,
-                    WiredHeadset::class.java, Earpiece::class.java, Speakerphone::class.java)
+            listOf(
+                BluetoothHeadset::class.java,
+                WiredHeadset::class.java,
+                Earpiece::class.java,
+                Speakerphone::class.java,
+            )
         }
     }
 }
