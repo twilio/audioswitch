@@ -8,14 +8,6 @@ import android.content.pm.PackageManager
 import android.media.AudioFocusRequest
 import android.media.AudioManager
 import android.os.Build
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.eq
-import com.nhaarman.mockitokotlin2.isA
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.times
-import com.nhaarman.mockitokotlin2.verify
-import com.nhaarman.mockitokotlin2.verifyZeroInteractions
-import com.nhaarman.mockitokotlin2.whenever
 import com.twilio.audioswitch.AudioDevice.Earpiece
 import com.twilio.audioswitch.AudioDevice.Speakerphone
 import com.twilio.audioswitch.AudioDevice.WiredHeadset
@@ -38,6 +30,14 @@ import org.junit.Before
 import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
+import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.isA
+import org.mockito.kotlin.times
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.verifyNoInteractions
 
 @RunWith(JUnitParamsRunner::class)
 class AudioSwitchTest : BaseTest() {
@@ -210,7 +210,7 @@ class AudioSwitchTest : BaseTest() {
         audioSwitch.start(audioDeviceChangeListener)
         audioSwitch.stop()
 
-        verifyZeroInteractions(bluetoothAdapter)
+        verifyNoInteractions(bluetoothAdapter)
         verify(context, times(0)).unregisterReceiver(headsetManager)
     }
 
@@ -229,7 +229,7 @@ class AudioSwitchTest : BaseTest() {
         audioSwitch.activate()
         audioSwitch.stop()
 
-        verifyZeroInteractions(bluetoothAdapter)
+        verifyNoInteractions(bluetoothAdapter)
         verify(context, times(0)).unregisterReceiver(headsetManager)
     }
 

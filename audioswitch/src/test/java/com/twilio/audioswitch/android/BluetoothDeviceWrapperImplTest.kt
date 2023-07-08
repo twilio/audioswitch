@@ -3,13 +3,13 @@ package com.twilio.audioswitch.android
 import android.bluetooth.BluetoothClass
 import android.bluetooth.BluetoothClass.Device.AUDIO_VIDEO_HEADPHONES
 import android.bluetooth.BluetoothDevice
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.whenever
 import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.CoreMatchers.nullValue
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Test
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 
 class BluetoothDeviceWrapperImplTest {
 
