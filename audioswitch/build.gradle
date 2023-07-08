@@ -10,6 +10,10 @@ android {
     namespace "com.twilio.audioswitch"
     testNamespace "com.twilio.audioswitch.test"
 
+    buildFeatures {
+        buildConfig = true
+    }
+
     defaultConfig {
         minSdkVersion 21
         targetSdkVersion 34
@@ -55,6 +59,12 @@ android {
             }
         }
     }
+
+    publishing {
+        singleVariant('release') {
+            withSourcesJar()
+        }
+    }
 }
 
 dependencies {
@@ -91,7 +101,7 @@ publishing {
             artifact("$buildDir/outputs/aar/audioswitch-release.aar")
 
             artifact androidSourcesJar {
-                classifier "sources"
+                archiveClassifier.set("sources")
             }
 
             groupId = audioSwitchGroupId
