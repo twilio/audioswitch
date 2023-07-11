@@ -17,8 +17,6 @@ import com.twilio.audioswitch.AudioSwitch
 import com.twilio.audioswitch.getInstrumentationContext
 import com.twilio.audioswitch.isSpeakerPhoneOn
 import com.twilio.audioswitch.retryAssertion
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.TimeUnit
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertFalse
 import junit.framework.TestCase.assertNull
@@ -30,6 +28,8 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 
 @RunWith(AndroidJUnit4::class)
 class ConnectedBluetoothHeadsetTest {
@@ -169,7 +169,8 @@ class ConnectedBluetoothHeadsetTest {
             audioSwitch.selectDevice(
                 audioSwitch.availableAudioDevices.find {
                     it is AudioDevice.BluetoothHeadset
-                })
+                },
+            )
             assertEquals(expectedBluetoothDevice, audioSwitch.selectedAudioDevice)
         }
     }
@@ -191,9 +192,11 @@ class ConnectedBluetoothHeadsetTest {
         startAndAwaitBluetoothDevice()
 
         InstrumentationRegistry.getInstrumentation().runOnMainSync {
-            audioSwitch.selectDevice(audioSwitch.availableAudioDevices.find {
-                it is AudioDevice.BluetoothHeadset
-            })
+            audioSwitch.selectDevice(
+                audioSwitch.availableAudioDevices.find {
+                    it is AudioDevice.BluetoothHeadset
+                },
+            )
             assertEquals(expectedBluetoothDevice, audioSwitch.selectedAudioDevice)
         }
 

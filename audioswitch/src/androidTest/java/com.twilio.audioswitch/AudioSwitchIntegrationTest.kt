@@ -5,14 +5,14 @@ import android.media.AudioManager
 import androidx.test.annotation.UiThreadTest
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.TimeUnit
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertFalse
 import junit.framework.TestCase.assertNotNull
 import junit.framework.TestCase.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 
 @RunWith(AndroidJUnit4::class)
 class AudioSwitchIntegrationTest : AndroidTestBase() {
@@ -67,8 +67,10 @@ class AudioSwitchIntegrationTest : AndroidTestBase() {
     @Test
     @UiThreadTest
     fun `it_should_return_valid_semver_formatted_version`() {
-        val semVerRegex = Regex("^([0-9]+)\\.([0-9]+)\\.([0-9]+)(?:-([0-9A-" +
-                "Za-z-]+(?:\\.[0-9A-Za-z-]+)*))?(?:\\+[0-9A-Za-z-]+)?$")
+        val semVerRegex = Regex(
+            "^([0-9]+)\\.([0-9]+)\\.([0-9]+)(?:-([0-9A-" +
+                "Za-z-]+(?:\\.[0-9A-Za-z-]+)*))?(?:\\+[0-9A-Za-z-]+)?$",
+        )
         val version: String = AudioSwitch.VERSION
         assertNotNull(version)
         assertTrue(version.matches(semVerRegex))

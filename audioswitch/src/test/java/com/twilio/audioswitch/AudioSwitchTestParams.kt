@@ -15,65 +15,77 @@ private sealed class TestType {
 }
 
 private val commonTestCases = listOf(
-        listOf(
-                BluetoothHeadset::class.java,
-                WiredHeadset::class.java,
-                Earpiece::class.java,
-                Speakerphone::class.java),
-        listOf(
-                WiredHeadset::class.java,
-                BluetoothHeadset::class.java,
-                Earpiece::class.java,
-                Speakerphone::class.java),
-        listOf(
-                WiredHeadset::class.java,
-                Earpiece::class.java,
-                BluetoothHeadset::class.java,
-                Speakerphone::class.java),
-        listOf(
-                WiredHeadset::class.java,
-                Earpiece::class.java,
-                Speakerphone::class.java,
-                BluetoothHeadset::class.java),
-        listOf(
-                BluetoothHeadset::class.java,
-                Earpiece::class.java,
-                WiredHeadset::class.java,
-                Speakerphone::class.java),
-        listOf(
-                BluetoothHeadset::class.java,
-                Earpiece::class.java,
-                Speakerphone::class.java,
-                WiredHeadset::class.java),
-        listOf(
-                Earpiece::class.java,
-                BluetoothHeadset::class.java,
-                WiredHeadset::class.java,
-                Speakerphone::class.java),
-        listOf(
-                BluetoothHeadset::class.java,
-                WiredHeadset::class.java,
-                Speakerphone::class.java,
-                Earpiece::class.java),
-        listOf(
-                Speakerphone::class.java,
-                BluetoothHeadset::class.java,
-                WiredHeadset::class.java,
-                Earpiece::class.java),
-        listOf(
-                BluetoothHeadset::class.java,
-                Speakerphone::class.java,
-                WiredHeadset::class.java,
-                Earpiece::class.java),
-        listOf(
-                BluetoothHeadset::class.java,
-                Speakerphone::class.java,
-                WiredHeadset::class.java),
-        listOf(
-                Earpiece::class.java,
-                BluetoothHeadset::class.java),
-        listOf(Speakerphone::class.java),
-        listOf()
+    listOf(
+        BluetoothHeadset::class.java,
+        WiredHeadset::class.java,
+        Earpiece::class.java,
+        Speakerphone::class.java,
+    ),
+    listOf(
+        WiredHeadset::class.java,
+        BluetoothHeadset::class.java,
+        Earpiece::class.java,
+        Speakerphone::class.java,
+    ),
+    listOf(
+        WiredHeadset::class.java,
+        Earpiece::class.java,
+        BluetoothHeadset::class.java,
+        Speakerphone::class.java,
+    ),
+    listOf(
+        WiredHeadset::class.java,
+        Earpiece::class.java,
+        Speakerphone::class.java,
+        BluetoothHeadset::class.java,
+    ),
+    listOf(
+        BluetoothHeadset::class.java,
+        Earpiece::class.java,
+        WiredHeadset::class.java,
+        Speakerphone::class.java,
+    ),
+    listOf(
+        BluetoothHeadset::class.java,
+        Earpiece::class.java,
+        Speakerphone::class.java,
+        WiredHeadset::class.java,
+    ),
+    listOf(
+        Earpiece::class.java,
+        BluetoothHeadset::class.java,
+        WiredHeadset::class.java,
+        Speakerphone::class.java,
+    ),
+    listOf(
+        BluetoothHeadset::class.java,
+        WiredHeadset::class.java,
+        Speakerphone::class.java,
+        Earpiece::class.java,
+    ),
+    listOf(
+        Speakerphone::class.java,
+        BluetoothHeadset::class.java,
+        WiredHeadset::class.java,
+        Earpiece::class.java,
+    ),
+    listOf(
+        BluetoothHeadset::class.java,
+        Speakerphone::class.java,
+        WiredHeadset::class.java,
+        Earpiece::class.java,
+    ),
+    listOf(
+        BluetoothHeadset::class.java,
+        Speakerphone::class.java,
+        WiredHeadset::class.java,
+    ),
+    listOf(
+        Earpiece::class.java,
+        BluetoothHeadset::class.java,
+    ),
+    listOf(Speakerphone::class.java),
+    listOf(),
 )
 
 private fun getTestInput(testType: TestType): Array<Any> {
@@ -86,7 +98,7 @@ private fun getTestInput(testType: TestType): Array<Any> {
 
 private fun getExpectedDevice(
     testType: TestType,
-    preferredDeviceList: List<Class<out AudioDevice>>
+    preferredDeviceList: List<Class<out AudioDevice>>,
 ): AudioDevice {
     return when (testType) {
         EarpieceAndSpeakerTest -> {

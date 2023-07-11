@@ -14,7 +14,7 @@ internal const val INTENT_NAME = "name"
 
 internal class WiredHeadsetReceiver(
     private val context: Context,
-    private val logger: Logger
+    private val logger: Logger,
 ) : BroadcastReceiver() {
 
     internal var deviceListener: WiredDeviceConnectionListener? = null

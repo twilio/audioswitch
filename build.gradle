@@ -1,5 +1,5 @@
 buildscript {
-    ext.kotlin_version = '1.4.21'
+    ext.kotlin_version = '1.6.21'
     ext.dokka_version = '1.4.32'
 
     /**
@@ -57,14 +57,14 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.0.3'
+        classpath 'com.android.tools.build:gradle:8.0.2'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "org.jetbrains.dokka:dokka-gradle-plugin:$dokka_version"
     }
 }
 
 plugins {
-    id "com.diffplug.spotless" version "5.6.1"
+    id "com.diffplug.spotless" version '6.19.0'
     id "org.jetbrains.dokka" version "$dokka_version"
     id "io.github.gradle-nexus.publish-plugin" version "1.0.0"
     id "maven-publish"

@@ -7,8 +7,8 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.twilio.audioswitch.AudioDevice.BluetoothHeadset
 import com.twilio.audioswitch.AudioDevice.Earpiece
 import com.twilio.audioswitch.AudioDevice.Speakerphone
-import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.CoreMatchers.equalTo
+import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.CoreMatchers.notNullValue
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Test
@@ -26,7 +26,7 @@ class UserDeviceSelectionTest : AndroidTestBase() {
         val audioSwitch = AudioSwitch(context)
         audioSwitch.start { _, _ -> }
         val earpiece = audioSwitch.availableAudioDevices
-                .find { it is Earpiece }
+            .find { it is Earpiece }
         assertThat(earpiece, `is`(notNullValue()))
 
         audioSwitch.selectDevice(earpiece!!)
@@ -41,7 +41,7 @@ class UserDeviceSelectionTest : AndroidTestBase() {
         val audioSwitch = AudioSwitch(context)
         audioSwitch.start { _, _ -> }
         val speakerphone = audioSwitch.availableAudioDevices
-                .find { it is Speakerphone }
+            .find { it is Speakerphone }
         assertThat(speakerphone, `is`(notNullValue()))
 
         audioSwitch.selectDevice(speakerphone!!)
@@ -57,7 +57,7 @@ class UserDeviceSelectionTest : AndroidTestBase() {
         audioSwitch.start { _, _ -> }
         simulateBluetoothSystemIntent(context, bluetoothHeadsetReceiver)
         val bluetoothDevice = audioSwitch.availableAudioDevices
-                .find { it is BluetoothHeadset }
+            .find { it is BluetoothHeadset }
         assertThat(bluetoothDevice, `is`(notNullValue()))
 
         audioSwitch.selectDevice(bluetoothDevice!!)

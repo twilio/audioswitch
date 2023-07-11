@@ -2,7 +2,6 @@ package com.twilio.audioswitch.bluetooth
 
 import android.os.Handler
 import androidx.annotation.VisibleForTesting
-import androidx.annotation.VisibleForTesting.PRIVATE
 import com.twilio.audioswitch.android.Logger
 import com.twilio.audioswitch.android.SystemClockWrapper
 import java.util.concurrent.TimeoutException
@@ -13,10 +12,10 @@ private const val TAG = "BluetoothScoJob"
 internal abstract class BluetoothScoJob(
     private val logger: Logger,
     private val bluetoothScoHandler: Handler,
-    private val systemClockWrapper: SystemClockWrapper
+    private val systemClockWrapper: SystemClockWrapper,
 ) {
 
-    @VisibleForTesting(otherwise = PRIVATE)
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     var bluetoothScoRunnable: BluetoothScoRunnable? = null
 
     protected abstract fun scoAction()

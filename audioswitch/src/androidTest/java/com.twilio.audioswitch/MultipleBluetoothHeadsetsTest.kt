@@ -5,8 +5,8 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
 import com.twilio.audioswitch.android.HEADSET_2_NAME
 import com.twilio.audioswitch.android.HEADSET_NAME
-import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.CoreMatchers.equalTo
+import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.CoreMatchers.nullValue
 import org.junit.Assert.assertThat
 import org.junit.Test
@@ -25,16 +25,20 @@ class MultipleBluetoothHeadsetsTest : AndroidTestBase() {
         audioSwitch.activate()
         simulateBluetoothSystemIntent(
             getInstrumentationContext(),
-            bluetoothHeadsetReceiver)
+            bluetoothHeadsetReceiver,
+        )
         simulateBluetoothSystemIntent(
             getInstrumentationContext(),
             bluetoothHeadsetReceiver,
-            HEADSET_2_NAME)
+            HEADSET_2_NAME,
+        )
 
         assertThat(audioSwitch.selectedAudioDevice!!.name, equalTo(HEADSET_2_NAME))
         assertThat(audioSwitch.availableAudioDevices.first().name, equalTo(HEADSET_2_NAME))
-        assertThat(audioSwitch.availableAudioDevices.find { it.name == HEADSET_NAME },
-                `is`(nullValue()))
+        assertThat(
+            audioSwitch.availableAudioDevices.find { it.name == HEADSET_NAME },
+            `is`(nullValue()),
+        )
         assertThat(isSpeakerPhoneOn(), equalTo(false)) // Best we can do for asserting if a fake BT headset is activated
         audioSwitch.stop()
     }

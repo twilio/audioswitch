@@ -3,13 +3,20 @@ apply plugin: 'maven-publish'
 apply plugin: 'signing'
 apply plugin: 'kotlin-android'
 apply plugin: "org.jetbrains.dokka"
+apply plugin: 'org.jetbrains.kotlin.android'
 
 android {
-    compileSdkVersion 31
+    compileSdkVersion 34
+    namespace "com.twilio.audioswitch"
+    testNamespace "com.twilio.audioswitch.test"
+
+    buildFeatures {
+        buildConfig = true
+    }
 
     defaultConfig {
-        minSdkVersion 16
-        targetSdkVersion 31
+        minSdkVersion 21
+        targetSdkVersion 34
         buildConfigField("String", "VERSION_NAME",
                 "\"${audioSwitchVersion}\"")
 
@@ -19,12 +26,12 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
     }
 
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_1_8
+        jvmTarget = JavaVersion.VERSION_11
     }
 
     testOptions {
@@ -38,6 +45,10 @@ android {
         }
     }
 
+    lint {
+        baseline = file("lint-baseline.xml")
+    }
+
     dokkaHtml.configure {
         dokkaSourceSets {
             named("main") {
@@ -48,12 +59,18 @@ android {
             }
         }
     }
+
+    publishing {
+        singleVariant('release') {
+            withSourcesJar()
+        }
+    }
 }
 
 dependencies {
     implementation "androidx.annotation:annotation:1.3.0"
     testImplementation 'junit:junit:4.13.2'
-    testImplementation 'com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0'
+    testImplementation 'org.mockito.kotlin:mockito-kotlin:4.1.0'
     testImplementation 'pl.pragmatists:JUnitParams:1.1.1'
     def androidXTest = '1.4.1-alpha03'
     androidTestUtil "androidx.test:orchestrator:$androidXTest"
@@ -63,32 +80,15 @@ dependencies {
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
 }
 
-task androidSourcesJar(type: Jar) {
-    archiveClassifier.set('sources')
-    from android.sourceSets.main.java.source
-}
-
-artifacts {
-    archives androidSourcesJar
-}
-
-def audioSwitchGroupId = 'com.twilio'
-def audioSwitchArtifactId = 'audioswitch'
-
 /*
  * The publishing block enables publishing to MavenCentral
  */
 publishing {
     publications {
         audioSwitchRelease(MavenPublication) {
-            artifact("$buildDir/outputs/aar/audioswitch-release.aar")
 
-            artifact androidSourcesJar {
-                classifier "sources"
-            }
-
-            groupId = audioSwitchGroupId
-            artifactId = audioSwitchArtifactId
+            groupId = 'com.twilio'
+            artifactId = 'audioswitch'
             version = audioSwitchVersion
 
             pom {
@@ -112,18 +112,10 @@ publishing {
                     developerConnection = 'scm:git:ssh://github.com/twilio/audioswitch.git'
                     url = 'https://github.com/twilio/audioswitch/tree/main'
                 }
-                // A slightly hacky fix so that your POM will include any transitive dependencies
-                // that your library builds upon
-                withXml {
-                    def dependenciesNode = asNode().appendNode('dependencies')
+            }
 
-                    project.configurations.implementation.allDependencies.each {
-                        def dependencyNode = dependenciesNode.appendNode('dependency')
-                        dependencyNode.appendNode('groupId', it.group)
-                        dependencyNode.appendNode('artifactId', it.name)
-                        dependencyNode.appendNode('version', it.version)
-                    }
-                }
+            afterEvaluate {
+                from components.release
             }
         }
     }
