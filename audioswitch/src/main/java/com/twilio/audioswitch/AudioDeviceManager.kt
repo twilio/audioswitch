@@ -27,6 +27,7 @@ internal class AudioDeviceManager(
     private var savedSpeakerphoneEnabled = false
     private var audioRequest: AudioFocusRequest? = null
 
+    var audioMode = AudioManager.MODE_IN_COMMUNICATION
     fun hasEarpiece(): Boolean {
         val hasEarpiece = context.packageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY)
         if (hasEarpiece) {
@@ -74,7 +75,7 @@ internal class AudioDeviceManager(
          * best possible VoIP performance. Some devices have difficulties with speaker mode
          * if this is not set.
          */
-        audioManager.mode = AudioManager.MODE_IN_COMMUNICATION
+        audioManager.mode = audioMode
     }
 
     fun enableBluetoothSco(enable: Boolean) {

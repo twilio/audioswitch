@@ -79,6 +79,17 @@ abstract class AbstractAudioSwitch
     val availableAudioDevices: List<AudioDevice>
         get() = this.availableUniqueAudioDevices.toList()
 
+    /**
+     * The audio mode to use while activated.
+     *
+     * Defaults to [AudioManager.MODE_IN_COMMUNICATION].
+     */
+    var audioMode: Int
+        get() = this.audioDeviceManager.audioMode
+        set(value) {
+            this.audioDeviceManager.audioMode = value
+        }
+
     init {
         this.preferredDeviceList = getPreferredDeviceList(preferredDeviceList)
         this.availableUniqueAudioDevices =
@@ -127,6 +138,7 @@ abstract class AbstractAudioSwitch
                 this.deviceScanner.start(this)
                 state = STARTED
             }
+
             else -> {
                 logger.d(TAG_AUDIO_SWITCH, "Redundant start() invocation while already in the started or activated state")
             }
@@ -144,9 +156,11 @@ abstract class AbstractAudioSwitch
                 deactivate()
                 closeListeners()
             }
+
             STARTED -> {
                 closeListeners()
             }
+
             STOPPED -> {
                 logger.d(TAG_AUDIO_SWITCH, "Redundant stop() invocation while already in the stopped state")
             }
@@ -170,6 +184,7 @@ abstract class AbstractAudioSwitch
                 selectedAudioDevice?.let { this.onActivate(it) }
                 state = ACTIVATED
             }
+
             ACTIVATED -> selectedAudioDevice?.let { this.onActivate(it) }
             STOPPED -> throw IllegalStateException()
         }
@@ -187,6 +202,7 @@ abstract class AbstractAudioSwitch
                 audioDeviceManager.restoreAudioState()
                 state = STARTED
             }
+
             STARTED, STOPPED -> {
             }
         }
