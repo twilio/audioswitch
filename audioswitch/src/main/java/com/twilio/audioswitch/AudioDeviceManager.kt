@@ -28,6 +28,7 @@ internal class AudioDeviceManager(
     private var audioRequest: AudioFocusRequest? = null
 
     var audioMode = AudioManager.MODE_IN_COMMUNICATION
+    var focusMode = AudioManager.AUDIOFOCUS_GAIN_TRANSIENT
     fun hasEarpiece(): Boolean {
         val hasEarpiece = context.packageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY)
         if (hasEarpiece) {
@@ -60,13 +61,13 @@ internal class AudioDeviceManager(
     fun setAudioFocus() {
         // Request audio focus before making any device switch.
         if (build.getVersion() >= Build.VERSION_CODES.O) {
-            audioRequest = audioFocusRequest.buildRequest(audioFocusChangeListener)
+            audioRequest = audioFocusRequest.buildRequest(audioFocusChangeListener, focusMode)
             audioRequest?.let { audioManager.requestAudioFocus(it) }
         } else {
             audioManager.requestAudioFocus(
                 audioFocusChangeListener,
                 AudioManager.STREAM_VOICE_CALL,
-                AudioManager.AUDIOFOCUS_GAIN_TRANSIENT
+                focusMode
             )
         }
         /*

@@ -90,6 +90,17 @@ abstract class AbstractAudioSwitch
             this.audioDeviceManager.audioMode = value
         }
 
+    /**
+     * The focus mode to use while activated.
+     *
+     * Defaults to [AudioManager.AUDIOFOCUS_GAIN_TRANSIENT].
+     */
+    var focusMode: Int
+        get() = this.audioDeviceManager.focusMode
+        set(value) {
+            this.audioDeviceManager.focusMode = value
+        }
+
     init {
         this.preferredDeviceList = getPreferredDeviceList(preferredDeviceList)
         this.availableUniqueAudioDevices =
