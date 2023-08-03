@@ -115,7 +115,7 @@ class LegacyAudioSwitch : AbstractAudioSwitch {
         }
 
         if (audioDevice is WiredHeadset && this.audioDeviceManager.hasEarpiece()) {
-            wasRemoved = wasRemoved || this.availableUniqueAudioDevices.add(Earpiece())
+            wasRemoved = this.availableUniqueAudioDevices.add(Earpiece()) || wasRemoved
         }
         this.selectAudioDevice(wasListChanged = wasRemoved)
     }

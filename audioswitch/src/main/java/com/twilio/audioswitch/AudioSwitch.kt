@@ -102,7 +102,7 @@ class AudioSwitch : AbstractAudioSwitch {
         }
 
         if (audioDevice is WiredHeadset && this.audioDeviceManager.hasEarpiece()) {
-            wasChanged = wasChanged || this.availableUniqueAudioDevices.add(Earpiece())
+            wasChanged = this.availableUniqueAudioDevices.add(Earpiece()) || wasChanged
         }
         this.selectAudioDevice(wasChanged)
     }

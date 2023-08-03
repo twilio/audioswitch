@@ -14,8 +14,8 @@ import com.twilio.audioswitch.wired.STATE_PLUGGED
 import com.twilio.audioswitch.wired.STATE_UNPLUGGED
 import junitparams.JUnitParamsRunner
 import junitparams.Parameters
-import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.CoreMatchers.equalTo
+import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.CoreMatchers.nullValue
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Before
@@ -258,6 +258,37 @@ class ModernAudioSwitchTest : BaseTest() {
                         AudioDevice.BluetoothHeadset(),
                         AudioDevice.Earpiece(),
                         AudioDevice.Speakerphone()
+                    )
+                ),
+                equalTo(true)
+            )
+        }
+    }
+
+    @Parameters(source = DefaultDeviceParams::class)
+    @Test
+    fun `when configuring a new preferred device list, all connected devices should be available but the wired headset when it is connected and disconnected`(
+        preferredDeviceList: List<Class<out AudioDevice>>
+    ) {
+        val audioSwitch = getModernAudioSwitch(setupAudioDeviceScannerMock())
+
+        audioSwitch.run {
+            start(this@ModernAudioSwitchTest.audioDeviceChangeListener)
+            activate()
+
+            audioSwitch.onDeviceConnected(AudioDevice.BluetoothHeadset())
+            audioSwitch.onDeviceConnected(AudioDevice.WiredHeadset())
+            audioSwitch.onDeviceConnected(AudioDevice.Speakerphone())
+            audioSwitch.onDeviceConnected(AudioDevice.Earpiece())
+            audioSwitch.onDeviceDisconnected(AudioDevice.WiredHeadset())
+
+            assertThat(availableAudioDevices.size, equalTo(3))
+            assertThat(
+                availableAudioDevices.containsAll(
+                    listOf(
+                        AudioDevice.BluetoothHeadset(),
+                        AudioDevice.Speakerphone(),
+                        AudioDevice.Earpiece()
                     )
                 ),
                 equalTo(true)

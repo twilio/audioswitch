@@ -21,8 +21,8 @@ import com.twilio.audioswitch.wired.STATE_PLUGGED
 import com.twilio.audioswitch.wired.STATE_UNPLUGGED
 import junitparams.JUnitParamsRunner
 import junitparams.Parameters
-import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.CoreMatchers.equalTo
+import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.CoreMatchers.nullValue
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Before
@@ -335,6 +335,46 @@ class LegacyAudioSwitchTest : BaseTest() {
 
     @Parameters(source = DefaultDeviceParams::class)
     @Test
+    fun `when configuring a new preferred device list, all connected devices should be available but wired headset after plugging and unplugging wired headset`(
+        preferredDeviceList: List<Class<out AudioDevice>>
+    ) {
+        val headsetManager = headsetManager
+        val audioSwitch = LegacyAudioSwitch(
+            context = context,
+            logger = logger,
+            audioDeviceManager = audioDeviceManager,
+            audioFocusChangeListener = defaultAudioFocusChangeListener,
+            preferredDeviceList = preferredDeviceList,
+            headsetManager = headsetManager,
+            wiredHeadsetReceiver = wiredHeadsetReceiver,
+            scanner = getLegacyDeviceScanner(headsetManager),
+            audioManager = audioManager,
+        )
+
+        audioSwitch.run {
+            start(this@LegacyAudioSwitchTest.audioDeviceChangeListener)
+            activate()
+            simulateNewBluetoothHeadsetConnection(audioSwitch.headsetManager)
+            simulateNewWiredHeadsetConnection()
+            simulateWiredHeadsetDisconnection()
+
+            assertThat(availableAudioDevices.size, equalTo(3))
+            assertThat(
+                availableAudioDevices.containsAll(
+                    listOf(
+                        AudioDevice.BluetoothHeadset(),
+                        AudioDevice.Speakerphone(),
+                        AudioDevice.Earpiece()
+                    )
+                ),
+                equalTo(true)
+            )
+        }
+    }
+
+
+    @Parameters(source = DefaultDeviceParams::class)
+    @Test
     fun `when configuring a new preferred device list, all connected devices should be available but the wired headset`(
         preferredDeviceList: List<Class<out AudioDevice>>
     ) {
@@ -391,6 +431,14 @@ class LegacyAudioSwitchTest : BaseTest() {
         val intent = mock<Intent> {
             whenever(mock.getIntExtra(INTENT_STATE, STATE_UNPLUGGED))
                 .thenReturn(STATE_PLUGGED)
+        }
+        wiredHeadsetReceiver.onReceive(context, intent)
+    }
+
+    private fun simulateWiredHeadsetDisconnection() {
+        val intent = mock<Intent> {
+            whenever(mock.getIntExtra(INTENT_STATE, STATE_UNPLUGGED))
+                .thenReturn(STATE_UNPLUGGED)
         }
         wiredHeadsetReceiver.onReceive(context, intent)
     }
