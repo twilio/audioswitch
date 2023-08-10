@@ -359,4 +359,39 @@ class AudioSwitchTest : BaseTest() {
             assertThat(selectedAudioDevice, equalTo(expectedDevice))
         }
     }
+
+    @Parameters(source = DefaultDeviceParams::class)
+    @Test
+    fun `when changing the preferred device list, the correct device should be automatically selected and activated`(
+        preferredDeviceList: List<Class<out AudioDevice>>,
+    ) {
+        val audioSwitch = AudioSwitch(
+            context = context,
+            logger = logger,
+            audioDeviceManager = audioDeviceManager,
+            audioFocusChangeListener = defaultAudioFocusChangeListener,
+            preferredDeviceList = preferredDeviceList,
+            scanner = setupAudioDeviceScannerMock(),
+            audioManager = audioManager,
+            handler = handler,
+        )
+
+        audioSwitch.run {
+            start(this@AudioSwitchTest.audioDeviceChangeListener)
+            activate()
+            audioSwitch.onDeviceConnected(AudioDevice.BluetoothHeadset())
+            audioSwitch.onDeviceConnected(AudioDevice.Speakerphone())
+            audioSwitch.onDeviceConnected(AudioDevice.Earpiece())
+
+            val newPreferredDeviceList = listOf(
+                AudioDevice.BluetoothHeadset::class.java,
+                AudioDevice.WiredHeadset::class.java,
+                AudioDevice.Speakerphone::class.java,
+                AudioDevice.Earpiece::class.java
+            )
+
+            audioSwitch.setPreferredDeviceList(newPreferredDeviceList)
+            assertThat(selectedAudioDevice, equalTo(AudioDevice.BluetoothHeadset()))
+        }
+    }
 }

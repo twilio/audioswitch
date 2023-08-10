@@ -64,7 +64,7 @@ abstract class AbstractAudioSwitch
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     internal val deviceScanner: Scanner = scanner
-    private val preferredDeviceList: List<Class<out AudioDevice>>
+    private var preferredDeviceList: List<Class<out AudioDevice>>
     protected var userSelectedAudioDevice: AudioDevice? = null
 
     internal enum class State {
@@ -78,7 +78,8 @@ abstract class AbstractAudioSwitch
         }
     var selectedAudioDevice: AudioDevice? = null
         private set
-    val availableUniqueAudioDevices: SortedSet<AudioDevice>
+    var availableUniqueAudioDevices: SortedSet<AudioDevice>
+        private set
     val availableAudioDevices: List<AudioDevice>
         get() = this.availableUniqueAudioDevices.toList()
 
@@ -167,6 +168,24 @@ abstract class AbstractAudioSwitch
             ConcurrentSkipListSet(AudioDevicePriorityComparator(this.preferredDeviceList))
         logger.d(TAG_AUDIO_SWITCH, "AudioSwitch($VERSION)")
         logger.d(TAG_AUDIO_SWITCH, "Preferred device list = ${this.preferredDeviceList.map { it.simpleName }}")
+    }
+
+    fun setPreferredDeviceList(preferredDeviceList: List<Class<out AudioDevice>>) {
+        if(preferredDeviceList == this.preferredDeviceList) {
+            return
+        }
+
+        val oldAvailableDevices = availableUniqueAudioDevices
+
+        this.preferredDeviceList = getPreferredDeviceList(preferredDeviceList)
+        this.availableUniqueAudioDevices =
+            ConcurrentSkipListSet(AudioDevicePriorityComparator(this.preferredDeviceList))
+
+        availableUniqueAudioDevices.addAll(oldAvailableDevices)
+
+        logger.d(TAG_AUDIO_SWITCH, "New preferred device list = ${this.preferredDeviceList.map { it.simpleName }}")
+
+        selectAudioDevice(wasListChanged = false)
     }
 
     private fun getPreferredDeviceList(preferredDeviceList: List<Class<out AudioDevice>>):
