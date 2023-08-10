@@ -3,11 +3,13 @@ package com.twilio.audioswitch
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.PackageManager
+import android.media.AudioAttributes
 import android.media.AudioDeviceInfo
 import android.media.AudioFocusRequest
 import android.media.AudioManager
 import android.media.AudioManager.OnAudioFocusChangeListener
 import android.os.Build
+import androidx.annotation.RequiresApi
 import com.twilio.audioswitch.android.BuildWrapper
 import com.twilio.audioswitch.android.Logger
 
@@ -29,6 +31,12 @@ internal class AudioDeviceManager(
 
     var audioMode = AudioManager.MODE_IN_COMMUNICATION
     var focusMode = AudioManager.AUDIOFOCUS_GAIN_TRANSIENT
+    var audioStreamType = AudioManager.STREAM_VOICE_CALL
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
+    var audioAttributeUsageType = AudioAttributes.USAGE_VOICE_COMMUNICATION
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
+    var audioAttributeContentType = AudioAttributes.CONTENT_TYPE_SPEECH
+
     fun hasEarpiece(): Boolean {
         val hasEarpiece = context.packageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY)
         if (hasEarpiece) {
@@ -61,12 +69,13 @@ internal class AudioDeviceManager(
     fun setAudioFocus() {
         // Request audio focus before making any device switch.
         if (build.getVersion() >= Build.VERSION_CODES.O) {
-            audioRequest = audioFocusRequest.buildRequest(audioFocusChangeListener, focusMode)
+            audioRequest = audioFocusRequest.buildRequest(audioFocusChangeListener, focusMode, audioAttributeUsageType, audioAttributeContentType)
             audioRequest?.let { audioManager.requestAudioFocus(it) }
         } else {
+            @Suppress("DEPRECATION")
             audioManager.requestAudioFocus(
                 audioFocusChangeListener,
-                AudioManager.STREAM_VOICE_CALL,
+                audioStreamType,
                 focusMode
             )
         }
@@ -105,7 +114,9 @@ internal class AudioDeviceManager(
         enableSpeakerphone(savedSpeakerphoneEnabled)
         if (build.getVersion() >= Build.VERSION_CODES.O) {
             audioRequest?.let { audioManager.abandonAudioFocusRequest(it) }
+            audioRequest = null
         } else {
+            @Suppress("DEPRECATION")
             audioManager.abandonAudioFocus(audioFocusChangeListener)
         }
     }

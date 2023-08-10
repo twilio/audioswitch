@@ -1,8 +1,11 @@
 package com.twilio.audioswitch
 
 import android.content.Context
+import android.media.AudioAttributes
 import android.media.AudioManager
 import android.media.AudioManager.OnAudioFocusChangeListener
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.annotation.VisibleForTesting
 import com.twilio.audioswitch.AbstractAudioSwitch.State.*
 import com.twilio.audioswitch.AudioDevice.*
@@ -80,9 +83,18 @@ abstract class AbstractAudioSwitch
         get() = this.availableUniqueAudioDevices.toList()
 
     /**
-     * The audio mode to use while activated.
+     * When true, AudioSwitch will request audio focus upon activation and abandon upon deactivation.
+     *
+     * Defaults to true.
+     */
+    var manageAudioFocus = true
+
+    /**
+     * The audio mode to use when requesting audio focus.
      *
      * Defaults to [AudioManager.MODE_IN_COMMUNICATION].
+     *
+     * @see AudioManager.MODE_NORMAL
      */
     var audioMode: Int
         get() = this.audioDeviceManager.audioMode
@@ -91,15 +103,63 @@ abstract class AbstractAudioSwitch
         }
 
     /**
-     * The focus mode to use while activated.
+     * The focus mode to use when requesting audio focus.
      *
      * Defaults to [AudioManager.AUDIOFOCUS_GAIN_TRANSIENT].
+     *
+     * @see AudioManager.AUDIOFOCUS_GAIN
      */
     var focusMode: Int
         get() = this.audioDeviceManager.focusMode
         set(value) {
             this.audioDeviceManager.focusMode = value
         }
+
+    /**
+     * The audio stream type to use when requesting audio focus on pre-O devices.
+     *
+     * Defaults to [AudioManager.STREAM_VOICE_CALL].
+     *
+     * Refer to this [compatibility table](https://source.android.com/docs/core/audio/attributes#compatibility)
+     * to ensure that your values match between android versions.
+     */
+    var audioStreamType: Int
+        get() = this.audioDeviceManager.audioStreamType
+        set(value) {
+            this.audioDeviceManager.audioStreamType = value
+        }
+
+    /**
+     * The audio attribute usage type to use when requesting audio focus on devices O and beyond.
+     *
+     * Defaults to [AudioAttributes.USAGE_VOICE_COMMUNICATION].
+     *
+     * Refer to this [compatibility table](https://source.android.com/docs/core/audio/attributes#compatibility)
+     * to ensure that your values match between android versions.
+     */
+    var audioAttributeUsageType: Int
+        @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
+        get() = this.audioDeviceManager.audioAttributeUsageType
+        @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
+        set(value) {
+            this.audioDeviceManager.audioAttributeUsageType = value
+        }
+    /**
+     * The audio attribute content type to use when requesting audio focus on devices O and beyond.
+     *
+     * Defaults to [AudioAttributes.CONTENT_TYPE_SPEECH].
+     *
+     * Refer to this [compatibility table](https://source.android.com/docs/core/audio/attributes#compatibility)
+     * to ensure that your values match between android versions.
+     */
+    var audioAttributeContentType: Int
+        @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
+        get() = this.audioDeviceManager.audioAttributeContentType
+        @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
+        set(value) {
+            this.audioDeviceManager.audioAttributeContentType = value
+        }
+
 
     init {
         this.preferredDeviceList = getPreferredDeviceList(preferredDeviceList)
@@ -191,7 +251,9 @@ abstract class AbstractAudioSwitch
 
                 // Always set mute to false for WebRTC
                 audioDeviceManager.mute(false)
-                audioDeviceManager.setAudioFocus()
+                if (manageAudioFocus) {
+                    audioDeviceManager.setAudioFocus()
+                }
                 selectedAudioDevice?.let { this.onActivate(it) }
                 state = ACTIVATED
             }
