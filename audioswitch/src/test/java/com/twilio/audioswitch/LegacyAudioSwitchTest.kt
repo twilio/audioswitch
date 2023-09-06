@@ -5,16 +5,21 @@ import android.bluetooth.BluetoothHeadset
 import android.bluetooth.BluetoothProfile
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.media.AudioManager
 import android.os.Build
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.atLeast
+import com.nhaarman.mockitokotlin2.atLeastOnce
 import com.nhaarman.mockitokotlin2.eq
 import com.nhaarman.mockitokotlin2.isA
 import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.never
+import com.nhaarman.mockitokotlin2.spy
 import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.verifyZeroInteractions
 import com.nhaarman.mockitokotlin2.whenever
+import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager
 import com.twilio.audioswitch.scanners.LegacyAudioDeviceScanner
 import com.twilio.audioswitch.wired.INTENT_STATE
 import com.twilio.audioswitch.wired.STATE_PLUGGED
@@ -23,6 +28,7 @@ import junitparams.JUnitParamsRunner
 import junitparams.Parameters
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.CoreMatchers.`is`
+import org.hamcrest.CoreMatchers.notNullValue
 import org.hamcrest.CoreMatchers.nullValue
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Before
@@ -425,6 +431,95 @@ class LegacyAudioSwitchTest : BaseTest() {
             listOf(AudioDevice.Earpiece(), AudioDevice.Speakerphone()),
             AudioDevice.Earpiece()
         )
+    }
+
+
+    @Parameters(source = DefaultDeviceParams::class)
+    @Test
+    fun `when audio mode is not in communication, audio routing should not happen`(
+        preferredDeviceList: List<Class<out AudioDevice>>,
+    ) {
+        val audioDeviceManagerSpy = spy(audioDeviceManager)
+        val headsetManager = BluetoothHeadsetManager(
+            context,
+            logger,
+            bluetoothAdapter,
+            audioDeviceManagerSpy,
+            bluetoothScoHandler = handler,
+            systemClockWrapper = systemClockWrapper,
+            headsetProxy = headsetProxy,
+            permissionsRequestStrategy = permissionsStrategyProxy,
+            headsetListener = mock()
+        )
+
+        val audioSwitch = LegacyAudioSwitch(
+            context = context,
+            logger = logger,
+            audioDeviceManager = audioDeviceManagerSpy,
+            wiredHeadsetReceiver = wiredHeadsetReceiver,
+            headsetManager = headsetManager,
+            audioFocusChangeListener = defaultAudioFocusChangeListener,
+            preferredDeviceList = preferredDeviceList,
+            scanner = getLegacyDeviceScanner(headsetManager),
+            audioManager = audioManager,
+        )
+
+        audioSwitch.run {
+            audioMode = AudioManager.MODE_NORMAL
+            start(this@LegacyAudioSwitchTest.audioDeviceChangeListener)
+            activate()
+            simulateNewBluetoothHeadsetConnection(audioSwitch.headsetManager)
+            audioSwitch.onDeviceConnected(AudioDevice.Speakerphone())
+            audioSwitch.onDeviceConnected(AudioDevice.Earpiece())
+
+            verify(audioDeviceManagerSpy, never()).enableBluetoothSco(any())
+            verify(audioDeviceManagerSpy, never()).enableSpeakerphone(any())
+            assertThat(audioSwitch.selectedAudioDevice, nullValue())
+        }
+    }
+
+    @Parameters(source = DefaultDeviceParams::class)
+    @Test
+    fun `when audio mode is not in communication, audio routing happens when forced`(
+        preferredDeviceList: List<Class<out AudioDevice>>,
+    ) {
+        val audioDeviceManagerSpy = spy(audioDeviceManager)
+        val headsetManager = BluetoothHeadsetManager(
+            context,
+            logger,
+            bluetoothAdapter,
+            audioDeviceManagerSpy,
+            bluetoothScoHandler = handler,
+            systemClockWrapper = systemClockWrapper,
+            headsetProxy = headsetProxy,
+            permissionsRequestStrategy = permissionsStrategyProxy,
+            headsetListener = mock()
+        )
+
+        val audioSwitch = LegacyAudioSwitch(
+            context = context,
+            logger = logger,
+            audioDeviceManager = audioDeviceManagerSpy,
+            wiredHeadsetReceiver = wiredHeadsetReceiver,
+            headsetManager = headsetManager,
+            audioFocusChangeListener = defaultAudioFocusChangeListener,
+            preferredDeviceList = preferredDeviceList,
+            scanner = getLegacyDeviceScanner(headsetManager),
+            audioManager = audioManager,
+        )
+
+        audioSwitch.run {
+            audioMode = AudioManager.MODE_NORMAL
+            forceHandleAudioRouting = true
+            start(this@LegacyAudioSwitchTest.audioDeviceChangeListener)
+            simulateNewBluetoothHeadsetConnection(audioSwitch.headsetManager)
+            activate()
+            onDeviceConnected(AudioDevice.Speakerphone())
+            onDeviceConnected(AudioDevice.Earpiece())
+
+            verify(audioDeviceManagerSpy, atLeastOnce()).enableSpeakerphone(any())
+            assertThat(selectedAudioDevice, notNullValue())
+        }
     }
 
     private fun simulateNewWiredHeadsetConnection() {

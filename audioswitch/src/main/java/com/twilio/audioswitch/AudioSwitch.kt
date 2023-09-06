@@ -109,15 +109,18 @@ class AudioSwitch : AbstractAudioSwitch {
 
     override fun onActivate(audioDevice: AudioDevice) {
         this.logger.d(TAG_AUDIO_SWITCH, "onActivate($audioDevice)")
+
         when (audioDevice) {
             is BluetoothHeadset -> {
                 this.audioDeviceManager.enableSpeakerphone(false)
                 this.audioDeviceManager.enableBluetoothSco(true)
             }
+
             is Earpiece, is WiredHeadset -> {
                 this.audioDeviceManager.enableSpeakerphone(false)
                 this.audioDeviceManager.enableBluetoothSco(false)
             }
+
             is Speakerphone -> {
                 this.audioDeviceManager.enableBluetoothSco(false)
                 this.audioDeviceManager.enableSpeakerphone(true)

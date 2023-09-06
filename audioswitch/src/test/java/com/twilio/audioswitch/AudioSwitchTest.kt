@@ -5,14 +5,17 @@ import android.media.AudioFocusRequest
 import android.media.AudioManager
 import android.os.Build
 import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.atLeastOnce
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.never
+import com.nhaarman.mockitokotlin2.spy
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import junitparams.JUnitParamsRunner
 import junitparams.Parameters
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.CoreMatchers.`is`
+import org.hamcrest.CoreMatchers.notNullValue
 import org.hamcrest.CoreMatchers.nullValue
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Assert.assertNotNull
@@ -392,6 +395,69 @@ class AudioSwitchTest : BaseTest() {
 
             audioSwitch.setPreferredDeviceList(newPreferredDeviceList)
             assertThat(selectedAudioDevice, equalTo(AudioDevice.BluetoothHeadset()))
+        }
+    }
+
+    @Parameters(source = DefaultDeviceParams::class)
+    @Test
+    fun `when audio mode is not in communication, audio routing should not happen`(
+        preferredDeviceList: List<Class<out AudioDevice>>,
+    ) {
+        val audioDeviceManagerSpy = spy(audioDeviceManager)
+        val audioSwitch = AudioSwitch(
+            context = context,
+            logger = logger,
+            audioDeviceManager = audioDeviceManagerSpy,
+            audioFocusChangeListener = defaultAudioFocusChangeListener,
+            preferredDeviceList = preferredDeviceList,
+            scanner = setupAudioDeviceScannerMock(),
+            audioManager = audioManager,
+            handler = handler,
+        )
+
+        audioSwitch.run {
+            audioMode = AudioManager.MODE_NORMAL
+            start(this@AudioSwitchTest.audioDeviceChangeListener)
+            activate()
+            audioSwitch.onDeviceConnected(AudioDevice.BluetoothHeadset())
+            audioSwitch.onDeviceConnected(AudioDevice.Speakerphone())
+            audioSwitch.onDeviceConnected(AudioDevice.Earpiece())
+
+            verify(audioDeviceManagerSpy, never()).enableBluetoothSco(any())
+            verify(audioDeviceManagerSpy, never()).enableSpeakerphone(any())
+            assertThat(audioSwitch.selectedAudioDevice, nullValue())
+        }
+    }
+
+    @Parameters(source = DefaultDeviceParams::class)
+    @Test
+    fun `when audio mode is not in communication, audio routing happens when forced`(
+        preferredDeviceList: List<Class<out AudioDevice>>,
+    ) {
+        val audioDeviceManagerSpy = spy(audioDeviceManager)
+        val audioSwitch = AudioSwitch(
+            context = context,
+            logger = logger,
+            audioDeviceManager = audioDeviceManagerSpy,
+            audioFocusChangeListener = defaultAudioFocusChangeListener,
+            preferredDeviceList = preferredDeviceList,
+            scanner = setupAudioDeviceScannerMock(),
+            audioManager = audioManager,
+            handler = handler,
+        )
+
+        audioSwitch.run {
+            audioMode = AudioManager.MODE_NORMAL
+            forceHandleAudioRouting = true
+            start(this@AudioSwitchTest.audioDeviceChangeListener)
+            activate()
+            audioSwitch.onDeviceConnected(AudioDevice.BluetoothHeadset())
+            audioSwitch.onDeviceConnected(AudioDevice.Speakerphone())
+            audioSwitch.onDeviceConnected(AudioDevice.Earpiece())
+
+            verify(audioDeviceManagerSpy, atLeastOnce()).enableBluetoothSco(any())
+            verify(audioDeviceManagerSpy, atLeastOnce()).enableSpeakerphone(any())
+            assertThat(audioSwitch.selectedAudioDevice, notNullValue())
         }
     }
 }
