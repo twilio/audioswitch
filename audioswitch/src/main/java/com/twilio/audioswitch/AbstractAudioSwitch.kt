@@ -283,11 +283,16 @@ abstract class AbstractAudioSwitch
                 if (manageAudioFocus) {
                     audioDeviceManager.setAudioFocus()
                 }
-                selectedAudioDevice?.let { this.onActivate(it) }
+                selectedAudioDevice
+                    ?.takeIf { shouldHandleAudioRouting() }
+                    ?.let { this.onActivate(it) }
                 state = ACTIVATED
             }
 
-            ACTIVATED -> selectedAudioDevice?.let { this.onActivate(it) }
+            ACTIVATED -> selectedAudioDevice
+                ?.takeIf { shouldHandleAudioRouting() }
+                ?.let { this.onActivate(it) }
+
             STOPPED -> throw IllegalStateException()
         }
     }

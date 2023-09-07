@@ -28,7 +28,6 @@ import junitparams.JUnitParamsRunner
 import junitparams.Parameters
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.CoreMatchers.`is`
-import org.hamcrest.CoreMatchers.notNullValue
 import org.hamcrest.CoreMatchers.nullValue
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Before
@@ -465,16 +464,15 @@ class LegacyAudioSwitchTest : BaseTest() {
         )
 
         audioSwitch.run {
-            audioMode = AudioManager.MODE_NORMAL
             start(this@LegacyAudioSwitchTest.audioDeviceChangeListener)
-            activate()
             simulateNewBluetoothHeadsetConnection(audioSwitch.headsetManager)
             audioSwitch.onDeviceConnected(AudioDevice.Speakerphone())
             audioSwitch.onDeviceConnected(AudioDevice.Earpiece())
+            audioMode = AudioManager.MODE_NORMAL
+            activate()
 
             verify(audioDeviceManagerSpy, never()).enableBluetoothSco(any())
             verify(audioDeviceManagerSpy, never()).enableSpeakerphone(any())
-            assertThat(audioSwitch.selectedAudioDevice, nullValue())
         }
     }
 
@@ -509,16 +507,15 @@ class LegacyAudioSwitchTest : BaseTest() {
         )
 
         audioSwitch.run {
-            audioMode = AudioManager.MODE_NORMAL
-            forceHandleAudioRouting = true
             start(this@LegacyAudioSwitchTest.audioDeviceChangeListener)
             simulateNewBluetoothHeadsetConnection(audioSwitch.headsetManager)
-            activate()
             onDeviceConnected(AudioDevice.Speakerphone())
             onDeviceConnected(AudioDevice.Earpiece())
+            audioMode = AudioManager.MODE_NORMAL
+            forceHandleAudioRouting = true
+            activate()
 
             verify(audioDeviceManagerSpy, atLeastOnce()).enableSpeakerphone(any())
-            assertThat(selectedAudioDevice, notNullValue())
         }
     }
 
