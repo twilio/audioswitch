@@ -457,4 +457,18 @@ class AudioSwitchTest : BaseTest() {
             verify(audioDeviceManagerSpy, atLeastOnce()).enableSpeakerphone(any())
         }
     }
+
+    @Test
+    fun `deactivate should reset audio manager settings`() {
+        val audioSwitch = audioSwitch
+        audioSwitch.start(audioDeviceChangeListener)
+        audioSwitch.selectDevice(AudioDevice.Earpiece())
+        audioSwitch.activate()
+        audioSwitch.deactivate()
+
+        verify(audioManager).mode = AudioManager.MODE_NORMAL
+        verify(audioManager).isMicrophoneMute = true
+        verify(audioManager).isSpeakerphoneOn = true
+    }
+
 }

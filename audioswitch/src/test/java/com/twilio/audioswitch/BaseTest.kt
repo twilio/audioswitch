@@ -131,12 +131,13 @@ open class BaseTest {
 
     internal fun simulateNewBluetoothHeadsetConnection(
         headsetManager: BluetoothHeadsetManager?,
-        bluetoothDevice: BluetoothDevice = expectedBluetoothDevice
+        bluetoothDevice: BluetoothDevice = expectedBluetoothDevice,
+        state: Int = BluetoothHeadset.STATE_CONNECTED
     ) {
         val intent = mock<Intent> {
             whenever(mock.action).thenReturn(BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED)
             whenever(mock.getIntExtra(BluetoothHeadset.EXTRA_STATE, BluetoothHeadset.STATE_DISCONNECTED))
-                .thenReturn(BluetoothHeadset.STATE_CONNECTED)
+                .thenReturn(state)
             whenever(mock.getParcelableExtra<BluetoothDevice>(BluetoothDevice.EXTRA_DEVICE))
                 .thenReturn(bluetoothDevice)
         }

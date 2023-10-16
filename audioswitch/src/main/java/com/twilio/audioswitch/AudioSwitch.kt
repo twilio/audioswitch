@@ -130,5 +130,8 @@ class AudioSwitch : AbstractAudioSwitch {
 
     override fun onDeactivate() {
         this.logger.d(TAG_AUDIO_SWITCH, "onDeactivate")
+        if (selectedAudioDevice is BluetoothHeadset) {
+            this.audioDeviceManager.enableBluetoothSco(false)
+        }
     }
 }

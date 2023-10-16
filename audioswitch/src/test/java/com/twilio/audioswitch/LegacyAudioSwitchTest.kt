@@ -519,6 +519,18 @@ class LegacyAudioSwitchTest : BaseTest() {
         }
     }
 
+    @Test
+    fun `deactivate should disable bluetooth sco`() {
+        val audioSwitch = legacyAudioSwitch
+        audioSwitch.start(audioDeviceChangeListener)
+        simulateNewBluetoothHeadsetConnection(audioSwitch.headsetManager)
+        audioSwitch.activate()
+        simulateNewBluetoothHeadsetConnection(audioSwitch.headsetManager, state = BluetoothHeadset.STATE_AUDIO_CONNECTED)
+        audioSwitch.deactivate()
+
+        verify(audioManager, times(1)).stopBluetoothSco()
+    }
+
     private fun simulateNewWiredHeadsetConnection() {
         val intent = mock<Intent> {
             whenever(mock.getIntExtra(INTENT_STATE, STATE_UNPLUGGED))

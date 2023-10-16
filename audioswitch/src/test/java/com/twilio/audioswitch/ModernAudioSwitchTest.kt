@@ -309,7 +309,28 @@ class ModernAudioSwitchTest : BaseTest() {
             listOf(AudioDevice.Earpiece()),
             AudioDevice.Earpiece()
         )
+    }
 
+
+    @Test
+    fun `deactivate should not disable bluetooth sco if not bluetooth headset`() {
+        val audioSwitch = getModernAudioSwitch(setupAudioDeviceScannerMock())
+        audioSwitch.start(audioDeviceChangeListener)
+        audioSwitch.activate()
+        audioSwitch.deactivate()
+
+        verify(audioManager, times(0)).stopBluetoothSco()
+    }
+
+    @Test
+    fun `deactivate should disable bluetooth sco`() {
+        val audioSwitch = getModernAudioSwitch(setupAudioDeviceScannerMock())
+        audioSwitch.start(audioDeviceChangeListener)
+        audioSwitch.onDeviceConnected(AudioDevice.BluetoothHeadset())
+        audioSwitch.activate()
+        audioSwitch.deactivate()
+
+        verify(audioManager, times(1)).stopBluetoothSco()
     }
 
     private fun simulateNewWiredHeadsetConnection() {
