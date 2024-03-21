@@ -6,10 +6,14 @@ import androidx.test.filters.LargeTest
 import com.twilio.audioswitch.AudioDevice.Earpiece
 import com.twilio.audioswitch.AudioDevice.Speakerphone
 import com.twilio.audioswitch.AudioDevice.WiredHeadset
+import com.twilio.audioswitch.bluetooth.BluetoothHeadsetConnectionListener
+import junit.framework.TestCase.assertTrue
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 
 @RunWith(AndroidJUnit4::class)
 @LargeTest
@@ -26,6 +30,29 @@ class AutomaticDeviceSelectionTest : AndroidTestBase() {
         simulateWiredHeadsetSystemIntent(context, wiredHeadsetReceiver)
 
         assertThat(audioSwitch.selectedAudioDevice!! is AudioDevice.BluetoothHeadset, equalTo(true))
+        audioSwitch.stop()
+    }
+
+    @UiThreadTest
+    @Test
+    fun `it_should_notify_callback_when_bluetooth_connects`() {
+        val context = getInstrumentationContext()
+        val bluetoothConnectedLatch = CountDownLatch(1)
+        val bluetoothListener = object : BluetoothHeadsetConnectionListener {
+            override fun onBluetoothHeadsetStateChanged(headsetName: String?, state: Int) {
+                bluetoothConnectedLatch.countDown()
+            }
+
+            override fun onBluetoothHeadsetActivationError() {}
+        }
+        val (audioSwitch, bluetoothHeadsetReceiver, wiredHeadsetReceiver) = setupFakeAudioSwitch(context, bluetoothListener =  bluetoothListener)
+
+        audioSwitch.start { _, _ -> }
+        simulateBluetoothSystemIntent(context, bluetoothHeadsetReceiver)
+        simulateWiredHeadsetSystemIntent(context, wiredHeadsetReceiver)
+
+        assertThat(audioSwitch.selectedAudioDevice!! is AudioDevice.BluetoothHeadset, equalTo(true))
+        assertTrue(bluetoothConnectedLatch.await(5, TimeUnit.SECONDS))
         audioSwitch.stop()
     }
 

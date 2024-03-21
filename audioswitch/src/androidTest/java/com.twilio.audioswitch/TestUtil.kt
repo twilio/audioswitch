@@ -14,6 +14,7 @@ import com.twilio.audioswitch.android.DEVICE_NAME
 import com.twilio.audioswitch.android.FakeBluetoothIntentProcessor
 import com.twilio.audioswitch.android.HEADSET_NAME
 import com.twilio.audioswitch.android.ProductionLogger
+import com.twilio.audioswitch.bluetooth.BluetoothHeadsetConnectionListener
 import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager
 import com.twilio.audioswitch.wired.INTENT_STATE
 import com.twilio.audioswitch.wired.STATE_PLUGGED
@@ -29,6 +30,7 @@ internal fun setupFakeAudioSwitch(
             Earpiece::class.java,
             Speakerphone::class.java,
         ),
+    bluetoothListener: BluetoothHeadsetConnectionListener? = null
 ): Triple<AudioSwitch, BluetoothHeadsetManager, WiredHeadsetReceiver> {
     val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
     val logger = ProductionLogger(true)
@@ -56,6 +58,7 @@ internal fun setupFakeAudioSwitch(
     return Triple(
         AudioSwitch(
             context,
+            bluetoothListener,
             logger,
             {},
             preferredDevicesList,
