@@ -30,7 +30,7 @@ internal fun setupFakeAudioSwitch(
             Earpiece::class.java,
             Speakerphone::class.java,
         ),
-    bluetoothListener: BluetoothHeadsetConnectionListener? = null
+    bluetoothListener: BluetoothHeadsetConnectionListener? = null,
 ): Triple<AudioSwitch, BluetoothHeadsetManager, WiredHeadsetReceiver> {
     val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
     val logger = ProductionLogger(true)

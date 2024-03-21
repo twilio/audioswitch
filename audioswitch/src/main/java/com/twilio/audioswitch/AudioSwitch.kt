@@ -111,13 +111,13 @@ class AudioSwitch {
         bluetoothHeadsetConnectionListener: BluetoothHeadsetConnectionListener? = null,
         loggingEnabled: Boolean = false,
         audioFocusChangeListener: OnAudioFocusChangeListener = OnAudioFocusChangeListener {},
-        preferredDeviceList: List<Class<out AudioDevice>> = defaultPreferredDeviceList
+        preferredDeviceList: List<Class<out AudioDevice>> = defaultPreferredDeviceList,
     ) : this(
         context.applicationContext,
         bluetoothHeadsetConnectionListener,
         ProductionLogger(loggingEnabled),
         audioFocusChangeListener,
-        preferredDeviceList
+        preferredDeviceList,
     )
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
@@ -139,7 +139,7 @@ class AudioSwitch {
             logger,
             BluetoothAdapter.getDefaultAdapter(),
             audioDeviceManager,
-        )
+        ),
     ) {
         this.logger = logger
         this.bluetoothHeadsetConnectionListener = bluetoothHeadsetConnectionListener

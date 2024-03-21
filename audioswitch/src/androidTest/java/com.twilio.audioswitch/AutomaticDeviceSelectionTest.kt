@@ -45,7 +45,7 @@ class AutomaticDeviceSelectionTest : AndroidTestBase() {
 
             override fun onBluetoothHeadsetActivationError() {}
         }
-        val (audioSwitch, bluetoothHeadsetReceiver, wiredHeadsetReceiver) = setupFakeAudioSwitch(context, bluetoothListener =  bluetoothListener)
+        val (audioSwitch, bluetoothHeadsetReceiver, wiredHeadsetReceiver) = setupFakeAudioSwitch(context, bluetoothListener = bluetoothListener)
 
         audioSwitch.start { _, _ -> }
         simulateBluetoothSystemIntent(context, bluetoothHeadsetReceiver)
