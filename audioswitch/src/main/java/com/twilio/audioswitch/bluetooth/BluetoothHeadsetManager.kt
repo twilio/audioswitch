@@ -123,7 +123,7 @@ internal constructor(
                                 "Bluetooth headset $bluetoothDevice connected",
                             )
                             connect()
-                            headsetListener?.onBluetoothHeadsetStateChanged(bluetoothDevice.name)
+                            headsetListener?.onBluetoothHeadsetStateChanged(bluetoothDevice.name, STATE_CONNECTED)
                         }
                         STATE_DISCONNECTED -> {
                             logger.d(
@@ -131,13 +131,13 @@ internal constructor(
                                 "Bluetooth headset $bluetoothDevice disconnected",
                             )
                             disconnect()
-                            headsetListener?.onBluetoothHeadsetStateChanged()
+                            headsetListener?.onBluetoothHeadsetStateChanged(state = STATE_DISCONNECTED)
                         }
                         STATE_AUDIO_CONNECTED -> {
                             logger.d(TAG, "Bluetooth audio connected on device $bluetoothDevice")
                             enableBluetoothScoJob.cancelBluetoothScoJob()
                             headsetState = AudioActivated
-                            headsetListener?.onBluetoothHeadsetStateChanged()
+                            headsetListener?.onBluetoothHeadsetStateChanged(state = STATE_AUDIO_CONNECTED)
                         }
                         STATE_AUDIO_DISCONNECTED -> {
                             logger.d(TAG, "Bluetooth audio disconnected on device $bluetoothDevice")
@@ -150,7 +150,7 @@ internal constructor(
                                 enableBluetoothScoJob.executeBluetoothScoJob()
                             }
 
-                            headsetListener?.onBluetoothHeadsetStateChanged()
+                            headsetListener?.onBluetoothHeadsetStateChanged(state = STATE_AUDIO_DISCONNECTED)
                         }
                         else -> {}
                     }

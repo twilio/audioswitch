@@ -27,6 +27,8 @@ private const val TAG = "AudioSwitch"
  * accessed from a single application thread. Accessing an instance from multiple threads may cause
  * synchronization problems.
  *
+ * @property bluetoothHeadsetConnectionListener Listener to notify if Bluetooth device state has
+ * changed (connect, disconnect, audio connect, audio disconnect) or failed to connect. Null by default.
  * @property loggingEnabled A property to configure AudioSwitch logging behavior. AudioSwitch logging is disabled by
  * default.
  * @property selectedAudioDevice Retrieves the selected [AudioDevice] from [AudioSwitch.selectDevice].
@@ -44,6 +46,7 @@ class AudioSwitch {
     private val mutableAudioDevices = ArrayList<AudioDevice>()
     private var bluetoothHeadsetManager: BluetoothHeadsetManager? = null
     private val preferredDeviceList: List<Class<out AudioDevice>>
+    private var bluetoothHeadsetConnectionListener: BluetoothHeadsetConnectionListener? = null
 
     internal var state: State = STOPPED
     internal enum class State {
@@ -51,13 +54,15 @@ class AudioSwitch {
     }
 
     internal val bluetoothDeviceConnectionListener = object : BluetoothHeadsetConnectionListener {
-        override fun onBluetoothHeadsetStateChanged(headsetName: String?) {
+        override fun onBluetoothHeadsetStateChanged(headsetName: String?, state: Int) {
             enumerateDevices(headsetName)
+            bluetoothHeadsetConnectionListener?.onBluetoothHeadsetStateChanged(headsetName, state)
         }
 
         override fun onBluetoothHeadsetActivationError() {
             if (userSelectedDevice is BluetoothHeadset) userSelectedDevice = null
             enumerateDevices()
+            bluetoothHeadsetConnectionListener?.onBluetoothHeadsetActivationError()
         }
     }
 
@@ -85,6 +90,8 @@ class AudioSwitch {
     /**
      * Constructs a new AudioSwitch instance.
      * - [context] - An Android Context.
+     * - [bluetoothHeadsetConnectionListener] - A listener to notify if Bluetooth device state has
+     * changed (connect, disconnect, audio connect, audio disconnect) or failed to connect. Null by default
      * - [loggingEnabled] - Toggle whether logging is enabled. This argument is false by default.
      * - [audioFocusChangeListener] - A listener that is invoked when the system audio focus is updated.
      * Note that updates are only sent to the listener after [activate] has been called.
@@ -101,19 +108,22 @@ class AudioSwitch {
     @JvmOverloads
     constructor(
         context: Context,
+        bluetoothHeadsetConnectionListener: BluetoothHeadsetConnectionListener? = null,
         loggingEnabled: Boolean = false,
         audioFocusChangeListener: OnAudioFocusChangeListener = OnAudioFocusChangeListener {},
-        preferredDeviceList: List<Class<out AudioDevice>> = defaultPreferredDeviceList,
+        preferredDeviceList: List<Class<out AudioDevice>> = defaultPreferredDeviceList
     ) : this(
         context.applicationContext,
+        bluetoothHeadsetConnectionListener,
         ProductionLogger(loggingEnabled),
         audioFocusChangeListener,
-        preferredDeviceList,
+        preferredDeviceList
     )
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     internal constructor(
         context: Context,
+        bluetoothHeadsetConnectionListener: BluetoothHeadsetConnectionListener?,
         logger: Logger,
         audioFocusChangeListener: OnAudioFocusChangeListener,
         preferredDeviceList: List<Class<out AudioDevice>>,
@@ -129,9 +139,10 @@ class AudioSwitch {
             logger,
             BluetoothAdapter.getDefaultAdapter(),
             audioDeviceManager,
-        ),
+        )
     ) {
         this.logger = logger
+        this.bluetoothHeadsetConnectionListener = bluetoothHeadsetConnectionListener
         this.audioDeviceManager = audioDeviceManager
         this.wiredHeadsetReceiver = wiredHeadsetReceiver
         this.bluetoothHeadsetManager = headsetManager
