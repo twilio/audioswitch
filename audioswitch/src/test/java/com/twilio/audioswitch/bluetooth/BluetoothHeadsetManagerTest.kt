@@ -205,7 +205,7 @@ class BluetoothHeadsetManagerTest : BaseTest() {
         headsetManager.onReceive(context, intent)
 
         val invocationCount = if (isNewDeviceConnected) 1 else 0
-        verify(headsetListener, times(invocationCount)).onBluetoothHeadsetStateChanged(DEVICE_NAME)
+        verify(headsetListener, times(invocationCount)).onBluetoothHeadsetStateChanged(DEVICE_NAME, BluetoothHeadset.STATE_CONNECTED)
     }
 
     @Parameters(method = "parameters")

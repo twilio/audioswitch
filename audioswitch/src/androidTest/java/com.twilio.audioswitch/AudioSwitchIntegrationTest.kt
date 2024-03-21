@@ -87,7 +87,7 @@ class AudioSwitchIntegrationTest : AndroidTestBase() {
             }
         }
         InstrumentationRegistry.getInstrumentation().runOnMainSync {
-            val audioSwitch = AudioSwitch(getTargetContext(), true, audioFocusChangeListener)
+            val audioSwitch = AudioSwitch(getTargetContext(), null, true, audioFocusChangeListener)
             audioSwitch.start { _, _ -> }
             audioSwitch.activate()
         }
@@ -117,7 +117,7 @@ class AudioSwitchIntegrationTest : AndroidTestBase() {
         val audioFocusUtil = AudioFocusUtil(audioManager, audioFocusChangeListener)
         audioFocusUtil.requestFocus()
 
-        val audioSwitch = AudioSwitch(getTargetContext(), true)
+        val audioSwitch = AudioSwitch(getTargetContext(), null, true)
         InstrumentationRegistry.getInstrumentation().runOnMainSync {
             audioSwitch.start { _, _ -> }
             audioSwitch.activate()

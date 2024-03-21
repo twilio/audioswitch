@@ -111,6 +111,7 @@ Multiple connected bluetooth headsets are supported.
   - The library will accurately display the up to date active bluetooth headset within the `AudioSwitch` `availableAudioDevices` and `selectedAudioDevice` functions.
     - Other connected headsets are not stored by the library at this moment.
   - In the event of a failure to connecting audio to a bluetooth headset, the library will revert the selected audio device (this is usually the Earpiece on a phone).
+    - Additionally [BluetoothHeadsetConnectionListener](audioswitch/src/main/java/com/twilio/audioswitch/bluetooth/BluetoothHeadsetConnectionListener.kt) can be provided to AudioSwitch constructor to monitor state changes and connection failures.
   - If a user would like to switch between multiple Bluetooth headsets, then they need to switch the active bluetooth headset from the system Bluetooth settings.
     - The newly activated headset will be propagated to the `AudioSwitch` `availableAudioDevices` and `selectedAudioDevice` functions.
 

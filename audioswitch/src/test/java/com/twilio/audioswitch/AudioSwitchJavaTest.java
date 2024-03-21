@@ -34,6 +34,7 @@ public class AudioSwitchJavaTest extends BaseTest {
         javaAudioSwitch =
                 new AudioSwitch(
                         getContext$audioswitch_debug(),
+                        null,
                         new UnitTestLogger(false),
                         getDefaultAudioFocusChangeListener$audioswitch_debug(),
                         getPreferredDeviceList$audioswitch_debug(),
@@ -130,6 +131,7 @@ public class AudioSwitchJavaTest extends BaseTest {
         javaAudioSwitch =
                 new AudioSwitch(
                         getContext$audioswitch_debug(),
+                        getBluetoothListener$audioswitch_debug(),
                         getLogger$audioswitch_debug(),
                         getDefaultAudioFocusChangeListener$audioswitch_debug(),
                         preferredDeviceList,

@@ -12,6 +12,7 @@ import com.twilio.audioswitch.AudioDevice.Earpiece
 import com.twilio.audioswitch.AudioDevice.Speakerphone
 import com.twilio.audioswitch.AudioDevice.WiredHeadset
 import com.twilio.audioswitch.android.BuildWrapper
+import com.twilio.audioswitch.bluetooth.BluetoothHeadsetConnectionListener
 import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager
 import com.twilio.audioswitch.wired.WiredHeadsetReceiver
 import org.hamcrest.CoreMatchers
@@ -29,6 +30,7 @@ open class BaseTest {
         whenever(mock.bluetoothClass).thenReturn(bluetoothClass)
     }
     internal val context = mock<Context>()
+    internal val bluetoothListener = mock<BluetoothHeadsetConnectionListener>()
     internal val logger = UnitTestLogger()
     internal val audioManager = setupAudioManagerMock()
     internal val bluetoothAdapter = mock<BluetoothAdapter>()
@@ -68,6 +70,7 @@ open class BaseTest {
 
     internal var audioSwitch = AudioSwitch(
         context = context,
+        bluetoothHeadsetConnectionListener = bluetoothListener,
         logger = logger,
         audioDeviceManager = audioDeviceManager,
         wiredHeadsetReceiver = wiredHeadsetReceiver,

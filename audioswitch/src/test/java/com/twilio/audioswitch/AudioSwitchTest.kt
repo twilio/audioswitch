@@ -94,6 +94,7 @@ class AudioSwitchTest : BaseTest() {
     fun `start should not start the HeadsetManager if it is null`() {
         audioSwitch = AudioSwitch(
             context = context,
+            bluetoothHeadsetConnectionListener = bluetoothListener,
             logger = logger,
             audioDeviceManager = audioDeviceManager,
             wiredHeadsetReceiver = wiredHeadsetReceiver,
@@ -201,6 +202,7 @@ class AudioSwitchTest : BaseTest() {
     fun `stop should not stop the BluetoothHeadsetManager if it is null and if transitioning from the started state`() {
         audioSwitch = AudioSwitch(
             context = context,
+            bluetoothHeadsetConnectionListener = bluetoothListener,
             logger = logger,
             audioDeviceManager = audioDeviceManager,
             wiredHeadsetReceiver = wiredHeadsetReceiver,
@@ -219,6 +221,7 @@ class AudioSwitchTest : BaseTest() {
     fun `stop should not stop the BluetoothHeadsetManager if it is null and if transitioning from the activated state`() {
         audioSwitch = AudioSwitch(
             context = context,
+            bluetoothHeadsetConnectionListener = bluetoothListener,
             logger = logger,
             audioDeviceManager = audioDeviceManager,
             wiredHeadsetReceiver = wiredHeadsetReceiver,
@@ -441,6 +444,7 @@ class AudioSwitchTest : BaseTest() {
     fun `constructor should throw an IllegalArgumentException given duplicate preferred devices`() {
         audioSwitch = AudioSwitch(
             context = context,
+            bluetoothHeadsetConnectionListener = bluetoothListener,
             logger = logger,
             audioDeviceManager = audioDeviceManager,
             wiredHeadsetReceiver = wiredHeadsetReceiver,
@@ -460,6 +464,7 @@ class AudioSwitchTest : BaseTest() {
         // Switch selection order so BT isn't automatically selected
         audioSwitch = AudioSwitch(
             context = context,
+            bluetoothHeadsetConnectionListener = bluetoothListener,
             logger = logger,
             audioDeviceManager = audioDeviceManager,
             wiredHeadsetReceiver = wiredHeadsetReceiver,
@@ -501,6 +506,7 @@ class AudioSwitchTest : BaseTest() {
     ) {
         audioSwitch = AudioSwitch(
             context = context,
+            bluetoothHeadsetConnectionListener = bluetoothListener,
             logger = logger,
             audioDeviceManager = audioDeviceManager,
             wiredHeadsetReceiver = wiredHeadsetReceiver,
@@ -525,6 +531,7 @@ class AudioSwitchTest : BaseTest() {
     ) {
         audioSwitch = AudioSwitch(
             context = context,
+            bluetoothHeadsetConnectionListener = bluetoothListener,
             logger = logger,
             audioDeviceManager = audioDeviceManager,
             wiredHeadsetReceiver = wiredHeadsetReceiver,
@@ -550,6 +557,7 @@ class AudioSwitchTest : BaseTest() {
     ) {
         audioSwitch = AudioSwitch(
             context = context,
+            bluetoothHeadsetConnectionListener = bluetoothListener,
             logger = logger,
             audioDeviceManager = audioDeviceManager,
             wiredHeadsetReceiver = wiredHeadsetReceiver,
@@ -574,6 +582,7 @@ class AudioSwitchTest : BaseTest() {
     ) {
         audioSwitch = AudioSwitch(
             context = context,
+            bluetoothHeadsetConnectionListener = bluetoothListener,
             logger = logger,
             audioDeviceManager = audioDeviceManager,
             wiredHeadsetReceiver = wiredHeadsetReceiver,
@@ -609,6 +618,7 @@ class AudioSwitchTest : BaseTest() {
     ) {
         audioSwitch = AudioSwitch(
             context = context,
+            bluetoothHeadsetConnectionListener = bluetoothListener,
             logger = logger,
             audioDeviceManager = audioDeviceManager,
             wiredHeadsetReceiver = wiredHeadsetReceiver,
