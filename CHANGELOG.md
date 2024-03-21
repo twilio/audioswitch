@@ -1,5 +1,11 @@
 # Changelog
 
+### 1.1.10 (March 21, 2024)
+
+Enhancements
+
+- BluetoothHeadsetConnectionListener now can be added to AudioSwitch to notify when bluetooth device has connected or failed to connect.
+
 ### 1.1.9 (July 13, 2023)
 
 Enhancements
