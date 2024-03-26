@@ -1,4 +1,11 @@
 # Changelog
+### 1.1.10 (In Progress)
+
+Enhancements
+
+- Updated gradle version to 8.4
+- Updated gradle plugin to 8.3.1
+
 
 ### 1.1.9 (July 13, 2023)
 
