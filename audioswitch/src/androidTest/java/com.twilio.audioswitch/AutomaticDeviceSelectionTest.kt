@@ -43,6 +43,8 @@ class AutomaticDeviceSelectionTest : AndroidTestBase() {
                 bluetoothConnectedLatch.countDown()
             }
 
+            override fun onBluetoothScoStateChanged(state: Int) {}
+
             override fun onBluetoothHeadsetActivationError() {}
         }
         val (audioSwitch, bluetoothHeadsetReceiver, wiredHeadsetReceiver) = setupFakeAudioSwitch(context, bluetoothListener = bluetoothListener)
