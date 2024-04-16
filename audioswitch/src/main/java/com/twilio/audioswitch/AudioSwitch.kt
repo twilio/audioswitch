@@ -59,6 +59,10 @@ class AudioSwitch {
             bluetoothHeadsetConnectionListener?.onBluetoothHeadsetStateChanged(headsetName, state)
         }
 
+        override fun onBluetoothScoStateChanged(state: Int) {
+            bluetoothHeadsetConnectionListener?.onBluetoothScoStateChanged(state)
+        }
+
         override fun onBluetoothHeadsetActivationError() {
             if (userSelectedDevice is BluetoothHeadset) userSelectedDevice = null
             enumerateDevices()

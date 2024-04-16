@@ -17,6 +17,11 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager.PERMISSION_GRANTED
+import android.media.AudioManager
+import android.media.AudioManager.ACTION_SCO_AUDIO_STATE_UPDATED
+import android.media.AudioManager.SCO_AUDIO_STATE_CONNECTED
+import android.media.AudioManager.SCO_AUDIO_STATE_CONNECTING
+import android.media.AudioManager.SCO_AUDIO_STATE_DISCONNECTED
 import android.os.Handler
 import android.os.Looper
 import androidx.annotation.VisibleForTesting
@@ -131,13 +136,13 @@ internal constructor(
                                 "Bluetooth headset $bluetoothDevice disconnected",
                             )
                             disconnect()
-                            headsetListener?.onBluetoothHeadsetStateChanged(state = STATE_DISCONNECTED)
+                            headsetListener?.onBluetoothHeadsetStateChanged(bluetoothDevice.name, STATE_DISCONNECTED)
                         }
                         STATE_AUDIO_CONNECTED -> {
                             logger.d(TAG, "Bluetooth audio connected on device $bluetoothDevice")
                             enableBluetoothScoJob.cancelBluetoothScoJob()
                             headsetState = AudioActivated
-                            headsetListener?.onBluetoothHeadsetStateChanged(state = STATE_AUDIO_CONNECTED)
+                            headsetListener?.onBluetoothHeadsetStateChanged(bluetoothDevice.name, STATE_AUDIO_CONNECTED)
                         }
                         STATE_AUDIO_DISCONNECTED -> {
                             logger.d(TAG, "Bluetooth audio disconnected on device $bluetoothDevice")
@@ -150,10 +155,45 @@ internal constructor(
                                 enableBluetoothScoJob.executeBluetoothScoJob()
                             }
 
-                            headsetListener?.onBluetoothHeadsetStateChanged(state = STATE_AUDIO_DISCONNECTED)
+                            headsetListener?.onBluetoothHeadsetStateChanged(bluetoothDevice.name, STATE_AUDIO_DISCONNECTED)
                         }
                         else -> {}
                     }
+                }
+            }
+            intent.getIntExtra(AudioManager.EXTRA_SCO_AUDIO_STATE, SCO_AUDIO_STATE_DISCONNECTED).let { state ->
+                when (state) {
+                    SCO_AUDIO_STATE_CONNECTING -> {
+                        logger.d(
+                            TAG,
+                            "Bluetooth SCO connecting",
+                        )
+
+                        headsetListener?.onBluetoothScoStateChanged(
+                            SCO_AUDIO_STATE_CONNECTING,
+                        )
+                    }
+                    SCO_AUDIO_STATE_CONNECTED -> {
+                        logger.d(
+                            TAG,
+                            "Bluetooth SCO connected",
+                        )
+
+                        headsetListener?.onBluetoothScoStateChanged(
+                            SCO_AUDIO_STATE_CONNECTED,
+                        )
+                    }
+                    SCO_AUDIO_STATE_DISCONNECTED -> {
+                        logger.d(
+                            TAG,
+                            "Bluetooth SCO disconnected",
+                        )
+
+                        headsetListener?.onBluetoothScoStateChanged(
+                            SCO_AUDIO_STATE_DISCONNECTED,
+                        )
+                    }
+                    else -> {}
                 }
             }
         }
@@ -176,6 +216,10 @@ internal constructor(
                 context.registerReceiver(
                     this,
                     IntentFilter(ACTION_AUDIO_STATE_CHANGED),
+                )
+                context.registerReceiver(
+                    this,
+                    IntentFilter(ACTION_SCO_AUDIO_STATE_UPDATED),
                 )
                 hasRegisteredReceivers = true
             }
@@ -243,7 +287,7 @@ internal constructor(
     }
 
     private fun isCorrectIntentAction(intentAction: String?) =
-        intentAction == ACTION_CONNECTION_STATE_CHANGED || intentAction == ACTION_AUDIO_STATE_CHANGED
+        intentAction == ACTION_CONNECTION_STATE_CHANGED || intentAction == ACTION_AUDIO_STATE_CHANGED || intentAction == ACTION_SCO_AUDIO_STATE_UPDATED
 
     private fun connect() {
         if (!hasActiveHeadset()) headsetState = Connected
