@@ -205,7 +205,7 @@ class BluetoothHeadsetManagerTest : BaseTest() {
         headsetManager.onReceive(context, intent)
 
         val invocationCount = if (isNewDeviceConnected) 1 else 0
-        verify(headsetListener, times(invocationCount)).onBluetoothHeadsetStateChanged(DEVICE_NAME)
+        verify(headsetListener, times(invocationCount)).onBluetoothHeadsetStateChanged(DEVICE_NAME, BluetoothHeadset.STATE_CONNECTED)
     }
 
     @Parameters(method = "parameters")
@@ -225,15 +225,15 @@ class BluetoothHeadsetManagerTest : BaseTest() {
         headsetManager.onReceive(context, intent)
 
         val invocationCount = if (isDeviceDisconnected) 1 else 0
-        verify(headsetListener, times(invocationCount)).onBluetoothHeadsetStateChanged()
+        verify(headsetListener, times(invocationCount)).onBluetoothHeadsetStateChanged(headsetName = "Bluetooth")
     }
 
     @Test
-    fun `onReceive should not register a new device when an ACL connected event is received with a null bluetooth device`() {
+    fun `onReceive should trigger once for sco disconnect when an ACL connected event is received with a null bluetooth device`() {
         whenever(expectedBluetoothDevice.bluetoothClass).thenReturn(null)
         simulateNewBluetoothHeadsetConnection()
 
-        verifyNoInteractions(headsetListener)
+        verify(headsetListener, times(1)).onBluetoothScoStateChanged(0)
     }
 
     @Test

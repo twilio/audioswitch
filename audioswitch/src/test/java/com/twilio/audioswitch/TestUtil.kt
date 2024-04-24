@@ -43,7 +43,7 @@ internal fun BaseTest.assertBluetoothHeadsetSetup() {
         headsetManager,
         BluetoothProfile.HEADSET,
     )
-    verify(context, times(2)).registerReceiver(eq(headsetManager), isA())
+    verify(context, times(3)).registerReceiver(eq(headsetManager), isA())
 }
 
 internal fun setupPermissionsCheckStrategy() =
