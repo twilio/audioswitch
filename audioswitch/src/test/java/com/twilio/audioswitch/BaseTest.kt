@@ -65,7 +65,6 @@ open class BaseTest {
         bluetoothScoHandler = handler,
         systemClockWrapper = systemClockWrapper,
         headsetProxy = headsetProxy,
-        permissionsRequestStrategy = permissionsStrategyProxy,
     )
 
     internal var audioSwitch = AudioSwitch(
@@ -74,7 +73,6 @@ open class BaseTest {
         logger = logger,
         audioDeviceManager = audioDeviceManager,
         wiredHeadsetReceiver = wiredHeadsetReceiver,
-        headsetManager = headsetManager,
         audioFocusChangeListener = defaultAudioFocusChangeListener,
         preferredDeviceList = preferredDeviceList,
     )

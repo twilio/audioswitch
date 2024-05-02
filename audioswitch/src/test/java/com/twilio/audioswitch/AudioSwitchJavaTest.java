@@ -39,8 +39,7 @@ public class AudioSwitchJavaTest extends BaseTest {
                         getDefaultAudioFocusChangeListener$audioswitch_debug(),
                         getPreferredDeviceList$audioswitch_debug(),
                         getAudioDeviceManager$audioswitch_debug(),
-                        getWiredHeadsetReceiver$audioswitch_debug(),
-                        getHeadsetManager$audioswitch_debug());
+                        getWiredHeadsetReceiver$audioswitch_debug());
     }
 
     @Test
@@ -136,8 +135,7 @@ public class AudioSwitchJavaTest extends BaseTest {
                         getDefaultAudioFocusChangeListener$audioswitch_debug(),
                         preferredDeviceList,
                         getAudioDeviceManager$audioswitch_debug(),
-                        getWiredHeadsetReceiver$audioswitch_debug(),
-                        getHeadsetManager$audioswitch_debug());
+                        getWiredHeadsetReceiver$audioswitch_debug());
 
         startAudioSwitch();
 

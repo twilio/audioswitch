@@ -98,7 +98,6 @@ class AudioSwitchTest : BaseTest() {
             logger = logger,
             audioDeviceManager = audioDeviceManager,
             wiredHeadsetReceiver = wiredHeadsetReceiver,
-            headsetManager = null,
             audioFocusChangeListener = defaultAudioFocusChangeListener,
             preferredDeviceList = preferredDeviceList,
         )
@@ -206,7 +205,6 @@ class AudioSwitchTest : BaseTest() {
             logger = logger,
             audioDeviceManager = audioDeviceManager,
             wiredHeadsetReceiver = wiredHeadsetReceiver,
-            headsetManager = null,
             audioFocusChangeListener = defaultAudioFocusChangeListener,
             preferredDeviceList = preferredDeviceList,
         )
@@ -224,8 +222,6 @@ class AudioSwitchTest : BaseTest() {
             bluetoothHeadsetConnectionListener = bluetoothListener,
             logger = logger,
             audioDeviceManager = audioDeviceManager,
-            wiredHeadsetReceiver = wiredHeadsetReceiver,
-            headsetManager = null,
             audioFocusChangeListener = defaultAudioFocusChangeListener,
             preferredDeviceList = preferredDeviceList,
         )
@@ -448,7 +444,6 @@ class AudioSwitchTest : BaseTest() {
             logger = logger,
             audioDeviceManager = audioDeviceManager,
             wiredHeadsetReceiver = wiredHeadsetReceiver,
-            headsetManager = null,
             audioFocusChangeListener = defaultAudioFocusChangeListener,
             preferredDeviceList = listOf(
                 Speakerphone::class.java,
@@ -468,7 +463,6 @@ class AudioSwitchTest : BaseTest() {
             logger = logger,
             audioDeviceManager = audioDeviceManager,
             wiredHeadsetReceiver = wiredHeadsetReceiver,
-            headsetManager = headsetManager,
             audioFocusChangeListener = defaultAudioFocusChangeListener,
             preferredDeviceList = listOf(
                 Earpiece::class.java,
@@ -510,7 +504,6 @@ class AudioSwitchTest : BaseTest() {
             logger = logger,
             audioDeviceManager = audioDeviceManager,
             wiredHeadsetReceiver = wiredHeadsetReceiver,
-            headsetManager = headsetManager,
             audioFocusChangeListener = defaultAudioFocusChangeListener,
             preferredDeviceList = preferredDeviceList,
         )
@@ -535,7 +528,6 @@ class AudioSwitchTest : BaseTest() {
             logger = logger,
             audioDeviceManager = audioDeviceManager,
             wiredHeadsetReceiver = wiredHeadsetReceiver,
-            headsetManager = headsetManager,
             audioFocusChangeListener = defaultAudioFocusChangeListener,
             preferredDeviceList = preferredDeviceList,
         )
@@ -561,7 +553,6 @@ class AudioSwitchTest : BaseTest() {
             logger = logger,
             audioDeviceManager = audioDeviceManager,
             wiredHeadsetReceiver = wiredHeadsetReceiver,
-            headsetManager = headsetManager,
             audioFocusChangeListener = defaultAudioFocusChangeListener,
             preferredDeviceList = preferredDeviceList,
         )
@@ -586,7 +577,6 @@ class AudioSwitchTest : BaseTest() {
             logger = logger,
             audioDeviceManager = audioDeviceManager,
             wiredHeadsetReceiver = wiredHeadsetReceiver,
-            headsetManager = headsetManager,
             audioFocusChangeListener = defaultAudioFocusChangeListener,
             preferredDeviceList = preferredDeviceList,
         )
@@ -622,7 +612,6 @@ class AudioSwitchTest : BaseTest() {
             logger = logger,
             audioDeviceManager = audioDeviceManager,
             wiredHeadsetReceiver = wiredHeadsetReceiver,
-            headsetManager = headsetManager,
             audioFocusChangeListener = defaultAudioFocusChangeListener,
             preferredDeviceList = preferredDeviceList,
         )
