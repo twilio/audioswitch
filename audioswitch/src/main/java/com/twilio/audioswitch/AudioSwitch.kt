@@ -1,7 +1,9 @@
 package com.twilio.audioswitch
 
+import android.Manifest
 import android.bluetooth.BluetoothAdapter
 import android.content.Context
+import android.content.pm.PackageManager
 import android.media.AudioManager
 import android.media.AudioManager.OnAudioFocusChangeListener
 import androidx.annotation.VisibleForTesting
@@ -20,6 +22,7 @@ import com.twilio.audioswitch.wired.WiredDeviceConnectionListener
 import com.twilio.audioswitch.wired.WiredHeadsetReceiver
 
 private const val TAG = "AudioSwitch"
+private const val PERMISSION_ERROR_MESSAGE = "Bluetooth unsupported, permissions not granted"
 
 /**
  * This class enables developers to enumerate available audio devices and select which device audio
@@ -27,7 +30,7 @@ private const val TAG = "AudioSwitch"
  * accessed from a single application thread. Accessing an instance from multiple threads may cause
  * synchronization problems.
  *
- * @property bluetoothHeadsetConnectionListener Listener to notify if Bluetooth device state has
+ * @property bluetoothHeadsetConnectionListener Requires bluetooth permission. Listener to notify if Bluetooth device state has
  * changed (connect, disconnect, audio connect, audio disconnect) or failed to connect. Null by default.
  * @property loggingEnabled A property to configure AudioSwitch logging behavior. AudioSwitch logging is disabled by
  * default.
@@ -138,19 +141,23 @@ class AudioSwitch {
             audioFocusChangeListener = audioFocusChangeListener,
         ),
         wiredHeadsetReceiver: WiredHeadsetReceiver = WiredHeadsetReceiver(context, logger),
-        headsetManager: BluetoothHeadsetManager? = BluetoothHeadsetManager.newInstance(
-            context,
-            logger,
-            BluetoothAdapter.getDefaultAdapter(),
-            audioDeviceManager,
-        ),
     ) {
         this.logger = logger
         this.bluetoothHeadsetConnectionListener = bluetoothHeadsetConnectionListener
         this.audioDeviceManager = audioDeviceManager
         this.wiredHeadsetReceiver = wiredHeadsetReceiver
-        this.bluetoothHeadsetManager = headsetManager
         this.preferredDeviceList = getPreferredDeviceList(preferredDeviceList)
+        this.bluetoothHeadsetManager = if (checkBluetoothPermission(context)) {
+            BluetoothHeadsetManager.newInstance(
+                context,
+                logger,
+                BluetoothAdapter.getDefaultAdapter(),
+                audioDeviceManager,
+            )
+        } else {
+            logger.w(TAG, PERMISSION_ERROR_MESSAGE)
+            return
+        }
         logger.d(TAG, "AudioSwitch($VERSION)")
         logger.d(TAG, "Preferred device list = ${this.preferredDeviceList.map { it.simpleName }}")
     }
@@ -385,6 +392,24 @@ class AudioSwitch {
         bluetoothHeadsetManager?.stop()
         wiredHeadsetReceiver.stop()
         audioDeviceChangeListener = null
+    }
+
+    private fun checkBluetoothPermission(context: Context): Boolean {
+        return if (context.applicationInfo.targetSdkVersion <= android.os.Build.VERSION_CODES.R ||
+            android.os.Build.VERSION.SDK_INT <= android.os.Build.VERSION_CODES.R
+        ) {
+            PackageManager.PERMISSION_GRANTED == context.checkPermission(
+                Manifest.permission.BLUETOOTH,
+                android.os.Process.myPid(),
+                android.os.Process.myUid(),
+            )
+        } else {
+            PackageManager.PERMISSION_GRANTED == context.checkPermission(
+                Manifest.permission.BLUETOOTH_CONNECT,
+                android.os.Process.myPid(),
+                android.os.Process.myUid(),
+            )
+        }
     }
 
     companion object {
