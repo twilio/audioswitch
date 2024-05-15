@@ -100,6 +100,8 @@ class AudioSwitchTest : BaseTest() {
             wiredHeadsetReceiver = wiredHeadsetReceiver,
             audioFocusChangeListener = defaultAudioFocusChangeListener,
             preferredDeviceList = preferredDeviceList,
+            permissionsCheckStrategy = permissionsStrategyProxy,
+            bluetoothHeadsetManager = null,
         )
 
         audioSwitch.start(audioDeviceChangeListener)
@@ -207,6 +209,8 @@ class AudioSwitchTest : BaseTest() {
             wiredHeadsetReceiver = wiredHeadsetReceiver,
             audioFocusChangeListener = defaultAudioFocusChangeListener,
             preferredDeviceList = preferredDeviceList,
+            permissionsCheckStrategy = permissionsStrategyProxy,
+            bluetoothHeadsetManager = null,
         )
         audioSwitch.start(audioDeviceChangeListener)
         audioSwitch.stop()
@@ -224,6 +228,8 @@ class AudioSwitchTest : BaseTest() {
             audioDeviceManager = audioDeviceManager,
             audioFocusChangeListener = defaultAudioFocusChangeListener,
             preferredDeviceList = preferredDeviceList,
+            permissionsCheckStrategy = permissionsStrategyProxy,
+            bluetoothHeadsetManager = null,
         )
         audioSwitch.start(audioDeviceChangeListener)
         audioSwitch.activate()
@@ -451,6 +457,8 @@ class AudioSwitchTest : BaseTest() {
                 Earpiece::class.java,
                 Speakerphone::class.java,
             ),
+            permissionsCheckStrategy = permissionsStrategyProxy,
+            bluetoothHeadsetManager = headsetManager,
         )
     }
 
@@ -470,7 +478,8 @@ class AudioSwitchTest : BaseTest() {
                 Speakerphone::class.java,
                 AudioDevice.BluetoothHeadset::class.java,
             ),
-
+            permissionsCheckStrategy = permissionsStrategyProxy,
+            bluetoothHeadsetManager = headsetManager,
         )
         val secondBluetoothDevice = mock<BluetoothDevice> {
             whenever(mock.name).thenReturn("$DEVICE_NAME 2")
@@ -506,6 +515,8 @@ class AudioSwitchTest : BaseTest() {
             wiredHeadsetReceiver = wiredHeadsetReceiver,
             audioFocusChangeListener = defaultAudioFocusChangeListener,
             preferredDeviceList = preferredDeviceList,
+            permissionsCheckStrategy = permissionsStrategyProxy,
+            bluetoothHeadsetManager = headsetManager,
         )
 
         audioSwitch.run {
@@ -530,6 +541,8 @@ class AudioSwitchTest : BaseTest() {
             wiredHeadsetReceiver = wiredHeadsetReceiver,
             audioFocusChangeListener = defaultAudioFocusChangeListener,
             preferredDeviceList = preferredDeviceList,
+            permissionsCheckStrategy = permissionsStrategyProxy,
+            bluetoothHeadsetManager = headsetManager,
         )
 
         audioSwitch.run {
@@ -555,6 +568,8 @@ class AudioSwitchTest : BaseTest() {
             wiredHeadsetReceiver = wiredHeadsetReceiver,
             audioFocusChangeListener = defaultAudioFocusChangeListener,
             preferredDeviceList = preferredDeviceList,
+            permissionsCheckStrategy = permissionsStrategyProxy,
+            bluetoothHeadsetManager = headsetManager,
         )
 
         audioSwitch.run {
@@ -579,6 +594,8 @@ class AudioSwitchTest : BaseTest() {
             wiredHeadsetReceiver = wiredHeadsetReceiver,
             audioFocusChangeListener = defaultAudioFocusChangeListener,
             preferredDeviceList = preferredDeviceList,
+            permissionsCheckStrategy = permissionsStrategyProxy,
+            bluetoothHeadsetManager = headsetManager,
         )
 
         audioSwitch.run {
@@ -614,6 +631,8 @@ class AudioSwitchTest : BaseTest() {
             wiredHeadsetReceiver = wiredHeadsetReceiver,
             audioFocusChangeListener = defaultAudioFocusChangeListener,
             preferredDeviceList = preferredDeviceList,
+            permissionsCheckStrategy = permissionsStrategyProxy,
+            bluetoothHeadsetManager = headsetManager,
         )
 
         audioSwitch.run {

@@ -1,9 +1,10 @@
 package com.twilio.audioswitch
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
 import android.content.Context
-import android.content.pm.PackageManager
+import android.content.pm.PackageManager.PERMISSION_GRANTED
 import android.media.AudioManager
 import android.media.AudioManager.OnAudioFocusChangeListener
 import androidx.annotation.VisibleForTesting
@@ -15,6 +16,7 @@ import com.twilio.audioswitch.AudioSwitch.State.ACTIVATED
 import com.twilio.audioswitch.AudioSwitch.State.STARTED
 import com.twilio.audioswitch.AudioSwitch.State.STOPPED
 import com.twilio.audioswitch.android.Logger
+import com.twilio.audioswitch.android.PermissionsCheckStrategy
 import com.twilio.audioswitch.android.ProductionLogger
 import com.twilio.audioswitch.bluetooth.BluetoothHeadsetConnectionListener
 import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager
@@ -50,6 +52,7 @@ class AudioSwitch {
     private var bluetoothHeadsetManager: BluetoothHeadsetManager? = null
     private val preferredDeviceList: List<Class<out AudioDevice>>
     private var bluetoothHeadsetConnectionListener: BluetoothHeadsetConnectionListener? = null
+    private val permissionsRequestStrategy: PermissionsCheckStrategy
 
     internal var state: State = STOPPED
     internal enum class State {
@@ -141,22 +144,25 @@ class AudioSwitch {
             audioFocusChangeListener = audioFocusChangeListener,
         ),
         wiredHeadsetReceiver: WiredHeadsetReceiver = WiredHeadsetReceiver(context, logger),
+        permissionsCheckStrategy: PermissionsCheckStrategy = DefaultPermissionsCheckStrategy(context),
+        bluetoothHeadsetManager: BluetoothHeadsetManager? = BluetoothHeadsetManager.newInstance(
+            context,
+            logger,
+            BluetoothAdapter.getDefaultAdapter(),
+            audioDeviceManager,
+        ),
     ) {
         this.logger = logger
         this.bluetoothHeadsetConnectionListener = bluetoothHeadsetConnectionListener
         this.audioDeviceManager = audioDeviceManager
         this.wiredHeadsetReceiver = wiredHeadsetReceiver
         this.preferredDeviceList = getPreferredDeviceList(preferredDeviceList)
-        this.bluetoothHeadsetManager = if (checkBluetoothPermission(context)) {
-            BluetoothHeadsetManager.newInstance(
-                context,
-                logger,
-                BluetoothAdapter.getDefaultAdapter(),
-                audioDeviceManager,
-            )
+        this.permissionsRequestStrategy = permissionsCheckStrategy
+        this.bluetoothHeadsetManager = if (hasPermissions()) {
+            bluetoothHeadsetManager
         } else {
             logger.w(TAG, PERMISSION_ERROR_MESSAGE)
-            return
+            null
         }
         logger.d(TAG, "AudioSwitch($VERSION)")
         logger.d(TAG, "Preferred device list = ${this.preferredDeviceList.map { it.simpleName }}")
@@ -394,21 +400,28 @@ class AudioSwitch {
         audioDeviceChangeListener = null
     }
 
-    private fun checkBluetoothPermission(context: Context): Boolean {
-        return if (context.applicationInfo.targetSdkVersion <= android.os.Build.VERSION_CODES.R ||
-            android.os.Build.VERSION.SDK_INT <= android.os.Build.VERSION_CODES.R
-        ) {
-            PackageManager.PERMISSION_GRANTED == context.checkPermission(
-                Manifest.permission.BLUETOOTH,
-                android.os.Process.myPid(),
-                android.os.Process.myUid(),
-            )
-        } else {
-            PackageManager.PERMISSION_GRANTED == context.checkPermission(
-                Manifest.permission.BLUETOOTH_CONNECT,
-                android.os.Process.myPid(),
-                android.os.Process.myUid(),
-            )
+    internal fun hasPermissions() = permissionsRequestStrategy.hasPermissions()
+
+    internal class DefaultPermissionsCheckStrategy(private val context: Context) : PermissionsCheckStrategy {
+
+        @SuppressLint("NewApi")
+        override fun hasPermissions(): Boolean {
+            return if (context.applicationInfo.targetSdkVersion <= android.os.Build.VERSION_CODES.R ||
+                android.os.Build.VERSION.SDK_INT <= android.os.Build.VERSION_CODES.R
+            ) {
+                PERMISSION_GRANTED == context.checkPermission(
+                    Manifest.permission.BLUETOOTH,
+                    android.os.Process.myPid(),
+                    android.os.Process.myUid(),
+                )
+            } else {
+                // for android 12/S or newer
+                PERMISSION_GRANTED == context.checkPermission(
+                    Manifest.permission.BLUETOOTH_CONNECT,
+                    android.os.Process.myPid(),
+                    android.os.Process.myUid(),
+                )
+            }
         }
     }
 

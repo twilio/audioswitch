@@ -75,6 +75,8 @@ open class BaseTest {
         wiredHeadsetReceiver = wiredHeadsetReceiver,
         audioFocusChangeListener = defaultAudioFocusChangeListener,
         preferredDeviceList = preferredDeviceList,
+        permissionsCheckStrategy = permissionsStrategyProxy,
+        bluetoothHeadsetManager = headsetManager,
     )
 
     internal fun assertBluetoothHeadsetTeardown() {
