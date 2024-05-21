@@ -355,7 +355,6 @@ class BluetoothHeadsetManagerTest : BaseTest() {
             bluetoothScoHandler = handler,
             systemClockWrapper = systemClockWrapper,
             headsetProxy = headsetProxy,
-            permissionsRequestStrategy = permissionsStrategyProxy,
         )
 
         headsetManager.headsetState = Connected
@@ -476,7 +475,6 @@ class BluetoothHeadsetManagerTest : BaseTest() {
             handler,
             systemClockWrapper,
             headsetProxy = headsetProxy,
-            permissionsRequestStrategy = permissionsStrategyProxy,
         )
     }
 }

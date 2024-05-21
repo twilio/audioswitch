@@ -64,7 +64,7 @@ internal fun setupFakeAudioSwitch(
             preferredDevicesList,
             audioDeviceManager,
             wiredHeadsetReceiver,
-            headsetManager,
+            bluetoothHeadsetManager = headsetManager,
         ),
         headsetManager!!,
         wiredHeadsetReceiver,
