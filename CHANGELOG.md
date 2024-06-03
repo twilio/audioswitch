@@ -6,7 +6,7 @@ Enhancements
 - Updated gradle version to 8.4
 - Updated gradle plugin to 8.3.1
 - BluetoothHeadsetConnectionListener now can be added to AudioSwitch to notify when bluetooth device has connected or failed to connect.
-- BLUETOOTH_CONNECT and/or BLUETOOTH permission have been removed and are optional now. For bluetooth support, permission have to be added to application using 
+- BLUETOOTH_CONNECT and/or BLUETOOTH permission have been removed and are optional now. For bluetooth support, permission have to be added to application using
 AudioSwitch library. If not provided bluetooth device will not appear in the list of available devices and no callbacks will be received for BluetoothHeadsetConnectionListener.
 
 ### 1.1.9 (July 13, 2023)
