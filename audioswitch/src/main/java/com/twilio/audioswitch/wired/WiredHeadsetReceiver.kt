@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import com.twilio.audioswitch.android.Logger
+import com.twilio.audioswitch.android.registerReceiverCompat
 
 private const val TAG = "WiredHeadsetReceiver"
 internal const val STATE_UNPLUGGED = 0
@@ -37,7 +38,13 @@ internal class WiredHeadsetReceiver(
 
     fun start(deviceListener: WiredDeviceConnectionListener) {
         this.deviceListener = deviceListener
-        context.registerReceiver(this, IntentFilter(Intent.ACTION_HEADSET_PLUG))
+        registerReceiverCompat(
+            context,
+            this,
+            IntentFilter(Intent.ACTION_HEADSET_PLUG),
+            true,
+            null,
+        )
     }
 
     fun stop() {
