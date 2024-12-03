@@ -184,12 +184,14 @@ class AudioSwitch {
     }
 
     /**
-     * Starts listening for audio device changes and calls the [listener] upon each change.
+     * Starts listening for audio device changes and calls the [listener] upon each change if listener provided.
      * **Note:** When audio device listening is no longer needed, [AudioSwitch.stop] should be
      * called in order to prevent a memory leak.
      */
-    fun start(listener: AudioDeviceChangeListener) {
-        audioDeviceChangeListener = listener
+    fun start(listener: AudioDeviceChangeListener? = null) {
+        listener?.let {
+            audioDeviceChangeListener = it
+        }
         when (state) {
             STOPPED -> {
                 state = STARTED
@@ -200,6 +202,28 @@ class AudioSwitch {
             else -> {
                 logger.d(TAG, "Redundant start() invocation while already in the started or activated state")
             }
+        }
+    }
+
+    /**
+     * Adds [AudioDeviceChangeListener] and starts listening for audio devices changes and calls
+     */
+    fun addAudioDeviceChangeListener(listener: AudioDeviceChangeListener) {
+        if (audioDeviceChangeListener == null) {
+            audioDeviceChangeListener = listener
+        } else {
+            logger.d(TAG, "Redundant addAudioDeviceChangeListener call, listener already added")
+        }
+    }
+
+    /**
+     * Removes [AudioDeviceChangeListener] and stops listening for audio device changes and calls
+     */
+    fun removeAudioDeviceChangeListener() {
+        if (audioDeviceChangeListener != null) {
+            audioDeviceChangeListener = null
+        } else {
+            logger.d(TAG, "Redundant removeAudioDeviceChangeListener call, AudioDeviceChangeListener is null")
         }
     }
 

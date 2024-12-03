@@ -146,6 +146,31 @@ public class AudioSwitchJavaTest extends BaseTest {
         assertEquals(new Speakerphone(), javaAudioSwitch.getSelectedAudioDevice());
     }
 
+
+    @Test
+    public void shouldAllowAddingAudioDeviceListener() {
+        javaAudioSwitch.start(null);
+        Function2<List<? extends AudioDevice>, AudioDevice, Unit> audioDeviceListener =
+                (audioDevices, audioDevice) -> {
+                    assertFalse(audioDevices.isEmpty());
+                    assertNotNull(audioDevice);
+                    return Unit.INSTANCE;
+                };
+        javaAudioSwitch.addAudioDeviceChangeListener(audioDeviceListener);
+    }
+
+    @Test
+    public void shouldAllowRemovingAudioDeviceListener() {
+        Function2<List<? extends AudioDevice>, AudioDevice, Unit> audioDeviceListener =
+                (audioDevices, audioDevice) -> {
+                    assertFalse(audioDevices.isEmpty());
+                    assertNotNull(audioDevice);
+                    return Unit.INSTANCE;
+                };
+        javaAudioSwitch.start(audioDeviceListener);
+        javaAudioSwitch.removeAudioDeviceChangeListener();
+    }
+
     private void startAudioSwitch() {
         Function2<List<? extends AudioDevice>, AudioDevice, Unit> audioDeviceListener =
                 (audioDevices, audioDevice) -> {

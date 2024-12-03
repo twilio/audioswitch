@@ -69,6 +69,38 @@ class AudioSwitchTest : BaseTest() {
     }
 
     @Test
+    fun `start can be called without audio device change listener`() {
+        audioSwitch.start()
+
+        assertThat(audioSwitch.state, equalTo(STARTED))
+        verifyNoInteractions(audioDeviceChangeListener)
+    }
+
+    @Test
+    fun `should be able to add audio device change listener`() {
+        audioSwitch.start()
+        audioSwitch.addAudioDeviceChangeListener(audioDeviceChangeListener)
+        audioSwitch.selectDevice(Speakerphone())
+        verify(audioDeviceChangeListener).invoke(
+            listOf(Earpiece(), Speakerphone()),
+            Speakerphone(),
+        )
+    }
+
+    @Test
+    fun `should be able to remove audio device change listener`() {
+        audioSwitch.start(audioDeviceChangeListener)
+        audioSwitch.removeAudioDeviceChangeListener()
+        audioSwitch.selectDevice(Speakerphone())
+        audioSwitch.selectDevice(Earpiece())
+        audioSwitch.selectDevice(Speakerphone())
+        verify(audioDeviceChangeListener, times(1)).invoke(
+            listOf(Earpiece(), Speakerphone()),
+            Earpiece(),
+        )
+    }
+
+    @Test
     fun `start should cache the default audio devices and the default selected audio device`() {
         audioSwitch.start(audioDeviceChangeListener)
 
