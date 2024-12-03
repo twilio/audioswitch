@@ -146,7 +146,6 @@ public class AudioSwitchJavaTest extends BaseTest {
         assertEquals(new Speakerphone(), javaAudioSwitch.getSelectedAudioDevice());
     }
 
-
     @Test
     public void shouldAllowAddingAudioDeviceListener() {
         javaAudioSwitch.start(null);
