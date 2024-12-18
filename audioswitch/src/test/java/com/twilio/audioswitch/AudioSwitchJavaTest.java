@@ -155,7 +155,7 @@ public class AudioSwitchJavaTest extends BaseTest {
                     assertNotNull(audioDevice);
                     return Unit.INSTANCE;
                 };
-        javaAudioSwitch.addAudioDeviceChangeListener(audioDeviceListener);
+        javaAudioSwitch.setAudioDeviceChangeListener(audioDeviceListener);
     }
 
     @Test
@@ -167,7 +167,7 @@ public class AudioSwitchJavaTest extends BaseTest {
                     return Unit.INSTANCE;
                 };
         javaAudioSwitch.start(audioDeviceListener);
-        javaAudioSwitch.removeAudioDeviceChangeListener();
+        javaAudioSwitch.setAudioDeviceChangeListener(null);
     }
 
     private void startAudioSwitch() {

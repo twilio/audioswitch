@@ -79,7 +79,7 @@ class AudioSwitchTest : BaseTest() {
     @Test
     fun `should be able to add audio device change listener`() {
         audioSwitch.start()
-        audioSwitch.addAudioDeviceChangeListener(audioDeviceChangeListener)
+        audioSwitch.setAudioDeviceChangeListener(audioDeviceChangeListener)
         audioSwitch.selectDevice(Speakerphone())
         verify(audioDeviceChangeListener).invoke(
             listOf(Earpiece(), Speakerphone()),
@@ -90,7 +90,7 @@ class AudioSwitchTest : BaseTest() {
     @Test
     fun `should be able to remove audio device change listener`() {
         audioSwitch.start(audioDeviceChangeListener)
-        audioSwitch.removeAudioDeviceChangeListener()
+        audioSwitch.setAudioDeviceChangeListener(null)
         audioSwitch.selectDevice(Speakerphone())
         audioSwitch.selectDevice(Earpiece())
         audioSwitch.selectDevice(Speakerphone())

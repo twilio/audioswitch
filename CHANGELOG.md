@@ -4,7 +4,7 @@
 Enhancements
 
 - AudioDeviceChangeListener is now optional parameter when calling `AudioSwitch.start(listener: AudioDeviceChangeListener? = null)`
-- Added `AudioSwitch.addAudioDeviceChangeListener(listener: AudioDeviceChangeListener)` and `AudioSwitch.removeAudioDeviceChangeListener()`
+- Added `AudioSwitch.setAudioDeviceChangeListener(listener: AudioDeviceChangeListener?)`
 
 ### 1.2.0 (June 3, 2024)
 

@@ -206,25 +206,11 @@ class AudioSwitch {
     }
 
     /**
-     * Adds [AudioDeviceChangeListener] and starts listening for audio devices changes and calls
+     * Adds [AudioDeviceChangeListener] and starts listening for audio devices changes and calls,
+     * or null to stop listening for audio device changes.
      */
-    fun addAudioDeviceChangeListener(listener: AudioDeviceChangeListener) {
-        if (audioDeviceChangeListener == null) {
-            audioDeviceChangeListener = listener
-        } else {
-            logger.d(TAG, "Redundant addAudioDeviceChangeListener call, listener already added")
-        }
-    }
-
-    /**
-     * Removes [AudioDeviceChangeListener] and stops listening for audio device changes and calls
-     */
-    fun removeAudioDeviceChangeListener() {
-        if (audioDeviceChangeListener != null) {
-            audioDeviceChangeListener = null
-        } else {
-            logger.d(TAG, "Redundant removeAudioDeviceChangeListener call, AudioDeviceChangeListener is null")
-        }
+    fun setAudioDeviceChangeListener(listener: AudioDeviceChangeListener?) {
+        audioDeviceChangeListener = listener
     }
 
     /**
