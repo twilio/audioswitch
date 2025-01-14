@@ -5,6 +5,7 @@ Enhancements
 
 - AudioDeviceChangeListener is now optional parameter when calling `AudioSwitch.start(listener: AudioDeviceChangeListener? = null)`
 - Added `AudioSwitch.setAudioDeviceChangeListener(listener: AudioDeviceChangeListener?)`
+- BluetoothHeadsetManager now checks for permissions every time it is called, creates an instance if null and permissions granted
 
 ### 1.2.0 (June 3, 2024)
 
