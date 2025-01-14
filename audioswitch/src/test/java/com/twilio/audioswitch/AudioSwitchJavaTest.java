@@ -41,6 +41,7 @@ public class AudioSwitchJavaTest extends BaseTest {
                         getAudioDeviceManager$audioswitch_debug(),
                         getWiredHeadsetReceiver$audioswitch_debug(),
                         getPermissionsStrategyProxy$audioswitch_debug(),
+                        getBluetoothManager$audioswitch_debug(),
                         getHeadsetManager$audioswitch_debug());
     }
 
@@ -139,6 +140,7 @@ public class AudioSwitchJavaTest extends BaseTest {
                         getAudioDeviceManager$audioswitch_debug(),
                         getWiredHeadsetReceiver$audioswitch_debug(),
                         getPermissionsStrategyProxy$audioswitch_debug(),
+                        getBluetoothManager$audioswitch_debug(),
                         getHeadsetManager$audioswitch_debug());
 
         startAudioSwitch();

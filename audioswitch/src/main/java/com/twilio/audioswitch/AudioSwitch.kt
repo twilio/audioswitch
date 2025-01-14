@@ -3,6 +3,7 @@ package com.twilio.audioswitch
 import android.Manifest
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothManager
 import android.content.Context
 import android.content.pm.PackageManager.PERMISSION_GRANTED
 import android.media.AudioManager
@@ -40,7 +41,7 @@ private const val PERMISSION_ERROR_MESSAGE = "Bluetooth unsupported, permissions
  * @property availableAudioDevices Retrieves the current list of available [AudioDevice]s.
 **/
 class AudioSwitch {
-
+    private val context: Context
     private var logger: Logger = ProductionLogger()
     private val audioDeviceManager: AudioDeviceManager
     private val wiredHeadsetReceiver: WiredHeadsetReceiver
@@ -145,13 +146,15 @@ class AudioSwitch {
         ),
         wiredHeadsetReceiver: WiredHeadsetReceiver = WiredHeadsetReceiver(context, logger),
         permissionsCheckStrategy: PermissionsCheckStrategy = DefaultPermissionsCheckStrategy(context),
+        bluetoothManager: BluetoothManager? = context.getSystemService(Context.BLUETOOTH_SERVICE) as? BluetoothManager,
         bluetoothHeadsetManager: BluetoothHeadsetManager? = BluetoothHeadsetManager.newInstance(
             context,
             logger,
-            BluetoothAdapter.getDefaultAdapter(),
+            bluetoothManager?.adapter,
             audioDeviceManager,
         ),
     ) {
+        this.context = context
         this.logger = logger
         this.bluetoothHeadsetConnectionListener = bluetoothHeadsetConnectionListener
         this.audioDeviceManager = audioDeviceManager
@@ -194,7 +197,7 @@ class AudioSwitch {
             STOPPED -> {
                 state = STARTED
                 enumerateDevices()
-                bluetoothHeadsetManager?.start(bluetoothDeviceConnectionListener)
+                bluetoothHeadsetManager.instance()?.start(bluetoothDeviceConnectionListener)
                 wiredHeadsetReceiver.start(wiredDeviceConnectionListener)
             }
             else -> {
@@ -253,7 +256,7 @@ class AudioSwitch {
         when (state) {
             ACTIVATED -> {
                 state = STARTED
-                bluetoothHeadsetManager?.deactivate()
+                bluetoothHeadsetManager.instance()?.deactivate()
 
                 // Restore stored audio state
                 audioDeviceManager.restoreAudioState()
@@ -284,15 +287,15 @@ class AudioSwitch {
         when (audioDevice) {
             is BluetoothHeadset -> {
                 audioDeviceManager.enableSpeakerphone(false)
-                bluetoothHeadsetManager?.activate()
+                bluetoothHeadsetManager.instance()?.activate()
             }
             is Earpiece, is WiredHeadset -> {
                 audioDeviceManager.enableSpeakerphone(false)
-                bluetoothHeadsetManager?.deactivate()
+                bluetoothHeadsetManager.instance()?.deactivate()
             }
             is Speakerphone -> {
                 audioDeviceManager.enableSpeakerphone(true)
-                bluetoothHeadsetManager?.deactivate()
+                bluetoothHeadsetManager.instance()?.deactivate()
             }
         }
     }
@@ -323,7 +326,7 @@ class AudioSwitch {
              * be the next valid device in the list.
              */
             if (firstAudioDevice is BluetoothHeadset &&
-                bluetoothHeadsetManager?.hasActivationError() == true
+                bluetoothHeadsetManager.instance()?.hasActivationError() == true
             ) {
                 mutableAudioDevices[1]
             } else {
@@ -355,7 +358,7 @@ class AudioSwitch {
                  * headset name received from the ACTION_ACL_CONNECTED intent needs to be passed into this
                  * function.
                  */
-                    bluetoothHeadsetManager?.getHeadset(bluetoothHeadsetName)?.let {
+                    bluetoothHeadsetManager.instance()?.getHeadset(bluetoothHeadsetName)?.let {
                         mutableAudioDevices.add(it)
                     }
                 }
@@ -395,9 +398,22 @@ class AudioSwitch {
 
     private fun closeListeners() {
         state = STOPPED
-        bluetoothHeadsetManager?.stop()
+        bluetoothHeadsetManager.instance()?.stop()
         wiredHeadsetReceiver.stop()
         audioDeviceChangeListener = null
+    }
+
+    private fun BluetoothHeadsetManager?.instance(): BluetoothHeadsetManager? {
+        if (this == null && hasPermissions()) {
+            val bluetoothManager = context.getSystemService(Context.BLUETOOTH_SERVICE) as? BluetoothManager
+            return BluetoothHeadsetManager.newInstance(
+                context,
+                logger,
+                bluetoothManager?.adapter,
+                audioDeviceManager,
+            )
+        }
+        return this
     }
 
     internal fun hasPermissions() = permissionsRequestStrategy.hasPermissions()
