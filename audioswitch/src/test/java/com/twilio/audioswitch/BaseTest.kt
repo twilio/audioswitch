@@ -4,6 +4,7 @@ import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothClass
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothHeadset
+import android.bluetooth.BluetoothManager
 import android.bluetooth.BluetoothProfile
 import android.content.Context
 import android.content.Intent
@@ -33,7 +34,9 @@ open class BaseTest {
     internal val bluetoothListener = mock<BluetoothHeadsetConnectionListener>()
     internal val logger = UnitTestLogger()
     internal val audioManager = setupAudioManagerMock()
+    internal val bluetoothManager = mock<BluetoothManager>()
     internal val bluetoothAdapter = mock<BluetoothAdapter>()
+
     internal val audioDeviceChangeListener = mock<AudioDeviceChangeListener>()
     internal val buildWrapper = mock<BuildWrapper>()
     internal val audioFocusRequest = mock<AudioFocusRequestWrapper>()
@@ -76,6 +79,7 @@ open class BaseTest {
         audioFocusChangeListener = defaultAudioFocusChangeListener,
         preferredDeviceList = preferredDeviceList,
         permissionsCheckStrategy = permissionsStrategyProxy,
+        bluetoothManager = bluetoothManager,
         bluetoothHeadsetManager = headsetManager,
     )
 
