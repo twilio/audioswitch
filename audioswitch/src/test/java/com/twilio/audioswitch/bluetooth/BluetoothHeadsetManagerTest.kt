@@ -39,6 +39,7 @@ class BluetoothHeadsetManagerTest : BaseTest() {
     @Before
     fun setUp() {
         initializeManagerWithMocks()
+        whenever(context.applicationInfo).thenReturn(applicationInfo)
     }
 
     @Test

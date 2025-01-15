@@ -33,6 +33,7 @@ import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.isA
+import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
@@ -49,6 +50,7 @@ class AudioSwitchTest : BaseTest() {
     @Before
     fun setUp() {
         whenever(context.packageManager).thenReturn(packageManager)
+        whenever(context.applicationInfo).thenReturn(applicationInfo)
     }
 
     @Test
@@ -58,7 +60,7 @@ class AudioSwitchTest : BaseTest() {
         assertBluetoothHeadsetSetup()
 
         assertThat(wiredHeadsetReceiver.deviceListener, equalTo(audioSwitch.wiredDeviceConnectionListener))
-        verify(context).registerReceiver(eq(wiredHeadsetReceiver), isA())
+        verify(context).registerReceiver(eq(wiredHeadsetReceiver), isA(), isNull(), isNull())
     }
 
     @Test
