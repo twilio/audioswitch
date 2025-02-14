@@ -5,7 +5,7 @@
 An Android audio management library for real-time communication apps.
 
 ![video-app-screenshots](images/audioswitch-logo.png)
-
+11
 ## Features
 
 - [x] Manage [audio focus](https://developer.android.com/guide/topics/media-apps/audio-focus) for typical VoIP and Video conferencing use cases.
