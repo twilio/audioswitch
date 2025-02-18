@@ -1,5 +1,6 @@
 package com.twilio.audioswitch.bluetooth
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothClass
@@ -20,6 +21,7 @@ import android.media.AudioManager.ACTION_SCO_AUDIO_STATE_UPDATED
 import android.media.AudioManager.SCO_AUDIO_STATE_CONNECTED
 import android.media.AudioManager.SCO_AUDIO_STATE_CONNECTING
 import android.media.AudioManager.SCO_AUDIO_STATE_DISCONNECTED
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import androidx.annotation.VisibleForTesting
@@ -30,6 +32,7 @@ import com.twilio.audioswitch.android.BluetoothIntentProcessor
 import com.twilio.audioswitch.android.BluetoothIntentProcessorImpl
 import com.twilio.audioswitch.android.Logger
 import com.twilio.audioswitch.android.SystemClockWrapper
+import com.twilio.audioswitch.android.registerReceiverCompat
 import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager.HeadsetState.AudioActivated
 import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager.HeadsetState.AudioActivating
 import com.twilio.audioswitch.bluetooth.BluetoothHeadsetManager.HeadsetState.AudioActivationError
@@ -204,17 +207,33 @@ internal constructor(
             BluetoothProfile.HEADSET,
         )
         if (!hasRegisteredReceivers) {
-            context.registerReceiver(
+            val broadcastPermission = if (context.applicationInfo.targetSdkVersion <= Build.VERSION_CODES.R ||
+                Build.VERSION.SDK_INT <= Build.VERSION_CODES.R
+            ) {
+                Manifest.permission.BLUETOOTH
+            } else {
+                Manifest.permission.BLUETOOTH_CONNECT
+            }
+            registerReceiverCompat(
+                context,
                 this,
                 IntentFilter(ACTION_CONNECTION_STATE_CHANGED),
+                true,
+                broadcastPermission,
             )
-            context.registerReceiver(
+            registerReceiverCompat(
+                context,
                 this,
                 IntentFilter(ACTION_AUDIO_STATE_CHANGED),
+                true,
+                broadcastPermission,
             )
-            context.registerReceiver(
+            registerReceiverCompat(
+                context,
                 this,
                 IntentFilter(ACTION_SCO_AUDIO_STATE_UPDATED),
+                true,
+                broadcastPermission,
             )
             hasRegisteredReceivers = true
         }

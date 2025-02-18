@@ -11,6 +11,7 @@ import org.junit.Assert.fail
 import org.junit.Test
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.isA
+import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -92,7 +93,7 @@ class WiredHeadsetReceiverTest {
     fun `start should register the broadcast receiver`() {
         wiredHeadsetReceiver.start(wiredDeviceConnectionListener)
 
-        verify(context).registerReceiver(eq(wiredHeadsetReceiver), isA())
+        verify(context).registerReceiver(eq(wiredHeadsetReceiver), isA(), isNull(), isNull())
     }
 
     @Test

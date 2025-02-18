@@ -7,6 +7,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import com.twilio.audioswitch.AudioDevice.BluetoothHeadset;
 import com.twilio.audioswitch.AudioDevice.Earpiece;
@@ -26,11 +27,13 @@ import org.mockito.junit.MockitoJUnitRunner;
 public class AudioSwitchJavaTest extends BaseTest {
     private AudioSwitch javaAudioSwitch;
     @Mock PackageManager packageManager;
+    @Mock ApplicationInfo applicationInfo;
 
     @Before
     public void setUp() {
         when(packageManager.hasSystemFeature(any())).thenReturn(true);
         when(getContext$audioswitch_debug().getPackageManager()).thenReturn(packageManager);
+        when(getContext$audioswitch_debug().getApplicationInfo()).thenReturn(applicationInfo);
         javaAudioSwitch =
                 new AudioSwitch(
                         getContext$audioswitch_debug(),

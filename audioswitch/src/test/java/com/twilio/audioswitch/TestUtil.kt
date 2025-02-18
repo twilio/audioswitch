@@ -9,6 +9,7 @@ import com.twilio.audioswitch.bluetooth.BluetoothScoJob
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.isA
+import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
@@ -43,7 +44,7 @@ internal fun BaseTest.assertBluetoothHeadsetSetup() {
         headsetManager,
         BluetoothProfile.HEADSET,
     )
-    verify(context, times(3)).registerReceiver(eq(headsetManager), isA())
+    verify(context, times(3)).registerReceiver(eq(headsetManager), isA(), isA(), isNull())
 }
 
 internal fun setupPermissionsCheckStrategy() =
