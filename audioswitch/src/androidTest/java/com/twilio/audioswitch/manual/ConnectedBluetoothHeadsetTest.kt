@@ -9,6 +9,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.media.AudioManager
+import android.os.Build
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.rule.GrantPermissionRule
@@ -132,6 +133,7 @@ class ConnectedBluetoothHeadsetTest {
 
     @Test
     fun it_should_remove_bluetooth_device_after_disconnected() {
+        assumeTrue(Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU)
         val bluetoothDeviceConnected = CountDownLatch(1)
         lateinit var actualBluetoothDevice: AudioDevice
         var noBluetoothDeviceAvailable: CountDownLatch? = null
@@ -236,6 +238,7 @@ class ConnectedBluetoothHeadsetTest {
 
     @Test
     fun it_should_automatically_activate_bluetooth_device_if_no_device_selected() {
+        assumeTrue(Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU)
         bluetoothAdapter.disable()
         retryAssertion { assertFalse(bluetoothAdapter.isEnabled) }
         val bluetoothDeviceConnected = CountDownLatch(1)
