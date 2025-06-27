@@ -439,7 +439,7 @@ class AudioSwitch {
         audioDeviceChangeListener = null
     }
 
-    private fun getBluetoothHeadsetManager() : BluetoothHeadsetManager? {
+    private fun getBluetoothHeadsetManager(): BluetoothHeadsetManager? {
         if (bluetoothHeadsetManager == null && hasPermissions()) {
             val bluetoothManager = context.getSystemService(Context.BLUETOOTH_SERVICE) as? BluetoothManager
             bluetoothHeadsetManager = BluetoothHeadsetManager.newInstance(
