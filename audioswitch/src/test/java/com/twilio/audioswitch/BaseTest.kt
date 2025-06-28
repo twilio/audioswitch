@@ -1,5 +1,6 @@
 package com.twilio.audioswitch
 
+import android.app.Application
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothClass
 import android.bluetooth.BluetoothDevice
@@ -30,7 +31,10 @@ open class BaseTest {
         whenever(mock.name).thenReturn(DEVICE_NAME)
         whenever(mock.bluetoothClass).thenReturn(bluetoothClass)
     }
-    internal val context = mock<Context>()
+    internal val application = mock<Application>()
+    internal val context = mock<Context>() {
+        whenever(mock.applicationContext).thenReturn(application)
+    }
     internal val bluetoothListener = mock<BluetoothHeadsetConnectionListener>()
     internal val logger = UnitTestLogger()
     internal val audioManager = setupAudioManagerMock()
