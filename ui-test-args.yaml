@@ -4,9 +4,9 @@ integration-tests:
   app: audioswitch/ftl/app-debug.apk
   test: audioswitch/build/outputs/apk/androidTest/debug/audioswitch-debug-androidTest.apk
   device:
-    - {model: griffin, version: 24}
-    - {model: starqlteue, version: 26}
+    - {model: austin, version: 33}
+    - {model: starlte, version: 29}
     - {model: crownqlteue, version: 29}
     - {model: cactus, version: 27}
-    - {model: q2q, version: 31}
+    - {model: q4q, version: 33}
     - {model: redfin, version: 30}
