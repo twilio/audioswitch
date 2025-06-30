@@ -1,5 +1,9 @@
 # Changelog
-### 1.2.2 (In Progress)
+### 1.2.3 (In Progress)
+
+### 1.2.2 (Jun 30, 20205)
+
+- Internal test release, no changes
 
 ### 1.2.1 (Jun 30, 20205)
 
