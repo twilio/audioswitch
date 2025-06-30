@@ -15,10 +15,10 @@ buildscript {
             project.property("signing.password") : '')
     ext["signing.secretKeyRingFile"] = (project.hasProperty('signing.secretKeyRingFile') ?
             project.property("signing.secretKeyRingFile") : '')
-    ext["ossrhUsername"] = (project.hasProperty('ossrhUsername') ?
-            project.property("ossrhUsername") : '')
-    ext["ossrhPassword"] = (project.hasProperty('ossrhPassword') ?
-            project.property("ossrhPassword") : '')
+    ext["mavenCenteralUsername"] = (project.hasProperty('mavenCenteralUsername') ?
+            project.property("mavenCenteralUsername") : '')
+    ext["mavenCenteralPassword"] = (project.hasProperty('mavenCenteralPassword') ?
+            project.property("mavenCenteralPassword") : '')
     ext["sonatypeStagingProfileId"] = (project.hasProperty('sonatypeStagingProfileId') ?
             project.property("sonatypeStagingProfileId") : '')
 
@@ -66,7 +66,7 @@ buildscript {
 plugins {
     id "com.diffplug.spotless" version '6.19.0'
     id "org.jetbrains.dokka" version "$dokka_version"
-    id "io.github.gradle-nexus.publish-plugin" version "1.0.0"
+    id "io.github.gradle-nexus.publish-plugin" version '2.0.0'
     id "maven-publish"
 }
 apply plugin: "com.diffplug.spotless"
@@ -99,15 +99,12 @@ allprojects {
 nexusPublishing {
     repositories {
         sonatype {
-            username = ossrhUsername
-            password = ossrhPassword
+            username = mavenCenteralUsername
+            password = mavenCenteralPassword
+            nexusUrl = uri("https://ossrh-staging-api.central.sonatype.com/service/local/")
             stagingProfileId = sonatypeStagingProfileId
-            useStaging = !isPreRelease
         }
     }
-
-    clientTimeout = Duration.ofSeconds(300)
-    connectTimeout = Duration.ofSeconds(60)
 }
 
 /*
@@ -238,8 +235,8 @@ task sonatypeAudioSwitchReleaseUpload(type: RootGradleBuild) {
             'signing.keyId': "${getPropertyValue("SIGNING_KEY_ID")}",
             'signing.password' : "${getPropertyValue("SIGNING_PASSWORD")}",
             'signing.secretKeyRingFile' : "${getPropertyValue("SIGNING_SECRET_KEY_RING_FILE")}",
-            'ossrhUsername' : "${getPropertyValue("OSSRH_USERNAME")}",
-            'ossrhPassword' : "${getPropertyValue("OSSRH_PASSWORD")}",
+            'mavenCenteralUsername' : "${getPropertyValue("MAVEN_CENTERAL_TOKEN_USERNAME")}",
+            'mavenCenteralPassword' : "${getPropertyValue("MAVEN_CENTERAL_TOKEN_PASSWORD")}",
             'sonatypeStagingProfileId' : "${getPropertyValue("SONATYPE_STAGING_PROFILE_ID")}"
     ]
 }

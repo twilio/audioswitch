@@ -7,12 +7,6 @@ parameters:
     type: boolean
     default: true
 
-  # this flag allows you to publish a snapshot from any branch, using a standalone workflow
-  enable-publish-snapshot-workflow:
-    description: "enables the standalone workflow to build and publish a snapshot from any branch"
-    type: boolean
-    default: false
-
 aliases:
   - &workspace
       ~/audioswitch
@@ -27,12 +21,6 @@ aliases:
           - /^\d+\.\d+\.\d+$/
       branches:
         ignore: /.*/
-
-  - &snapshot-filter
-    filters:
-      branches:
-        only:
-          - master
 
 commands:
   restore_gradle_cache:
@@ -76,16 +64,11 @@ commands:
 
   publish_to_sonatype:
     description: Publish to Sonatype Repository
-    parameters:
-      pre-release:
-        description: If true, publish a pre-release, otherwise publish a release
-        type: boolean
     steps:
       - run:
-          name: Publish AudioSwitch <<# parameters.pre-release >> snapshot <</ parameters.pre-release >><<^ parameters.pre-release >> release <</ parameters.pre-release >>
+          name: Publish AudioSwitch release
           command: |
-            ./gradlew -q sonatypeAudioSwitchReleaseUpload \
-            -PpreRelease=<< parameters.pre-release >>
+            ./gradlew -q sonatypeAudioSwitchReleaseUpload
 
 executors:
   build-executor:
@@ -168,18 +151,6 @@ jobs:
             gcloud firebase test android run --use-orchestrator --environment-variables clearPackageData=true --no-record-video --project video-app-79418
             ui-test-args.yaml:integration-tests
 
-  publish-pre-release:
-    executor: build-executor
-    steps:
-      - checkout
-      - attach_workspace:
-          at: *workspace
-      - restore_gradle_cache
-      - install_signing_key
-      - publish_to_sonatype:
-          pre-release: true
-      - save_gradle_cache
-
   publish-release:
     executor: build-executor
     steps:
@@ -188,8 +159,7 @@ jobs:
           at: *workspace
       - restore_gradle_cache
       - install_signing_key
-      - publish_to_sonatype:
-          pre-release: false
+      - publish_to_sonatype
       - save_gradle_cache
 
   bump-version:
@@ -219,8 +189,8 @@ jobs:
       - save_gradle_cache
 
 workflows:
-  # Default workflow. Triggered by all commits. Runs checks and tests on all branches. For master, also publishes a snapshot.
-  build-test-publish:
+  # Default workflow. Triggered by all commits. Runs checks and tests on all branches.
+  build-test:
     when: << pipeline.parameters.enable-default-workflow >>
     jobs:
       - lint
@@ -236,11 +206,6 @@ workflows:
             - build-audioswitch
             - lint
             - check-format
-      - publish-pre-release:
-          <<: *snapshot-filter
-          requires:
-            - unit-tests
-            - integration-tests
 
   # Workflow to publish a release. Triggered by new git tags that match a version number, e.g. '1.2.3'.
   release:
@@ -255,9 +220,3 @@ workflows:
           <<: *release-filter
           requires:
             - publish-docs
-
-  # Workflow to explicitly build and publish a snapshot. Triggered manually by setting the parameter to true.
-  publish-snapshot:
-    when: << pipeline.parameters.enable-publish-snapshot-workflow >>
-    jobs:
-      - publish-pre-release
