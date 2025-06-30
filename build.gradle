@@ -15,10 +15,10 @@ buildscript {
             project.property("signing.password") : '')
     ext["signing.secretKeyRingFile"] = (project.hasProperty('signing.secretKeyRingFile') ?
             project.property("signing.secretKeyRingFile") : '')
-    ext["ossrhUsername"] = (project.hasProperty('ossrhUsername') ?
-            project.property("ossrhUsername") : '')
-    ext["ossrhPassword"] = (project.hasProperty('ossrhPassword') ?
-            project.property("ossrhPassword") : '')
+    ext["mavenCenteralUsername"] = (project.hasProperty('mavenCenteralUsername') ?
+            project.property("mavenCenteralUsername") : '')
+    ext["mavenCenteralPassword"] = (project.hasProperty('mavenCenteralPassword') ?
+            project.property("mavenCenteralPassword") : '')
     ext["sonatypeStagingProfileId"] = (project.hasProperty('sonatypeStagingProfileId') ?
             project.property("sonatypeStagingProfileId") : '')
 
