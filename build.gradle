@@ -15,9 +15,9 @@ buildscript {
             project.property("signing.password") : '')
     ext["signing.secretKeyRingFile"] = (project.hasProperty('signing.secretKeyRingFile') ?
             project.property("signing.secretKeyRingFile") : '')
-    ext["mavenCenteralUsername"] = (project.hasProperty('mavenCenteralUsername') ?
+    ext["mavenCentralUsername"] = (project.hasProperty('mavenCentralUsername') ?
             project.property("mavenCenteralUsername") : '')
-    ext["mavenCenteralPassword"] = (project.hasProperty('mavenCenteralPassword') ?
+    ext["mavenCentralPassword"] = (project.hasProperty('mavenCentralPassword') ?
             project.property("mavenCenteralPassword") : '')
     ext["sonatypeStagingProfileId"] = (project.hasProperty('sonatypeStagingProfileId') ?
             project.property("sonatypeStagingProfileId") : '')
@@ -235,8 +235,8 @@ task sonatypeAudioSwitchReleaseUpload(type: RootGradleBuild) {
             'signing.keyId': "${getPropertyValue("SIGNING_KEY_ID")}",
             'signing.password' : "${getPropertyValue("SIGNING_PASSWORD")}",
             'signing.secretKeyRingFile' : "${getPropertyValue("SIGNING_SECRET_KEY_RING_FILE")}",
-            'mavenCenteralUsername' : "${getPropertyValue("MAVEN_CENTERAL_TOKEN_USERNAME")}",
-            'mavenCenteralPassword' : "${getPropertyValue("MAVEN_CENTERAL_TOKEN_PASSWORD")}",
+            'mavenCentralUsername' : "${getPropertyValue("MAVEN_CENTRAL_TOKEN_USERNAME")}",
+            'mavenCentralPassword' : "${getPropertyValue("MAVEN_CENTRAL_TOKEN_PASSWORD")}",
             'sonatypeStagingProfileId' : "${getPropertyValue("SONATYPE_STAGING_PROFILE_ID")}"
     ]
 }
