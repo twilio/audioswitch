@@ -99,8 +99,8 @@ allprojects {
 nexusPublishing {
     repositories {
         sonatype {
-            username = mavenCenteralUsername
-            password = mavenCenteralPassword
+            username = mavenCentralUsername
+            password = mavenCentralPassword
             nexusUrl = uri("https://ossrh-staging-api.central.sonatype.com/service/local/")
             stagingProfileId = sonatypeStagingProfileId
         }
