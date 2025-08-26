@@ -18,7 +18,6 @@ import java.util.concurrent.TimeUnit
 @RunWith(AndroidJUnit4::class)
 @LargeTest
 class AutomaticDeviceSelectionTest : AndroidTestBase() {
-
     @UiThreadTest
     @Test
     fun `it_should_select_the_bluetooth_audio_device_by_default`() {
@@ -38,16 +37,24 @@ class AutomaticDeviceSelectionTest : AndroidTestBase() {
     fun `it_should_notify_callback_when_bluetooth_connects`() {
         val context = getInstrumentationContext()
         val bluetoothConnectedLatch = CountDownLatch(1)
-        val bluetoothListener = object : BluetoothHeadsetConnectionListener {
-            override fun onBluetoothHeadsetStateChanged(headsetName: String?, state: Int) {
-                bluetoothConnectedLatch.countDown()
+        val bluetoothListener =
+            object : BluetoothHeadsetConnectionListener {
+                override fun onBluetoothHeadsetStateChanged(
+                    headsetName: String?,
+                    state: Int,
+                ) {
+                    bluetoothConnectedLatch.countDown()
+                }
+
+                override fun onBluetoothScoStateChanged(state: Int) {}
+
+                override fun onBluetoothHeadsetActivationError() {}
             }
-
-            override fun onBluetoothScoStateChanged(state: Int) {}
-
-            override fun onBluetoothHeadsetActivationError() {}
-        }
-        val (audioSwitch, bluetoothHeadsetReceiver, wiredHeadsetReceiver) = setupFakeAudioSwitch(context, bluetoothListener = bluetoothListener)
+        val (audioSwitch, bluetoothHeadsetReceiver, wiredHeadsetReceiver) =
+            setupFakeAudioSwitch(
+                context,
+                bluetoothListener = bluetoothListener,
+            )
 
         audioSwitch.start { _, _ -> }
         simulateBluetoothSystemIntent(context, bluetoothHeadsetReceiver)

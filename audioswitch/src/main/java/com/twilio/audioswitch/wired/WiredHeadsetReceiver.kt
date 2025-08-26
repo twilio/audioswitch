@@ -16,10 +16,12 @@ internal class WiredHeadsetReceiver(
     private val context: Context,
     private val logger: Logger,
 ) : BroadcastReceiver() {
-
     internal var deviceListener: WiredDeviceConnectionListener? = null
 
-    override fun onReceive(context: Context, intent: Intent) {
+    override fun onReceive(
+        context: Context,
+        intent: Intent,
+    ) {
         intent.getIntExtra(INTENT_STATE, STATE_UNPLUGGED).let { state ->
             if (state == STATE_PLUGGED) {
                 intent.getStringExtra(INTENT_NAME).let { name ->

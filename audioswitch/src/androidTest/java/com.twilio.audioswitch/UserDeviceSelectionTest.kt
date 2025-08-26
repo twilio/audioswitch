@@ -17,7 +17,6 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 @LargeTest
 class UserDeviceSelectionTest : AndroidTestBase() {
-
     private val context = InstrumentationRegistry.getInstrumentation().context
 
     @UiThreadTest
@@ -25,8 +24,9 @@ class UserDeviceSelectionTest : AndroidTestBase() {
     fun `it_should_select_the_earpiece_audio_device_when_the_user_selects_it`() {
         val audioSwitch = AudioSwitch(context)
         audioSwitch.start { _, _ -> }
-        val earpiece = audioSwitch.availableAudioDevices
-            .find { it is Earpiece }
+        val earpiece =
+            audioSwitch.availableAudioDevices
+                .find { it is Earpiece }
         assertThat(earpiece, `is`(notNullValue()))
 
         audioSwitch.selectDevice(earpiece!!)
@@ -40,8 +40,9 @@ class UserDeviceSelectionTest : AndroidTestBase() {
     fun `it_should_select_the_speakerphone_audio_device_when_the_user_selects_it`() {
         val audioSwitch = AudioSwitch(context)
         audioSwitch.start { _, _ -> }
-        val speakerphone = audioSwitch.availableAudioDevices
-            .find { it is Speakerphone }
+        val speakerphone =
+            audioSwitch.availableAudioDevices
+                .find { it is Speakerphone }
         assertThat(speakerphone, `is`(notNullValue()))
 
         audioSwitch.selectDevice(speakerphone!!)
@@ -56,8 +57,9 @@ class UserDeviceSelectionTest : AndroidTestBase() {
         val (audioSwitch, bluetoothHeadsetReceiver) = setupFakeAudioSwitch(context)
         audioSwitch.start { _, _ -> }
         simulateBluetoothSystemIntent(context, bluetoothHeadsetReceiver)
-        val bluetoothDevice = audioSwitch.availableAudioDevices
-            .find { it is BluetoothHeadset }
+        val bluetoothDevice =
+            audioSwitch.availableAudioDevices
+                .find { it is BluetoothHeadset }
         assertThat(bluetoothDevice, `is`(notNullValue()))
 
         audioSwitch.selectDevice(bluetoothDevice!!)

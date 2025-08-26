@@ -5,8 +5,8 @@ import android.bluetooth.BluetoothDevice.EXTRA_DEVICE
 import android.content.Intent
 
 internal class BluetoothIntentProcessorImpl : BluetoothIntentProcessor {
-
     override fun getBluetoothDevice(intent: Intent): BluetoothDeviceWrapper? =
-        intent.getParcelableExtra<BluetoothDevice>(EXTRA_DEVICE)
+        intent
+            .getParcelableExtra<BluetoothDevice>(EXTRA_DEVICE)
             ?.let { device -> BluetoothDeviceWrapperImpl(device) }
 }

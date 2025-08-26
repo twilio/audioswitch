@@ -16,21 +16,22 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
 class WiredHeadsetReceiverTest {
-
     private val context = mock<Context>()
     private val logger = mock<Logger>()
     private val wiredDeviceConnectionListener = mock<WiredDeviceConnectionListener>()
-    private val wiredHeadsetReceiver = WiredHeadsetReceiver(
-        context,
-        logger,
-    )
+    private val wiredHeadsetReceiver =
+        WiredHeadsetReceiver(
+            context,
+            logger,
+        )
 
     @Test
     fun `onReceive should notify listener when a wired headset has been plugged in`() {
-        val intent = mock<Intent> {
-            whenever(mock.getIntExtra("state", STATE_UNPLUGGED))
-                .thenReturn(STATE_PLUGGED)
-        }
+        val intent =
+            mock<Intent> {
+                whenever(mock.getIntExtra("state", STATE_UNPLUGGED))
+                    .thenReturn(STATE_PLUGGED)
+            }
         wiredHeadsetReceiver.start(wiredDeviceConnectionListener)
 
         wiredHeadsetReceiver.onReceive(context, intent)
@@ -41,10 +42,11 @@ class WiredHeadsetReceiverTest {
     @Test
     fun `onReceive should not notify listener when a wired headset has been plugged in but the listener is null`() {
         wiredHeadsetReceiver.deviceListener = null
-        val intent = mock<Intent> {
-            whenever(mock.getIntExtra("state", STATE_UNPLUGGED))
-                .thenReturn(STATE_PLUGGED)
-        }
+        val intent =
+            mock<Intent> {
+                whenever(mock.getIntExtra("state", STATE_UNPLUGGED))
+                    .thenReturn(STATE_PLUGGED)
+            }
 
         try {
             wiredHeadsetReceiver.onReceive(context, intent)
@@ -55,10 +57,11 @@ class WiredHeadsetReceiverTest {
 
     @Test
     fun `onReceive should notify listener when a wired headset has been unplugged`() {
-        val intent = mock<Intent> {
-            whenever(mock.getIntExtra("state", STATE_UNPLUGGED))
-                .thenReturn(STATE_UNPLUGGED)
-        }
+        val intent =
+            mock<Intent> {
+                whenever(mock.getIntExtra("state", STATE_UNPLUGGED))
+                    .thenReturn(STATE_UNPLUGGED)
+            }
         wiredHeadsetReceiver.start(wiredDeviceConnectionListener)
 
         wiredHeadsetReceiver.onReceive(context, intent)
@@ -69,10 +72,11 @@ class WiredHeadsetReceiverTest {
     @Test
     fun `onReceive should not notify listener when a wired headset has been unplugged but the listener is null`() {
         wiredHeadsetReceiver.deviceListener = null
-        val intent = mock<Intent> {
-            whenever(mock.getIntExtra("state", STATE_UNPLUGGED))
-                .thenReturn(STATE_UNPLUGGED)
-        }
+        val intent =
+            mock<Intent> {
+                whenever(mock.getIntExtra("state", STATE_UNPLUGGED))
+                    .thenReturn(STATE_UNPLUGGED)
+            }
 
         try {
             wiredHeadsetReceiver.onReceive(context, intent)

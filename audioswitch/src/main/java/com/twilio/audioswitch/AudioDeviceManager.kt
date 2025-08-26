@@ -21,7 +21,6 @@ internal class AudioDeviceManager(
     private val audioFocusRequest: AudioFocusRequestWrapper = AudioFocusRequestWrapper(),
     private val audioFocusChangeListener: OnAudioFocusChangeListener,
 ) {
-
     private var savedAudioMode = 0
     private var savedIsMicrophoneMuted = false
     private var savedSpeakerphoneEnabled = false

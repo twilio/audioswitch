@@ -12,7 +12,6 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 
 class BluetoothDeviceWrapperImplTest {
-
     @Test
     fun `name should return a generic bluetooth device name if none was returned from the BluetoothDevice class`() {
         val device = BluetoothDeviceWrapperImpl(mock())
@@ -22,9 +21,10 @@ class BluetoothDeviceWrapperImplTest {
 
     @Test
     fun `name should return a the BluetoothDevice name`() {
-        val bluetoothDevice = mock<BluetoothDevice> {
-            whenever(mock.name).thenReturn("Some Device Name")
-        }
+        val bluetoothDevice =
+            mock<BluetoothDevice> {
+                whenever(mock.name).thenReturn("Some Device Name")
+            }
         val deviceWrapper = BluetoothDeviceWrapperImpl(bluetoothDevice)
 
         assertThat(deviceWrapper.name, equalTo("Some Device Name"))
@@ -40,12 +40,14 @@ class BluetoothDeviceWrapperImplTest {
 
     @Test
     fun `deviceClass should return bluetooth class from the BluetoothDevice device class`() {
-        val deviceClass = mock<BluetoothClass> {
-            whenever(mock.deviceClass).thenReturn(AUDIO_VIDEO_HEADPHONES)
-        }
-        val bluetoothDevice = mock<BluetoothDevice> {
-            whenever(mock.bluetoothClass).thenReturn(deviceClass)
-        }
+        val deviceClass =
+            mock<BluetoothClass> {
+                whenever(mock.deviceClass).thenReturn(AUDIO_VIDEO_HEADPHONES)
+            }
+        val bluetoothDevice =
+            mock<BluetoothDevice> {
+                whenever(mock.bluetoothClass).thenReturn(deviceClass)
+            }
         val deviceWrapper = BluetoothDeviceWrapperImpl(bluetoothDevice)
 
         assertThat(deviceWrapper.deviceClass, equalTo(AUDIO_VIDEO_HEADPHONES))
