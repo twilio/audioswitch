@@ -57,14 +57,14 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:8.3.1'
+        classpath 'com.android.tools.build:gradle:8.12.1'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "org.jetbrains.dokka:dokka-gradle-plugin:$dokka_version"
     }
 }
 
 plugins {
-    id "com.diffplug.spotless" version '6.19.0'
+    id "com.diffplug.spotless" version '7.2.1'
     id "org.jetbrains.dokka" version "$dokka_version"
     id "io.github.gradle-nexus.publish-plugin" version '2.0.0'
     id "maven-publish"
@@ -135,7 +135,7 @@ def matchesVersion(versionTag) {
     return releaseTag == versionTag
 }
 
-task validateReleaseTag {
+tasks.register('validateReleaseTag') {
     description = 'Validate the release tag matches the release version ' +
             'present on commit'
     group = 'Git'
@@ -151,7 +151,7 @@ task validateReleaseTag {
     }
 }
 
-task incrementVersion(type: RootGradleBuild) {
+tasks.register('incrementVersion', RootGradleBuild) {
     description = 'Increment the SDK version after a release'
     group = 'Git'
 
@@ -163,7 +163,7 @@ task incrementVersion(type: RootGradleBuild) {
             standardOutput stdOut
         }
 
-        def gitBranch = stdOut.toString().replaceAll("\\s","")
+        def gitBranch = stdOut.toString().replaceAll("\\s", "")
         def circleTag = System.getenv("CIRCLE_TAG")
         def githubToken = System.getenv("GITHUB_TOKEN")
         def repoSlug = "${System.env.CIRCLE_PROJECT_USERNAME}/${System.env.CIRCLE_PROJECT_REPONAME}"
@@ -225,23 +225,23 @@ task incrementVersion(type: RootGradleBuild) {
     }
 }
 
-task sonatypeAudioSwitchReleaseUpload(type: RootGradleBuild) {
+tasks.register('sonatypeAudioSwitchReleaseUpload', RootGradleBuild) {
     description = 'Publish an AudioSwitch release or pre-release'
     group = 'Publishing'
     dependsOn validateReleaseTag
     buildFile = file('build.gradle')
     tasks = ['assembleRelease', 'publishAudioSwitchReleasePublicationToSonatypeRepository', 'closeAndReleaseSonatypeStagingRepository']
     startParameter.projectProperties += gradle.startParameter.projectProperties + [
-            'signing.keyId': "${getPropertyValue("SIGNING_KEY_ID")}",
-            'signing.password' : "${getPropertyValue("SIGNING_PASSWORD")}",
-            'signing.secretKeyRingFile' : "${getPropertyValue("SIGNING_SECRET_KEY_RING_FILE")}",
-            'mavenCentralUsername' : "${getPropertyValue("MAVEN_CENTRAL_TOKEN_USERNAME")}",
-            'mavenCentralPassword' : "${getPropertyValue("MAVEN_CENTRAL_TOKEN_PASSWORD")}",
+            'signing.keyId'            : "${getPropertyValue("SIGNING_KEY_ID")}",
+            'signing.password'         : "${getPropertyValue("SIGNING_PASSWORD")}",
+            'signing.secretKeyRingFile': "${getPropertyValue("SIGNING_SECRET_KEY_RING_FILE")}",
+            'mavenCentralUsername'     : "${getPropertyValue("MAVEN_CENTRAL_TOKEN_USERNAME")}",
+            'mavenCentralPassword'     : "${getPropertyValue("MAVEN_CENTRAL_TOKEN_PASSWORD")}",
             'sonatypeStagingProfileId' : "${getPropertyValue("SONATYPE_STAGING_PROFILE_ID")}"
     ]
 }
 
-task publishDocs {
+tasks.register('publishDocs') {
     description = 'Publish AudioSwitch KDocs to gh-pages branch'
     group = 'Publishing'
     dependsOn 'audioswitch:dokkaHtml'
