@@ -1,5 +1,5 @@
 # Changelog
-### 1.2.3 (In Progress)
+### 1.2.5 (In Progress)
 
 ### 1.2.3 (Wed Aug 27, 2025)
 
