@@ -231,8 +231,8 @@ tasks.register('publishDocs') {
         //grgit.fetch(remote: remoteName)
 
         // Checkout gh-pages branch
-        remoteName='origin'
-        grgit.checkout(branch: 'gh-pages', startPoint: "remotes/${remoteName}/gh-pages", createBranch: true)
+        //grgit.checkout(branch: 'gh-pages', startPoint: "remotes/${remoteName}/gh-pages", createBranch: true)
+        grgit.checkout(branch: 'gh-pages')
 
         // Create docs directory if it doesn't exist
         def docsDir = file("${rootDir}/docs")
