@@ -1,5 +1,7 @@
 # Changelog
-### 1.2.3 (In Progress)
+### 1.2.5 (In Progress)
+
+### 1.2.3 (Wed Aug 27, 2025)
 
 - Updated gradle to version 8.13
 - Updated gradle plugin to 8.12.1

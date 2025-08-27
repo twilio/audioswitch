@@ -158,9 +158,10 @@ tasks.register('incrementVersion', RootGradleBuild) {
                 ?.getName()
                 ?.replace('refs/remotes/origin/', '')
         def circleTag = System.getenv("CIRCLE_TAG")
+        def githubUser = System.getenv("GIT_USER_NAME")
         def githubToken = System.getenv("GITHUB_TOKEN")
         def repoSlug = "${System.env.CIRCLE_PROJECT_USERNAME}/${System.env.CIRCLE_PROJECT_REPONAME}"
-        def gitRef = "https://${githubToken}@github.com/${repoSlug}.git"
+        def gitRef = "https://${githubUser}:${githubToken}@github.com/${repoSlug}.git"
         def nextVersionPatch = versionPatch.toInteger() + 1
         def remoteName = "upstream"
 
@@ -215,9 +216,10 @@ tasks.register('publishDocs') {
 
     doLast {
         def releaseVersion = System.getenv("CIRCLE_TAG") ?: ""
+        def githubUser = System.getenv("GIT_USER_NAME")
         def githubToken = System.getenv("GITHUB_TOKEN")
         def repoSlug = "${System.env.CIRCLE_PROJECT_USERNAME}/${System.env.CIRCLE_PROJECT_REPONAME}"
-        def gitRef = "https://${githubToken}@github.com/${repoSlug}.git"
+        def gitRef = "https://${githubUser}:${githubToken}@github.com/${repoSlug}.git"
         def remoteName = "upstream"
 
         // Add remote if it doesn't exist
