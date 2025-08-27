@@ -211,7 +211,7 @@ tasks.register('publishDocs') {
     description = 'Publish AudioSwitch KDocs to gh-pages branch'
     group = 'Publishing'
     dependsOn 'audioswitch:dokkaHtml'
-    //dependsOn validateReleaseTag
+    dependsOn validateReleaseTag
 
     doLast {
         def releaseVersion = System.getenv("CIRCLE_TAG") ?: ""
@@ -222,17 +222,16 @@ tasks.register('publishDocs') {
 
         // Add remote if it doesn't exist
         try {
-            //grgit.remote.add(name: remoteName, url: gitRef)
+            grgit.remote.add(name: remoteName, url: gitRef)
         } catch (Exception ignored) {
             // Remote already exists
         }
 
         // Fetch remote branches
-        //grgit.fetch(remote: remoteName)
+        grgit.fetch(remote: remoteName)
 
         // Checkout gh-pages branch
-        //grgit.checkout(branch: 'gh-pages', startPoint: "remotes/${remoteName}/gh-pages", createBranch: true)
-        grgit.checkout(branch: 'gh-pages')
+        grgit.checkout(branch: 'gh-pages', startPoint: "remotes/${remoteName}/gh-pages", createBranch: true)
 
         // Create docs directory if it doesn't exist
         def docsDir = file("${rootDir}/docs")
@@ -255,10 +254,10 @@ tasks.register('publishDocs') {
 
         // Add, commit and push changes
         grgit.add(patterns: ["docs/${releaseVersion}", "docs/latest"])
-        //grgit.commit(message: "${releaseVersion} release docs [skip ci]")
-        //grgit.push(remote: remoteName, refsOrSpecs: ['gh-pages'])
+        grgit.commit(message: "${releaseVersion} release docs [skip ci]")
+        grgit.push(remote: remoteName, refsOrSpecs: ['gh-pages'])
 
         // Return to release tag
-        //grgit.checkout(branch: releaseVersion)
+        grgit.checkout(branch: releaseVersion)
     }
 }
