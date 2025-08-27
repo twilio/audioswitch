@@ -58,57 +58,73 @@ class AudioSwitch {
     private val permissionsRequestStrategy: PermissionsCheckStrategy
 
     internal var state: State = STOPPED
+
     internal enum class State {
-        STARTED, ACTIVATED, STOPPED
+        STARTED,
+        ACTIVATED,
+        STOPPED,
     }
 
-    internal val bluetoothDeviceConnectionListener = object : BluetoothHeadsetConnectionListener {
-        override fun onBluetoothHeadsetStateChanged(headsetName: String?, state: Int) {
-            enumerateDevices(headsetName)
-            bluetoothHeadsetConnectionListener?.onBluetoothHeadsetStateChanged(headsetName, state)
-        }
+    internal val bluetoothDeviceConnectionListener =
+        object : BluetoothHeadsetConnectionListener {
+            override fun onBluetoothHeadsetStateChanged(
+                headsetName: String?,
+                state: Int,
+            ) {
+                enumerateDevices(headsetName)
+                bluetoothHeadsetConnectionListener?.onBluetoothHeadsetStateChanged(headsetName, state)
+            }
 
-        override fun onBluetoothScoStateChanged(state: Int) {
-            bluetoothHeadsetConnectionListener?.onBluetoothScoStateChanged(state)
-        }
+            override fun onBluetoothScoStateChanged(state: Int) {
+                bluetoothHeadsetConnectionListener?.onBluetoothScoStateChanged(state)
+            }
 
-        override fun onBluetoothHeadsetActivationError() {
-            if (userSelectedDevice is BluetoothHeadset) userSelectedDevice = null
-            enumerateDevices()
-            bluetoothHeadsetConnectionListener?.onBluetoothHeadsetActivationError()
-        }
-    }
-
-    internal val wiredDeviceConnectionListener = object : WiredDeviceConnectionListener {
-        override fun onDeviceConnected() {
-            wiredHeadsetAvailable = true
-            enumerateDevices()
-        }
-
-        override fun onDeviceDisconnected() {
-            wiredHeadsetAvailable = false
-            enumerateDevices()
-        }
-    }
-
-    internal val applicationLifecycleListener = object : Application.ActivityLifecycleCallbacks {
-        override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) { }
-
-        override fun onActivityStarted(activity: Activity) { }
-
-        override fun onActivityResumed(activity: Activity) {
-            if (STOPPED != state && null == bluetoothHeadsetManager) {
-                getBluetoothHeadsetManager()?.start(bluetoothDeviceConnectionListener)
+            override fun onBluetoothHeadsetActivationError() {
+                if (userSelectedDevice is BluetoothHeadset) userSelectedDevice = null
+                enumerateDevices()
+                bluetoothHeadsetConnectionListener?.onBluetoothHeadsetActivationError()
             }
         }
 
-        override fun onActivityPaused(activity: Activity) { }
+    internal val wiredDeviceConnectionListener =
+        object : WiredDeviceConnectionListener {
+            override fun onDeviceConnected() {
+                wiredHeadsetAvailable = true
+                enumerateDevices()
+            }
 
-        override fun onActivityStopped(activity: Activity) { }
+            override fun onDeviceDisconnected() {
+                wiredHeadsetAvailable = false
+                enumerateDevices()
+            }
+        }
 
-        override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) { }
-        override fun onActivityDestroyed(activity: Activity) { }
-    }
+    internal val applicationLifecycleListener =
+        object : Application.ActivityLifecycleCallbacks {
+            override fun onActivityCreated(
+                activity: Activity,
+                savedInstanceState: Bundle?,
+            ) { }
+
+            override fun onActivityStarted(activity: Activity) { }
+
+            override fun onActivityResumed(activity: Activity) {
+                if (STOPPED != state && null == bluetoothHeadsetManager) {
+                    getBluetoothHeadsetManager()?.start(bluetoothDeviceConnectionListener)
+                }
+            }
+
+            override fun onActivityPaused(activity: Activity) { }
+
+            override fun onActivityStopped(activity: Activity) { }
+
+            override fun onActivitySaveInstanceState(
+                activity: Activity,
+                outState: Bundle,
+            ) { }
+
+            override fun onActivityDestroyed(activity: Activity) { }
+        }
 
     var loggingEnabled: Boolean
         get() = logger.loggingEnabled
@@ -159,21 +175,23 @@ class AudioSwitch {
         logger: Logger,
         audioFocusChangeListener: OnAudioFocusChangeListener,
         preferredDeviceList: List<Class<out AudioDevice>>,
-        audioDeviceManager: AudioDeviceManager = AudioDeviceManager(
-            context,
-            logger,
-            context.getSystemService(Context.AUDIO_SERVICE) as AudioManager,
-            audioFocusChangeListener = audioFocusChangeListener,
-        ),
+        audioDeviceManager: AudioDeviceManager =
+            AudioDeviceManager(
+                context,
+                logger,
+                context.getSystemService(Context.AUDIO_SERVICE) as AudioManager,
+                audioFocusChangeListener = audioFocusChangeListener,
+            ),
         wiredHeadsetReceiver: WiredHeadsetReceiver = WiredHeadsetReceiver(context, logger),
         permissionsCheckStrategy: PermissionsCheckStrategy = DefaultPermissionsCheckStrategy(context),
         bluetoothManager: BluetoothManager? = context.getSystemService(Context.BLUETOOTH_SERVICE) as? BluetoothManager,
-        bluetoothHeadsetManager: BluetoothHeadsetManager? = BluetoothHeadsetManager.newInstance(
-            context,
-            logger,
-            bluetoothManager?.adapter,
-            audioDeviceManager,
-        ),
+        bluetoothHeadsetManager: BluetoothHeadsetManager? =
+            BluetoothHeadsetManager.newInstance(
+                context,
+                logger,
+                bluetoothManager?.adapter,
+                audioDeviceManager,
+            ),
     ) {
         this.context = context
         this.logger = logger
@@ -182,13 +200,14 @@ class AudioSwitch {
         this.wiredHeadsetReceiver = wiredHeadsetReceiver
         this.preferredDeviceList = getPreferredDeviceList(preferredDeviceList)
         this.permissionsRequestStrategy = permissionsCheckStrategy
-        this.bluetoothHeadsetManager = if (hasPermissions()) {
-            bluetoothHeadsetManager
-        } else {
-            logger.w(TAG, PERMISSION_ERROR_MESSAGE)
-            bluetoothHeadsetManager
-            null
-        }
+        this.bluetoothHeadsetManager =
+            if (hasPermissions()) {
+                bluetoothHeadsetManager
+            } else {
+                logger.w(TAG, PERMISSION_ERROR_MESSAGE)
+                bluetoothHeadsetManager
+                null
+            }
         logger.d(TAG, "AudioSwitch($VERSION)")
         logger.d(TAG, "Preferred device list = ${this.preferredDeviceList.map { it.simpleName }}")
     }
@@ -315,7 +334,11 @@ class AudioSwitch {
     }
 
     private fun hasNoDuplicates(list: List<Class<out AudioDevice>>) =
-        list.groupingBy { it }.eachCount().filter { it.value > 1 }.isEmpty()
+        list
+            .groupingBy { it }
+            .eachCount()
+            .filter { it.value > 1 }
+            .isEmpty()
 
     private fun activate(audioDevice: AudioDevice) {
         when (audioDevice) {
@@ -351,24 +374,25 @@ class AudioSwitch {
 
         // Select the audio device
         logger.d(TAG, "Current user selected AudioDevice = $userSelectedDevice")
-        selectedDevice = if (userSelectedDevice != null) {
-            userSelectedDevice
-        } else if (mutableAudioDevices.size > 0) {
-            val firstAudioDevice = mutableAudioDevices[0]
+        selectedDevice =
+            if (userSelectedDevice != null) {
+                userSelectedDevice
+            } else if (mutableAudioDevices.size > 0) {
+                val firstAudioDevice = mutableAudioDevices[0]
             /*
              * If there was an error starting bluetooth sco, then the selected AudioDevice should
              * be the next valid device in the list.
              */
-            if (firstAudioDevice is BluetoothHeadset &&
-                getBluetoothHeadsetManager()?.hasActivationError() == true
-            ) {
-                mutableAudioDevices[1]
+                if (firstAudioDevice is BluetoothHeadset &&
+                    getBluetoothHeadsetManager()?.hasActivationError() == true
+                ) {
+                    mutableAudioDevices[1]
+                } else {
+                    firstAudioDevice
+                }
             } else {
-                firstAudioDevice
+                null
             }
-        } else {
-            null
-        }
 
         // Activate the device if in the active state
         if (state == ACTIVATED) {
@@ -442,39 +466,42 @@ class AudioSwitch {
     private fun getBluetoothHeadsetManager(): BluetoothHeadsetManager? {
         if (bluetoothHeadsetManager == null && hasPermissions()) {
             val bluetoothManager = context.getSystemService(Context.BLUETOOTH_SERVICE) as? BluetoothManager
-            bluetoothHeadsetManager = BluetoothHeadsetManager.newInstance(
-                context,
-                logger,
-                bluetoothManager?.adapter,
-                audioDeviceManager,
-            )
+            bluetoothHeadsetManager =
+                BluetoothHeadsetManager.newInstance(
+                    context,
+                    logger,
+                    bluetoothManager?.adapter,
+                    audioDeviceManager,
+                )
         }
         return bluetoothHeadsetManager
     }
 
     internal fun hasPermissions() = permissionsRequestStrategy.hasPermissions()
 
-    internal class DefaultPermissionsCheckStrategy(private val context: Context) : PermissionsCheckStrategy {
-
+    internal class DefaultPermissionsCheckStrategy(
+        private val context: Context,
+    ) : PermissionsCheckStrategy {
         @SuppressLint("NewApi")
-        override fun hasPermissions(): Boolean {
-            return if (context.applicationInfo.targetSdkVersion <= android.os.Build.VERSION_CODES.R ||
+        override fun hasPermissions(): Boolean =
+            if (context.applicationInfo.targetSdkVersion <= android.os.Build.VERSION_CODES.R ||
                 android.os.Build.VERSION.SDK_INT <= android.os.Build.VERSION_CODES.R
             ) {
-                PERMISSION_GRANTED == context.checkPermission(
-                    Manifest.permission.BLUETOOTH,
-                    android.os.Process.myPid(),
-                    android.os.Process.myUid(),
-                )
+                PERMISSION_GRANTED ==
+                    context.checkPermission(
+                        Manifest.permission.BLUETOOTH,
+                        android.os.Process.myPid(),
+                        android.os.Process.myUid(),
+                    )
             } else {
                 // for android 12/S or newer
-                PERMISSION_GRANTED == context.checkPermission(
-                    Manifest.permission.BLUETOOTH_CONNECT,
-                    android.os.Process.myPid(),
-                    android.os.Process.myUid(),
-                )
+                PERMISSION_GRANTED ==
+                    context.checkPermission(
+                        Manifest.permission.BLUETOOTH_CONNECT,
+                        android.os.Process.myPid(),
+                        android.os.Process.myUid(),
+                    )
             }
-        }
     }
 
     companion object {

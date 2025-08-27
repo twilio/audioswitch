@@ -34,7 +34,7 @@ import java.util.concurrent.TimeUnit
 
 @RunWith(AndroidJUnit4::class)
 class ConnectedBluetoothHeadsetTest {
-
+    @Suppress("ktlint:standard:property-naming")
     private val BLUETOOTH_TIMEOUT: Long = 7
     private val bluetoothAdapter by lazy { BluetoothAdapter.getDefaultAdapter() }
     private val previousBluetoothEnabled by lazy { bluetoothAdapter.isEnabled }
@@ -43,47 +43,56 @@ class ConnectedBluetoothHeadsetTest {
     private lateinit var bluetoothHeadset: BluetoothHeadset
     private lateinit var expectedBluetoothDevice: AudioDevice.BluetoothHeadset
     private val bluetoothServiceConnected = CountDownLatch(1)
-    private val bluetoothServiceListener = object : BluetoothProfile.ServiceListener {
-        override fun onServiceConnected(profile: Int, proxy: BluetoothProfile?) {
-            bluetoothHeadset = proxy as BluetoothHeadset
-            bluetoothServiceConnected.countDown()
-        }
+    private val bluetoothServiceListener =
+        object : BluetoothProfile.ServiceListener {
+            override fun onServiceConnected(
+                profile: Int,
+                proxy: BluetoothProfile?,
+            ) {
+                bluetoothHeadset = proxy as BluetoothHeadset
+                bluetoothServiceConnected.countDown()
+            }
 
-        override fun onServiceDisconnected(profile: Int) {
+            override fun onServiceDisconnected(profile: Int) {
+            }
         }
-    }
-    private val bluetoothHeadsetFilter = IntentFilter().apply {
-        addAction(BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED)
-        addAction(BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED)
-        addAction(AudioManager.ACTION_SCO_AUDIO_STATE_UPDATED)
-    }
+    private val bluetoothHeadsetFilter =
+        IntentFilter().apply {
+            addAction(BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED)
+            addAction(BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED)
+            addAction(AudioManager.ACTION_SCO_AUDIO_STATE_UPDATED)
+        }
     private val bluetoothStateConnected = CountDownLatch(1)
     private val bluetoothStateDisconnected = CountDownLatch(1)
     private val bluetoothAudioStateConnected = CountDownLatch(1)
-    private val bluetoothReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent?) {
-            intent?.getIntExtra(BluetoothHeadset.EXTRA_STATE, BluetoothHeadset.STATE_DISCONNECTED).let { state ->
-                when (state) {
-                    BluetoothHeadset.STATE_CONNECTED -> {
-                        bluetoothStateConnected.countDown()
-                    }
-                    BluetoothHeadset.STATE_DISCONNECTED -> {
-                        bluetoothStateDisconnected.countDown()
-                    }
-                    BluetoothHeadset.STATE_AUDIO_CONNECTED -> {
-                        bluetoothAudioStateConnected.countDown()
+    private val bluetoothReceiver =
+        object : BroadcastReceiver() {
+            override fun onReceive(
+                context: Context?,
+                intent: Intent?,
+            ) {
+                intent?.getIntExtra(BluetoothHeadset.EXTRA_STATE, BluetoothHeadset.STATE_DISCONNECTED).let { state ->
+                    when (state) {
+                        BluetoothHeadset.STATE_CONNECTED -> {
+                            bluetoothStateConnected.countDown()
+                        }
+                        BluetoothHeadset.STATE_DISCONNECTED -> {
+                            bluetoothStateDisconnected.countDown()
+                        }
+                        BluetoothHeadset.STATE_AUDIO_CONNECTED -> {
+                            bluetoothAudioStateConnected.countDown()
+                        }
                     }
                 }
-            }
-            intent?.getIntExtra(AudioManager.EXTRA_SCO_AUDIO_STATE, AudioManager.SCO_AUDIO_STATE_ERROR).let { state ->
-                when (state) {
-                    AudioManager.SCO_AUDIO_STATE_CONNECTED -> {
-                        bluetoothAudioStateConnected.countDown()
+                intent?.getIntExtra(AudioManager.EXTRA_SCO_AUDIO_STATE, AudioManager.SCO_AUDIO_STATE_ERROR).let { state ->
+                    when (state) {
+                        AudioManager.SCO_AUDIO_STATE_CONNECTED -> {
+                            bluetoothAudioStateConnected.countDown()
+                        }
                     }
                 }
             }
         }
-    }
 
     @get:Rule
     val bluetoothPermissionRules: GrantPermissionRule by lazy {
@@ -181,9 +190,10 @@ class ConnectedBluetoothHeadsetTest {
     fun it_should_select_another_audio_device_with_bluetooth_device_connected() {
         startAndAwaitBluetoothDevice()
         InstrumentationRegistry.getInstrumentation().runOnMainSync {
-            val expectedAudioDevice = audioSwitch.availableAudioDevices.find {
-                it !is AudioDevice.BluetoothHeadset
-            }
+            val expectedAudioDevice =
+                audioSwitch.availableAudioDevices.find {
+                    it !is AudioDevice.BluetoothHeadset
+                }
             audioSwitch.selectDevice(expectedAudioDevice)
             assertEquals(expectedAudioDevice, audioSwitch.selectedAudioDevice)
         }

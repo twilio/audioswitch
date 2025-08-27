@@ -24,17 +24,20 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
 open class BaseTest {
-    internal val bluetoothClass = mock<BluetoothClass> {
-        whenever(mock.deviceClass).thenReturn(BluetoothClass.Device.AUDIO_VIDEO_HANDSFREE)
-    }
-    internal val expectedBluetoothDevice = mock<BluetoothDevice> {
-        whenever(mock.name).thenReturn(DEVICE_NAME)
-        whenever(mock.bluetoothClass).thenReturn(bluetoothClass)
-    }
+    internal val bluetoothClass =
+        mock<BluetoothClass> {
+            whenever(mock.deviceClass).thenReturn(BluetoothClass.Device.AUDIO_VIDEO_HANDSFREE)
+        }
+    internal val expectedBluetoothDevice =
+        mock<BluetoothDevice> {
+            whenever(mock.name).thenReturn(DEVICE_NAME)
+            whenever(mock.bluetoothClass).thenReturn(bluetoothClass)
+        }
     internal val application = mock<Application>()
-    internal val context = mock<Context>() {
-        whenever(mock.applicationContext).thenReturn(application)
-    }
+    internal val context =
+        mock<Context> {
+            whenever(mock.applicationContext).thenReturn(application)
+        }
     internal val bluetoothListener = mock<BluetoothHeadsetConnectionListener>()
     internal val logger = UnitTestLogger()
     internal val audioManager = setupAudioManagerMock()
@@ -45,47 +48,51 @@ open class BaseTest {
     internal val buildWrapper = mock<BuildWrapper>()
     internal val audioFocusRequest = mock<AudioFocusRequestWrapper>()
     internal val defaultAudioFocusChangeListener = mock<OnAudioFocusChangeListener>()
-    internal val audioDeviceManager = AudioDeviceManager(
-        context,
-        logger,
-        audioManager,
-        buildWrapper,
-        audioFocusRequest,
-        defaultAudioFocusChangeListener,
-    )
+    internal val audioDeviceManager =
+        AudioDeviceManager(
+            context,
+            logger,
+            audioManager,
+            buildWrapper,
+            audioFocusRequest,
+            defaultAudioFocusChangeListener,
+        )
     internal val wiredHeadsetReceiver = WiredHeadsetReceiver(context, logger)
     internal var handler = setupScoHandlerMock()
     internal var systemClockWrapper = setupSystemClockMock()
     internal val headsetProxy = mock<BluetoothHeadset>()
-    internal val preferredDeviceList = listOf(
-        AudioDevice.BluetoothHeadset::class.java,
-        WiredHeadset::class.java,
-        Earpiece::class.java,
-        Speakerphone::class.java,
-    )
+    internal val preferredDeviceList =
+        listOf(
+            AudioDevice.BluetoothHeadset::class.java,
+            WiredHeadset::class.java,
+            Earpiece::class.java,
+            Speakerphone::class.java,
+        )
     internal val permissionsStrategyProxy = setupPermissionsCheckStrategy()
-    internal var headsetManager: BluetoothHeadsetManager = BluetoothHeadsetManager(
-        context,
-        logger,
-        bluetoothAdapter,
-        audioDeviceManager,
-        bluetoothScoHandler = handler,
-        systemClockWrapper = systemClockWrapper,
-        headsetProxy = headsetProxy,
-    )
+    internal var headsetManager: BluetoothHeadsetManager =
+        BluetoothHeadsetManager(
+            context,
+            logger,
+            bluetoothAdapter,
+            audioDeviceManager,
+            bluetoothScoHandler = handler,
+            systemClockWrapper = systemClockWrapper,
+            headsetProxy = headsetProxy,
+        )
 
-    internal var audioSwitch = AudioSwitch(
-        context = context,
-        bluetoothHeadsetConnectionListener = bluetoothListener,
-        logger = logger,
-        audioDeviceManager = audioDeviceManager,
-        wiredHeadsetReceiver = wiredHeadsetReceiver,
-        audioFocusChangeListener = defaultAudioFocusChangeListener,
-        preferredDeviceList = preferredDeviceList,
-        permissionsCheckStrategy = permissionsStrategyProxy,
-        bluetoothManager = bluetoothManager,
-        bluetoothHeadsetManager = headsetManager,
-    )
+    internal var audioSwitch =
+        AudioSwitch(
+            context = context,
+            bluetoothHeadsetConnectionListener = bluetoothListener,
+            logger = logger,
+            audioDeviceManager = audioDeviceManager,
+            wiredHeadsetReceiver = wiredHeadsetReceiver,
+            audioFocusChangeListener = defaultAudioFocusChangeListener,
+            preferredDeviceList = preferredDeviceList,
+            permissionsCheckStrategy = permissionsStrategyProxy,
+            bluetoothManager = bluetoothManager,
+            bluetoothHeadsetManager = headsetManager,
+        )
 
     internal fun assertBluetoothHeadsetTeardown() {
         assertThat(headsetManager.headsetListener, CoreMatchers.`is`(CoreMatchers.nullValue()))
@@ -93,29 +100,27 @@ open class BaseTest {
         verify(context).unregisterReceiver(headsetManager)
     }
 
-    internal fun simulateNewBluetoothHeadsetConnection(
-        bluetoothDevice: BluetoothDevice = expectedBluetoothDevice,
-    ) {
-        val intent = mock<Intent> {
-            whenever(mock.action).thenReturn(BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED)
-            whenever(mock.getIntExtra(BluetoothHeadset.EXTRA_STATE, BluetoothHeadset.STATE_DISCONNECTED))
-                .thenReturn(BluetoothHeadset.STATE_CONNECTED)
-            whenever(mock.getParcelableExtra<BluetoothDevice>(BluetoothDevice.EXTRA_DEVICE))
-                .thenReturn(bluetoothDevice)
-        }
+    internal fun simulateNewBluetoothHeadsetConnection(bluetoothDevice: BluetoothDevice = expectedBluetoothDevice) {
+        val intent =
+            mock<Intent> {
+                whenever(mock.action).thenReturn(BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED)
+                whenever(mock.getIntExtra(BluetoothHeadset.EXTRA_STATE, BluetoothHeadset.STATE_DISCONNECTED))
+                    .thenReturn(BluetoothHeadset.STATE_CONNECTED)
+                whenever(mock.getParcelableExtra<BluetoothDevice>(BluetoothDevice.EXTRA_DEVICE))
+                    .thenReturn(bluetoothDevice)
+            }
         headsetManager.onReceive(context, intent)
     }
 
-    internal fun simulateDisconnectedBluetoothHeadsetConnection(
-        bluetoothDevice: BluetoothDevice = expectedBluetoothDevice,
-    ) {
-        val intent = mock<Intent> {
-            whenever(mock.action).thenReturn(BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED)
-            whenever(mock.getIntExtra(BluetoothHeadset.EXTRA_STATE, BluetoothHeadset.STATE_DISCONNECTED))
-                .thenReturn(BluetoothHeadset.STATE_DISCONNECTED)
-            whenever(mock.getParcelableExtra<BluetoothDevice>(BluetoothDevice.EXTRA_DEVICE))
-                .thenReturn(bluetoothDevice)
-        }
+    internal fun simulateDisconnectedBluetoothHeadsetConnection(bluetoothDevice: BluetoothDevice = expectedBluetoothDevice) {
+        val intent =
+            mock<Intent> {
+                whenever(mock.action).thenReturn(BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED)
+                whenever(mock.getIntExtra(BluetoothHeadset.EXTRA_STATE, BluetoothHeadset.STATE_DISCONNECTED))
+                    .thenReturn(BluetoothHeadset.STATE_DISCONNECTED)
+                whenever(mock.getParcelableExtra<BluetoothDevice>(BluetoothDevice.EXTRA_DEVICE))
+                    .thenReturn(bluetoothDevice)
+            }
         headsetManager.onReceive(context, intent)
     }
 }

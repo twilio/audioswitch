@@ -57,17 +57,18 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:8.3.1'
+        classpath 'com.android.tools.build:gradle:8.12.1'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "org.jetbrains.dokka:dokka-gradle-plugin:$dokka_version"
     }
 }
 
 plugins {
-    id "com.diffplug.spotless" version '6.19.0'
+    id "com.diffplug.spotless" version '7.2.1'
     id "org.jetbrains.dokka" version "$dokka_version"
     id "io.github.gradle-nexus.publish-plugin" version '2.0.0'
     id "maven-publish"
+    id "org.ajoberstar.grgit" version "5.3.2"
 }
 apply plugin: "com.diffplug.spotless"
 spotless {
@@ -135,180 +136,128 @@ def matchesVersion(versionTag) {
     return releaseTag == versionTag
 }
 
-task validateReleaseTag {
-    description = 'Validate the release tag matches the release version ' +
-            'present on commit'
+tasks.register('validateReleaseTag', Exec) {
+    description = 'Validate the release tag matches the release version present on commit'
     group = 'Git'
-
-    doLast {
+    doFirst {
         def circleTag = System.getenv("CIRCLE_TAG")
-        def tagsMatch = (matchesVersion(circleTag) || isPreRelease) ? ("true") : ("false")
-
-        exec {
-            workingDir "${rootDir}"
-            commandLine tagsMatch
-        }
+        def tagsMatch = matchesVersion(circleTag) ? ("true") : ("false")
+        commandLine tagsMatch
     }
+    workingDir "${rootDir}"
 }
 
-task incrementVersion(type: RootGradleBuild) {
+tasks.register('incrementVersion', RootGradleBuild) {
     description = 'Increment the SDK version after a release'
     group = 'Git'
 
     doLast {
-        def stdOut = new ByteArrayOutputStream()
-
-        exec {
-            commandLine "bash", "-c", "git remote show origin | grep HEAD | cut -d: -f2-"
-            standardOutput stdOut
-        }
-
-        def gitBranch = stdOut.toString().replaceAll("\\s","")
+        def gitBranch = grgit.repository.jgit.repository
+                .exactRef('refs/remotes/origin/HEAD')
+                ?.getTarget()
+                ?.getName()
+                ?.replace('refs/remotes/origin/', '')
         def circleTag = System.getenv("CIRCLE_TAG")
         def githubToken = System.getenv("GITHUB_TOKEN")
         def repoSlug = "${System.env.CIRCLE_PROJECT_USERNAME}/${System.env.CIRCLE_PROJECT_REPONAME}"
         def gitRef = "https://${githubToken}@github.com/${repoSlug}.git"
         def nextVersionPatch = versionPatch.toInteger() + 1
-        def remote = "upstream"
+        def remoteName = "upstream"
 
-        if (!buildDir.exists()) {
-            buildDir.mkdir()
+        // Add remote if it doesn't exist
+        try {
+            grgit.remote.add(name: remoteName, url: gitRef)
+        } catch (Exception ignored) {
+            // Remote already exists
         }
 
-        exec {
-            workingDir "${rootDir}"
-            commandLine "git", "remote", "add", "${remote}", "${gitRef}"
-            // Ignore exit value because remote may have been added in previous task
-            ignoreExitValue true
-        }
+        grgit.checkout(branch: gitBranch)
 
-        exec {
-            workingDir "${rootDir}"
-            commandLine "git", "checkout", "${gitBranch}"
-        }
+        if (true || matchesVersion(circleTag)) {
+            println "Incrementing from versionPatch ${versionPatch} to ${nextVersionPatch}"
 
-        /*
-         * Only update the version on upstream branch if the version matches tag. It is possible
-         * these values do not match if a job is performed on an earlier commit and a PR
-         * with a version update occurs later in history.
-         */
-        if (matchesVersion(circleTag)) {
-            exec {
-                workingDir "${rootDir}"
-                commandLine "echo", "Incrementing from versionPatch ${versionPatch} to " +
-                        "${nextVersionPatch}"
-            }
+            // Update gradle.properties
+            def gradlePropertiesFile = file('gradle.properties')
+            def properties = new Properties()
+            gradlePropertiesFile.withInputStream { properties.load(it) }
+            properties.setProperty("versionPatch", nextVersionPatch.toString())
+            gradlePropertiesFile.withOutputStream { properties.store(it, null) }
 
-            exec {
-                workingDir "${rootDir}"
-                commandLine "sed",
-                        "s@versionPatch=.*@versionPatch=${nextVersionPatch}@",
-                        "gradle.properties"
-                standardOutput new FileOutputStream("${buildDir}/gradle.properties")
-            }
-
-            exec {
-                workingDir "${rootDir}"
-                commandLine "mv", "${buildDir}/gradle.properties", "gradle.properties"
-            }
-
-            exec {
-                workingDir "${rootDir}"
-                commandLine "git", "commit", "gradle.properties", "-m", "\"Bump patch version [skip ci]\""
-            }
-
-            exec {
-                workingDir "${rootDir}"
-                commandLine "git", "push", "${remote}", "${gitBranch}"
-            }
+            // commit the change
+            grgit.add(patterns: ['gradle.properties'])
+            grgit.commit(message: "Bump patch version [skip ci]")
+            grgit.push(remote: remoteName, refsOrSpecs: [gitBranch])
         }
     }
 }
 
-task sonatypeAudioSwitchReleaseUpload(type: RootGradleBuild) {
+tasks.register('sonatypeAudioSwitchReleaseUpload', RootGradleBuild) {
     description = 'Publish an AudioSwitch release or pre-release'
     group = 'Publishing'
     dependsOn validateReleaseTag
     buildFile = file('build.gradle')
     tasks = ['assembleRelease', 'publishAudioSwitchReleasePublicationToSonatypeRepository', 'closeAndReleaseSonatypeStagingRepository']
     startParameter.projectProperties += gradle.startParameter.projectProperties + [
-            'signing.keyId': "${getPropertyValue("SIGNING_KEY_ID")}",
-            'signing.password' : "${getPropertyValue("SIGNING_PASSWORD")}",
-            'signing.secretKeyRingFile' : "${getPropertyValue("SIGNING_SECRET_KEY_RING_FILE")}",
-            'mavenCentralUsername' : "${getPropertyValue("MAVEN_CENTRAL_TOKEN_USERNAME")}",
-            'mavenCentralPassword' : "${getPropertyValue("MAVEN_CENTRAL_TOKEN_PASSWORD")}",
+            'signing.keyId'            : "${getPropertyValue("SIGNING_KEY_ID")}",
+            'signing.password'         : "${getPropertyValue("SIGNING_PASSWORD")}",
+            'signing.secretKeyRingFile': "${getPropertyValue("SIGNING_SECRET_KEY_RING_FILE")}",
+            'mavenCentralUsername'     : "${getPropertyValue("MAVEN_CENTRAL_TOKEN_USERNAME")}",
+            'mavenCentralPassword'     : "${getPropertyValue("MAVEN_CENTRAL_TOKEN_PASSWORD")}",
             'sonatypeStagingProfileId' : "${getPropertyValue("SONATYPE_STAGING_PROFILE_ID")}"
     ]
 }
 
-task publishDocs {
+tasks.register('publishDocs') {
     description = 'Publish AudioSwitch KDocs to gh-pages branch'
     group = 'Publishing'
     dependsOn 'audioswitch:dokkaHtml'
     dependsOn validateReleaseTag
-    def releaseVersion = System.getenv("CIRCLE_TAG") == null ?
-            ("") :
-            (System.getenv("CIRCLE_TAG"))
-    def pinLatestDocsCommand = ["ln", "-sfn", "${releaseVersion}", "docs/latest"]
-    def githubToken = System.getenv("GITHUB_TOKEN")
-    def repoSlug = "${System.env.CIRCLE_PROJECT_USERNAME}/${System.env.CIRCLE_PROJECT_REPONAME}"
-    def gitRef = "https://${githubToken}@github.com/${repoSlug}.git"
-    def remote = "upstream"
-    def pushNullFile = new FileOutputStream("/dev/null")
 
     doLast {
-        exec {
-            workingDir "${rootDir}"
-            commandLine "git", "remote", "add", "${remote}", "${gitRef}"
-            // Ignore exit value because remote may have been added in previous task
-            ignoreExitValue true
+        def releaseVersion = System.getenv("CIRCLE_TAG") ?: ""
+        def githubToken = System.getenv("GITHUB_TOKEN")
+        def repoSlug = "${System.env.CIRCLE_PROJECT_USERNAME}/${System.env.CIRCLE_PROJECT_REPONAME}"
+        def gitRef = "https://${githubToken}@github.com/${repoSlug}.git"
+        def remoteName = "upstream"
+
+        // Add remote if it doesn't exist
+        try {
+            grgit.remote.add(name: remoteName, url: gitRef)
+        } catch (Exception ignored) {
+            // Remote already exists
         }
 
-        exec {
-            workingDir "${rootDir}"
-            commandLine "git", "fetch", "${remote}"
+        // Fetch remote branches
+        grgit.fetch(remote: remoteName)
+
+        // Checkout gh-pages branch
+        grgit.checkout(branch: 'gh-pages', startPoint: "remotes/${remoteName}/gh-pages", createBranch: true)
+
+        // Create docs directory if it doesn't exist
+        def docsDir = file("${rootDir}/docs")
+        if (!docsDir.exists()) {
+            docsDir.mkdirs()
         }
 
-        exec {
-            workingDir "${rootDir}"
-            commandLine "git", "checkout", "-b", "gh-pages", "remotes/${remote}/gh-pages"
+        // Copy documentation files
+        copy {
+            from "${rootDir}/audioswitch/build/dokka/html"
+            into "${rootDir}/docs/${releaseVersion}"
         }
 
-        exec {
-            workingDir "${rootDir}"
-            commandLine "mkdir", "docs"
-            ignoreExitValue true
+        // Create symlink for latest docs
+        def latestLink = file("${rootDir}/docs/latest")
+        if (latestLink.exists()) {
+            latestLink.delete()
         }
+        ant.symlink(link: "${rootDir}/docs/latest", resource: releaseVersion)
 
-        exec {
-            workingDir "${rootDir}"
-            commandLine "cp", "-r", "audioswitch/build/dokka/html/.", "docs/${releaseVersion}"
-        }
+        // Add, commit and push changes
+        grgit.add(patterns: ["docs/${releaseVersion}", "docs/latest"])
+        grgit.commit(message: "${releaseVersion} release docs [skip ci]")
+        grgit.push(remote: remoteName, refsOrSpecs: ['gh-pages'])
 
-        exec {
-            workingDir "${rootDir}"
-            commandLine pinLatestDocsCommand
-        }
-
-        exec {
-            workingDir "${rootDir}"
-            commandLine "git", "add", "docs/${releaseVersion}", "docs/latest"
-        }
-
-        exec {
-            workingDir "${rootDir}"
-            commandLine "git", "commit", "-m", "\"${releaseVersion} release docs [skip ci]\""
-        }
-
-        exec {
-            workingDir "${rootDir}"
-            commandLine "git", "push", "--quiet", "${remote}", "gh-pages"
-            standardOutput pushNullFile
-        }
-
-        exec {
-            workingDir "${rootDir}"
-            commandLine "git", "checkout", "${releaseVersion}"
-        }
+        // Return to release tag
+        grgit.checkout(branch: releaseVersion)
     }
 }

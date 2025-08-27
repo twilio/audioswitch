@@ -44,17 +44,18 @@ internal fun setupFakeAudioSwitch(
             {},
         )
     val wiredHeadsetReceiver = WiredHeadsetReceiver(context, logger)
-    val headsetManager = BluetoothAdapter.getDefaultAdapter()?.let { bluetoothAdapter ->
-        BluetoothHeadsetManager(
-            context,
-            logger,
-            bluetoothAdapter,
-            audioDeviceManager,
-            bluetoothIntentProcessor = FakeBluetoothIntentProcessor(),
-        )
-    } ?: run {
-        null
-    }
+    val headsetManager =
+        BluetoothAdapter.getDefaultAdapter()?.let { bluetoothAdapter ->
+            BluetoothHeadsetManager(
+                context,
+                logger,
+                bluetoothAdapter,
+                audioDeviceManager,
+                bluetoothIntentProcessor = FakeBluetoothIntentProcessor(),
+            )
+        } ?: run {
+            null
+        }
     return Triple(
         AudioSwitch(
             context,
@@ -78,10 +79,11 @@ internal fun simulateBluetoothSystemIntent(
     action: String = BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED,
     connectionState: Int = BluetoothHeadset.STATE_CONNECTED,
 ) {
-    val intent = Intent(action).apply {
-        putExtra(BluetoothHeadset.EXTRA_STATE, connectionState)
-        putExtra(DEVICE_NAME, deviceName)
-    }
+    val intent =
+        Intent(action).apply {
+            putExtra(BluetoothHeadset.EXTRA_STATE, connectionState)
+            putExtra(DEVICE_NAME, deviceName)
+        }
     headsetManager.onReceive(context, intent)
 }
 
@@ -89,9 +91,10 @@ internal fun simulateWiredHeadsetSystemIntent(
     context: Context,
     wiredHeadsetReceiver: WiredHeadsetReceiver,
 ) {
-    val intent = Intent().apply {
-        putExtra(INTENT_STATE, STATE_PLUGGED)
-    }
+    val intent =
+        Intent().apply {
+            putExtra(INTENT_STATE, STATE_PLUGGED)
+        }
     wiredHeadsetReceiver.onReceive(context, intent)
 }
 

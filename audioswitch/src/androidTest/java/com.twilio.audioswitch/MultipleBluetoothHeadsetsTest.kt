@@ -15,7 +15,6 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 @LargeTest
 class MultipleBluetoothHeadsetsTest : AndroidTestBase() {
-
     @UiThreadTest
     @Test
     fun `it_should_assert_the_second_bluetooth_headset_when_two_are_connected`() {

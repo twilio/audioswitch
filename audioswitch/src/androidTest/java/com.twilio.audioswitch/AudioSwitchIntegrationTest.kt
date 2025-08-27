@@ -16,7 +16,6 @@ import java.util.concurrent.TimeUnit
 
 @RunWith(AndroidJUnit4::class)
 class AudioSwitchIntegrationTest : AndroidTestBase() {
-
     @Test
     @UiThreadTest
     fun it_should_disable_logging_by_default() {
@@ -50,8 +49,9 @@ class AudioSwitchIntegrationTest : AndroidTestBase() {
         audioSwitch.loggingEnabled = true
         assertTrue(audioSwitch.loggingEnabled)
         audioSwitch.start { _, _ -> }
-        val earpiece = audioSwitch.availableAudioDevices
-            .find { it is AudioDevice.Earpiece }
+        val earpiece =
+            audioSwitch.availableAudioDevices
+                .find { it is AudioDevice.Earpiece }
         assertNotNull(earpiece)
         audioSwitch.selectDevice(earpiece!!)
         assertEquals(earpiece, audioSwitch.selectedAudioDevice)
@@ -67,10 +67,11 @@ class AudioSwitchIntegrationTest : AndroidTestBase() {
     @Test
     @UiThreadTest
     fun `it_should_return_valid_semver_formatted_version`() {
-        val semVerRegex = Regex(
-            "^([0-9]+)\\.([0-9]+)\\.([0-9]+)(?:-([0-9A-" +
-                "Za-z-]+(?:\\.[0-9A-Za-z-]+)*))?(?:\\+[0-9A-Za-z-]+)?$",
-        )
+        val semVerRegex =
+            Regex(
+                "^([0-9]+)\\.([0-9]+)\\.([0-9]+)(?:-([0-9A-" +
+                    "Za-z-]+(?:\\.[0-9A-Za-z-]+)*))?(?:\\+[0-9A-Za-z-]+)?$",
+            )
         val version: String = AudioSwitch.VERSION
         assertNotNull(version)
         assertTrue(version.matches(semVerRegex))
@@ -80,20 +81,22 @@ class AudioSwitchIntegrationTest : AndroidTestBase() {
     fun it_should_receive_audio_focus_changes_if_configured() {
         val audioFocusLostLatch = CountDownLatch(1)
         val audioFocusGainedLatch = CountDownLatch(1)
-        val audioFocusChangeListener = AudioManager.OnAudioFocusChangeListener { focusChange ->
-            when (focusChange) {
-                AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> audioFocusLostLatch.countDown()
-                AudioManager.AUDIOFOCUS_GAIN -> audioFocusGainedLatch.countDown()
+        val audioFocusChangeListener =
+            AudioManager.OnAudioFocusChangeListener { focusChange ->
+                when (focusChange) {
+                    AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> audioFocusLostLatch.countDown()
+                    AudioManager.AUDIOFOCUS_GAIN -> audioFocusGainedLatch.countDown()
+                }
             }
-        }
         InstrumentationRegistry.getInstrumentation().runOnMainSync {
             val audioSwitch = AudioSwitch(getTargetContext(), null, true, audioFocusChangeListener)
             audioSwitch.start { _, _ -> }
             audioSwitch.activate()
         }
 
-        val audioManager = getInstrumentationContext()
-            .getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        val audioManager =
+            getInstrumentationContext()
+                .getSystemService(Context.AUDIO_SERVICE) as AudioManager
         val audioFocusUtil = AudioFocusUtil(audioManager, audioFocusChangeListener)
         audioFocusUtil.requestFocus()
 
@@ -106,14 +109,16 @@ class AudioSwitchIntegrationTest : AndroidTestBase() {
     fun it_should_acquire_audio_focus_if_it_is_already_acquired_in_the_system() {
         val audioFocusLostLatch = CountDownLatch(1)
         val audioFocusGainedLatch = CountDownLatch(1)
-        val audioFocusChangeListener = AudioManager.OnAudioFocusChangeListener { focusChange ->
-            when (focusChange) {
-                AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> audioFocusLostLatch.countDown()
-                AudioManager.AUDIOFOCUS_GAIN -> audioFocusGainedLatch.countDown()
+        val audioFocusChangeListener =
+            AudioManager.OnAudioFocusChangeListener { focusChange ->
+                when (focusChange) {
+                    AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> audioFocusLostLatch.countDown()
+                    AudioManager.AUDIOFOCUS_GAIN -> audioFocusGainedLatch.countDown()
+                }
             }
-        }
-        val audioManager = getInstrumentationContext()
-            .getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        val audioManager =
+            getInstrumentationContext()
+                .getSystemService(Context.AUDIO_SERVICE) as AudioManager
         val audioFocusUtil = AudioFocusUtil(audioManager, audioFocusChangeListener)
         audioFocusUtil.requestFocus()
 

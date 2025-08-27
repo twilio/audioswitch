@@ -14,7 +14,6 @@ internal abstract class BluetoothScoJob(
     private val bluetoothScoHandler: Handler,
     private val systemClockWrapper: SystemClockWrapper,
 ) {
-
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     var bluetoothScoRunnable: BluetoothScoRunnable? = null
 
@@ -42,7 +41,6 @@ internal abstract class BluetoothScoJob(
     }
 
     inner class BluetoothScoRunnable : Runnable {
-
         private val startTime = systemClockWrapper.elapsedRealtime()
         private var elapsedTime = 0L
 
