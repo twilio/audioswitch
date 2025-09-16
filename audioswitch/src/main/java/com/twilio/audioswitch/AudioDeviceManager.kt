@@ -76,19 +76,40 @@ internal class AudioDeviceManager(
         audioManager.mode = AudioManager.MODE_IN_COMMUNICATION
     }
 
+    @SuppressLint("NewApi")
     fun enableBluetoothSco(enable: Boolean) {
-        audioManager.run { if (enable) startBluetoothSco() else stopBluetoothSco() }
+        if (build.getVersion() >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            if (enable) {
+                audioManager.availableCommunicationDevices.firstOrNull {it.type == AudioDeviceInfo.TYPE_BLUETOOTH_SCO }
+                    ?.let { device ->
+                        audioManager.setCommunicationDevice(device)
+                    }
+            } else {
+                audioManager.clearCommunicationDevice()
+            }
+        } else {
+            audioManager.run { if (enable) startBluetoothSco() else stopBluetoothSco() }
+        }
     }
 
     @SuppressLint("NewApi")
     fun enableSpeakerphone(enable: Boolean) {
-        audioManager.isSpeakerphoneOn = enable
+        if (build.getVersion() >= Build.VERSION_CODES.S) {
+            if (enable) {
+                audioManager.availableCommunicationDevices.firstOrNull { it.type == AudioDeviceInfo.TYPE_BUILTIN_SPEAKER }
+                    ?.let { device ->
+                        audioManager.setCommunicationDevice(device)
+                    }
+            }
+        } else {
+            audioManager.isSpeakerphoneOn = enable
+        }
 
         /**
          * Some Samsung devices (reported Galaxy s9, s21) fail to route audio through USB headset
          * when in MODE_IN_COMMUNICATION
          */
-        if (!audioManager.isSpeakerphoneOn && "^SM-G(960|99)".toRegex().containsMatchIn(Build.MODEL)) {
+        if (!enable && "^SM-G(960|99)".toRegex().containsMatchIn(Build.MODEL)) {
             val devices = audioManager.getDevices(AudioManager.GET_DEVICES_OUTPUTS)
             for (device in devices) {
                 if (device.type == AudioDeviceInfo.TYPE_USB_HEADSET) {
@@ -104,10 +125,17 @@ internal class AudioDeviceManager(
     }
 
     // TODO Consider persisting audio state in the event of process death
+    @SuppressLint("NewApi")
     fun cacheAudioState() {
         savedAudioMode = audioManager.mode
         savedIsMicrophoneMuted = audioManager.isMicrophoneMute
-        savedSpeakerphoneEnabled = audioManager.isSpeakerphoneOn
+
+        if (build.getVersion() >= Build.VERSION_CODES.S) {
+            val currentDevice = audioManager.communicationDevice
+            savedSpeakerphoneEnabled = currentDevice?.type == AudioDeviceInfo.TYPE_BUILTIN_SPEAKER
+        } else {
+            savedSpeakerphoneEnabled = audioManager.isSpeakerphoneOn
+        }
     }
 
     @SuppressLint("NewApi")

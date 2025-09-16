@@ -377,7 +377,7 @@ class AudioSwitch {
         selectedDevice =
             if (userSelectedDevice != null) {
                 userSelectedDevice
-            } else if (mutableAudioDevices.size > 0) {
+            } else if (mutableAudioDevices.isNotEmpty()) {
                 val firstAudioDevice = mutableAudioDevices[0]
             /*
              * If there was an error starting bluetooth sco, then the selected AudioDevice should

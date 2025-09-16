@@ -324,9 +324,7 @@ internal class BluetoothHeadsetManager
         @SuppressLint("MissingPermission")
         private fun hasConnectedDevice() =
             headsetProxy?.let { proxy ->
-                proxy.connectedDevices?.let { devices ->
-                    devices.isNotEmpty()
-                }
+                proxy.connectedDevices?.isNotEmpty()
             } ?: false
 
         private fun Intent.getHeadsetDevice(): BluetoothDeviceWrapper? =
