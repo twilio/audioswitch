@@ -80,7 +80,8 @@ internal class AudioDeviceManager(
     fun enableBluetoothSco(enable: Boolean) {
         if (build.getVersion() >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             if (enable) {
-                audioManager.availableCommunicationDevices.firstOrNull {it.type == AudioDeviceInfo.TYPE_BLUETOOTH_SCO }
+                audioManager.availableCommunicationDevices
+                    .firstOrNull { it.type == AudioDeviceInfo.TYPE_BLUETOOTH_SCO }
                     ?.let { device ->
                         audioManager.setCommunicationDevice(device)
                     }
@@ -96,7 +97,8 @@ internal class AudioDeviceManager(
     fun enableSpeakerphone(enable: Boolean) {
         if (build.getVersion() >= Build.VERSION_CODES.S) {
             if (enable) {
-                audioManager.availableCommunicationDevices.firstOrNull { it.type == AudioDeviceInfo.TYPE_BUILTIN_SPEAKER }
+                audioManager.availableCommunicationDevices
+                    .firstOrNull { it.type == AudioDeviceInfo.TYPE_BUILTIN_SPEAKER }
                     ?.let { device ->
                         audioManager.setCommunicationDevice(device)
                     }
