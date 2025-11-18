@@ -31,17 +31,18 @@ internal class AudioDeviceManager(
         var hasEarpiece = false
         if (build.getVersion() >= Build.VERSION_CODES.M &&
             context.packageManager
-                .hasSystemFeature(PackageManager.FEATURE_AUDIO_OUTPUT)) {
+                .hasSystemFeature(PackageManager.FEATURE_AUDIO_OUTPUT)
+        ) {
             val devices = audioManager.getDevices(AudioManager.GET_DEVICES_OUTPUTS)
             for (device in devices) {
                 if (device.type == AudioDeviceInfo.TYPE_BUILTIN_EARPIECE) {
                     logger.d(TAG, "Builtin Earpiece available")
-                    hasEarpiece= true
+                    hasEarpiece = true
                 }
             }
         } else {
-			hasEarpiece = context.packageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY)
-		}
+            hasEarpiece = context.packageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY)
+        }
         return hasEarpiece
     }
 
