@@ -12,3 +12,7 @@ Thank you to all our contributors!
 * [Ryan C. Payne](https://github.com/paynerc)
 * [Ardavon Falls](https://github.com/afalls-twilio)
 * [Magnus Martikainen](https://github.com/mmartikainen)
+* [Win Nu](https://github.com/winnuz)
+* [Rob Holmes](https://github.com/robholmes)
+* [Thien My](https://github.com/myntvn)
+* [David Liu](https://github.com/davidliu)
