@@ -105,6 +105,17 @@ internal class AudioDeviceManager(
         } else {
             audioManager.isSpeakerphoneOn = enable
         }
+        /**
+         * Some Samsung devices (reported Galaxy s9, s21) fail to route audio through USB headset
+         * when in MODE_IN_COMMUNICATION
+         */
+        if ("^SM-G(960|99)".toRegex().containsMatchIn(Build.MODEL) &&
+            (AudioDeviceInfo.TYPE_BUILTIN_SPEAKER != audioManager.communicationDevice?.type) &&
+            (AudioManager.MODE_NORMAL != audioManager.mode)) {
+            audioManager.getDevices(AudioManager.GET_DEVICES_OUTPUTS)
+                .firstOrNull { it.type == AudioDeviceInfo.TYPE_USB_HEADSET }
+                ?.let { audioManager.mode = AudioManager.MODE_NORMAL }
+        }
     }
 
     @SuppressLint("NewApi")
@@ -145,7 +156,7 @@ internal class AudioDeviceManager(
     }
 
     @RequiresApi(Build.VERSION_CODES.S)
-    private fun enableCommunicationForAudioDeviceType(deviceType: Int, enable: Boolean) {
+    fun enableCommunicationForAudioDeviceType(deviceType: Int, enable: Boolean) {
         if (enable) {
             audioManager.availableCommunicationDevices
                 .firstOrNull { it.type == deviceType }
@@ -160,3 +171,4 @@ internal class AudioDeviceManager(
         }
     }
 }
+
