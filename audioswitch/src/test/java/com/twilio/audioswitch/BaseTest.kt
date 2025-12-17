@@ -99,17 +99,26 @@ open class BaseTest {
     // getContext$audioswitch_debug() -> getContext$kotlin_module_name$1a2b3c4d() which is hard to
     // mock and brittle, so lets force an actual implementation here
     protected fun getContext() = context
+
     protected fun getDefaultAudioFocusChangeListener() = defaultAudioFocusChangeListener
+
     protected fun getBluetoothListener() = bluetoothListener
+
     protected fun getLogger() = logger
+
     protected fun getPreferredDeviceList() = preferredDeviceList
+
     protected fun getPermissionsStrategyProxy() = permissionsStrategyProxy
+
     protected fun getBluetoothManager() = bluetoothManager
+
     // needed to not violate scoping issues with internal classes
     @JvmName("getAudioDeviceManager")
     internal fun getAudioDeviceManager() = audioDeviceManager
+
     @JvmName("getWiredHeadsetReceiver")
     internal fun getWiredHeadsetReceiver() = wiredHeadsetReceiver
+
     @JvmName("getHeadsetManager")
     internal fun getHeadsetManager() = headsetManager
 
