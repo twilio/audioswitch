@@ -1,5 +1,8 @@
 # Changelog
+
 ### 1.2.5 (In Progress)
+
+- Upgraded kotlin to 1.8.22
 
 ### 1.2.3 (Wed Aug 27, 2025)
 
