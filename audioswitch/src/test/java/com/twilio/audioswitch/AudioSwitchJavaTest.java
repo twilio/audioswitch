@@ -30,19 +30,19 @@ public class AudioSwitchJavaTest extends BaseTest {
     @Before
     public void setUp() {
         when(packageManager.hasSystemFeature(any())).thenReturn(true);
-        when(getContext$audioswitch_debug().getPackageManager()).thenReturn(packageManager);
+        when(getContext().getPackageManager()).thenReturn(packageManager);
         javaAudioSwitch =
                 new AudioSwitch(
-                        getContext$audioswitch_debug(),
+                        getContext(),
                         null,
                         new UnitTestLogger(false),
-                        getDefaultAudioFocusChangeListener$audioswitch_debug(),
-                        getPreferredDeviceList$audioswitch_debug(),
-                        getAudioDeviceManager$audioswitch_debug(),
-                        getWiredHeadsetReceiver$audioswitch_debug(),
-                        getPermissionsStrategyProxy$audioswitch_debug(),
-                        getBluetoothManager$audioswitch_debug(),
-                        getHeadsetManager$audioswitch_debug());
+                        getDefaultAudioFocusChangeListener(),
+                        getPreferredDeviceList(),
+                        getAudioDeviceManager(),
+                        getWiredHeadsetReceiver(),
+                        getPermissionsStrategyProxy(),
+                        getBluetoothManager(),
+                        getHeadsetManager());
     }
 
     @Test
@@ -132,16 +132,16 @@ public class AudioSwitchJavaTest extends BaseTest {
         preferredDeviceList.add(BluetoothHeadset.class);
         javaAudioSwitch =
                 new AudioSwitch(
-                        getContext$audioswitch_debug(),
-                        getBluetoothListener$audioswitch_debug(),
-                        getLogger$audioswitch_debug(),
-                        getDefaultAudioFocusChangeListener$audioswitch_debug(),
+                        getContext(),
+                        getBluetoothListener(),
+                        getLogger(),
+                        getDefaultAudioFocusChangeListener(),
                         preferredDeviceList,
-                        getAudioDeviceManager$audioswitch_debug(),
-                        getWiredHeadsetReceiver$audioswitch_debug(),
-                        getPermissionsStrategyProxy$audioswitch_debug(),
-                        getBluetoothManager$audioswitch_debug(),
-                        getHeadsetManager$audioswitch_debug());
+                        getAudioDeviceManager(),
+                        getWiredHeadsetReceiver(),
+                        getPermissionsStrategyProxy(),
+                        getBluetoothManager(),
+                        getHeadsetManager());
 
         startAudioSwitch();
 
