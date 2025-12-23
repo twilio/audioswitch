@@ -344,15 +344,22 @@ class AudioSwitch {
         when (audioDevice) {
             is BluetoothHeadset -> {
                 audioDeviceManager.enableSpeakerphone(false)
+                audioDeviceManager.enableEarpiece(false)
                 getBluetoothHeadsetManager()?.activate()
             }
-            is Earpiece, is WiredHeadset -> {
+            is Earpiece -> {
+                audioDeviceManager.enableSpeakerphone(false)
+                getBluetoothHeadsetManager()?.deactivate()
+                audioDeviceManager.enableEarpiece(true)
+            }
+            is WiredHeadset -> {
                 audioDeviceManager.enableSpeakerphone(false)
                 getBluetoothHeadsetManager()?.deactivate()
             }
             is Speakerphone -> {
-                audioDeviceManager.enableSpeakerphone(true)
+                audioDeviceManager.enableEarpiece(false)
                 getBluetoothHeadsetManager()?.deactivate()
+                audioDeviceManager.enableSpeakerphone(true)
             }
         }
     }
@@ -379,10 +386,10 @@ class AudioSwitch {
                 userSelectedDevice
             } else if (mutableAudioDevices.isNotEmpty()) {
                 val firstAudioDevice = mutableAudioDevices[0]
-            /*
-             * If there was an error starting bluetooth sco, then the selected AudioDevice should
-             * be the next valid device in the list.
-             */
+                /*
+                 * If there was an error starting bluetooth sco, then the selected AudioDevice should
+                 * be the next valid device in the list.
+                 */
                 if (firstAudioDevice is BluetoothHeadset &&
                     getBluetoothHeadsetManager()?.hasActivationError() == true
                 ) {
