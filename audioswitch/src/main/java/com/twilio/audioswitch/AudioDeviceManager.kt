@@ -111,8 +111,10 @@ internal class AudioDeviceManager(
          */
         if ("^SM-G(960|99)".toRegex().containsMatchIn(Build.MODEL) &&
             (AudioDeviceInfo.TYPE_BUILTIN_SPEAKER != audioManager.communicationDevice?.type) &&
-            (AudioManager.MODE_NORMAL != audioManager.mode)) {
-            audioManager.getDevices(AudioManager.GET_DEVICES_OUTPUTS)
+            (AudioManager.MODE_NORMAL != audioManager.mode)
+        ) {
+            audioManager
+                .getDevices(AudioManager.GET_DEVICES_OUTPUTS)
                 .firstOrNull { it.type == AudioDeviceInfo.TYPE_USB_HEADSET }
                 ?.let { audioManager.mode = AudioManager.MODE_NORMAL }
         }
@@ -156,19 +158,20 @@ internal class AudioDeviceManager(
     }
 
     @RequiresApi(Build.VERSION_CODES.S)
-    fun enableCommunicationForAudioDeviceType(deviceType: Int, enable: Boolean) {
+    fun enableCommunicationForAudioDeviceType(
+        deviceType: Int,
+        enable: Boolean,
+    ) {
         if (enable) {
             audioManager.availableCommunicationDevices
                 .firstOrNull { it.type == deviceType }
-                ?.let {
-                    device ->
-                        if (device != audioManager.communicationDevice) {
-                            audioManager.setCommunicationDevice(device)
-                        }
+                ?.let { device ->
+                    if (device != audioManager.communicationDevice) {
+                        audioManager.setCommunicationDevice(device)
+                    }
                 }
         } else if (audioManager.communicationDevice?.type == deviceType) {
             audioManager.clearCommunicationDevice()
         }
     }
 }
-
