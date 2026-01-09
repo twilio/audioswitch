@@ -1,1 +1,0 @@
-sourceset_dependencies='{":audioswitch:dokkaHtml/androidTestRelease":[],":audioswitch:dokkaHtml/debug":[],":audioswitch:dokkaHtml/main":[],":audioswitch:dokkaHtml/release":[],":audioswitch:dokkaHtml/testFixtures":[],":audioswitch:dokkaHtml/testFixturesDebug":[],":audioswitch:dokkaHtml/testFixturesRelease":[]}'
