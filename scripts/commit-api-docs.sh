@@ -4,7 +4,7 @@ set -e
 # Parse command line arguments
 VERSION=""
 GIT_USER_NAME=""
-GIT_TOKEN=""
+GITHUB_TOKEN=""
 
 while [[ $# -gt 0 ]]; do
   case $1 in
@@ -16,22 +16,22 @@ while [[ $# -gt 0 ]]; do
       GIT_USER_NAME="$2"
       shift 2
       ;;
-    --git-token)
-      GIT_TOKEN="$2"
+    --github-token)
+      GITHUB_TOKEN="$2"
       shift 2
       ;;
     *)
       echo "Unknown option: $1"
-      echo "Usage: $0 --version <version> --git-user-name <name> --git-token <token>"
+      echo "Usage: $0 --version <version> --git-user-name <name> --github-token <token>"
       exit 1
       ;;
   esac
 done
 
 # Validate required parameter
-if [ -z "$VERSION" ] || [ -z "$GIT_USER_NAME" ] || [ -z "$GIT_TOKEN" ]; then
+if [ -z "$VERSION" ] || [ -z "$GIT_USER_NAME" ] || [ -z "$GITHUB_TOKEN" ]; then
   echo "Error: All parameters are required"
-  echo "Usage: $0 --version <version> --git-user-name <name> --git-token <token>"
+  echo "Usage: $0 --version <version> --git-user-name <name> --github-token <token>"
   exit 1
 fi
 
@@ -46,7 +46,7 @@ if [ -z "$CIRCLE_PROJECT_REPONAME" ]; then
 fi
 
 # Create repo slug
-REMOTE_REPO="https://${GIT_USER_NAME}:${GIT_TOKEN}@github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}.git"
+REMOTE_REPO="https://${GIT_USER_NAME}:${GITHUB_TOKEN}@github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}.git"
 
 # Capture current branch
 ORIGINAL_BRANCH=$(git rev-parse --abbrev-ref HEAD)
