@@ -208,58 +208,12 @@ tasks.register('sonatypeAudioSwitchReleaseUpload', RootGradleBuild) {
     ]
 }
 
-tasks.register('publishDocs') {
+tasks.register('publishDocs', Exec) {
     description = 'Publish AudioSwitch KDocs to gh-pages branch'
     group = 'Publishing'
     dependsOn 'audioswitch:dokkaHtml'
     dependsOn validateReleaseTag
-
-    doLast {
-        def releaseVersion = System.getenv("CIRCLE_TAG") ?: ""
-        def githubUser = System.getenv("GIT_USER_NAME")
-        def githubToken = System.getenv("GITHUB_TOKEN")
-        def repoSlug = "${System.env.CIRCLE_PROJECT_USERNAME}/${System.env.CIRCLE_PROJECT_REPONAME}"
-        def gitRef = "https://${githubUser}:${githubToken}@github.com/${repoSlug}.git"
-        def remoteName = "upstream"
-
-        // Add remote if it doesn't exist
-        try {
-            grgit.remote.add(name: remoteName, url: gitRef)
-        } catch (Exception ignored) {
-            // Remote already exists
-        }
-
-        // Fetch remote branches
-        grgit.fetch(remote: remoteName)
-
-        // Checkout gh-pages branch
-        grgit.checkout(branch: 'gh-pages', startPoint: "remotes/${remoteName}/gh-pages", createBranch: true)
-
-        // Create docs directory if it doesn't exist
-        def docsDir = file("${rootDir}/docs")
-        if (!docsDir.exists()) {
-            docsDir.mkdirs()
-        }
-
-        // Copy documentation files
-        copy {
-            from "${rootDir}/audioswitch/build/dokka/html"
-            into "${rootDir}/docs/${releaseVersion}"
-        }
-
-        // Create symlink for latest docs
-        def latestLink = file("${rootDir}/docs/latest")
-        if (latestLink.exists()) {
-            latestLink.delete()
-        }
-        ant.symlink(link: "${rootDir}/docs/latest", resource: releaseVersion)
-
-        // Add, commit and push changes
-        grgit.add(patterns: ["docs/${releaseVersion}", "docs/latest"])
-        grgit.commit(message: "${releaseVersion} release docs [skip ci]")
-        grgit.push(remote: remoteName, refsOrSpecs: ['gh-pages'])
-
-        // Return to release tag
-        grgit.checkout(branch: releaseVersion)
-    }
+    workingDir rootDir
+    def version = System.getenv("CIRCLE_TAG") ?: ""
+    commandLine 'bash', 'scripts/commit-api-docs.sh', '--version', version
 }
