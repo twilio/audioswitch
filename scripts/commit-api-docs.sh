@@ -73,7 +73,7 @@ cp -r audioswitch/build/dokka/html "docs/${VERSION}"
 
 # Create symlink for latest
 rm -rf docs/latest
-ln -s "docs/${VERSION}" docs/latest
+ln -s "${VERSION}" docs/latest
 
 # Add files to git
 git add "docs/${VERSION}" docs/latest
