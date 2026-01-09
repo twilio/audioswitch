@@ -107,9 +107,10 @@ internal class AudioDeviceManager(
         }
         /**
          * Some Samsung devices (reported Galaxy s9, s21) fail to route audio through USB headset
-         * when in MODE_IN_COMMUNICATION
+         * when in MODE_IN_COMMUNICATION & when running unit tests, Build.MODEL is null
          */
-        if ("^SM-G(960|99)".toRegex().containsMatchIn(Build.MODEL) &&
+        if (null != Build.MODEL &&
+            "^SM-G(960|99)".toRegex().containsMatchIn(Build.MODEL) &&
             (AudioDeviceInfo.TYPE_BUILTIN_SPEAKER != audioManager.communicationDevice?.type) &&
             (AudioManager.MODE_NORMAL != audioManager.mode)
         ) {
