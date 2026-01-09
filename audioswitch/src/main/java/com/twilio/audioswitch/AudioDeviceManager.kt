@@ -113,7 +113,8 @@ internal class AudioDeviceManager(
          * when in MODE_IN_COMMUNICATION & when running unit tests, Build.MODEL is null
          */
         if (!speakerEnabled && null != Build.MODEL &&
-            "^SM-G(960|99)".toRegex().containsMatchIn(Build.MODEL)) {
+            "^SM-G(960|99)".toRegex().containsMatchIn(Build.MODEL)
+        ) {
             val devices = audioManager.getDevices(AudioManager.GET_DEVICES_OUTPUTS)
             for (device in devices) {
                 if (device.type == AudioDeviceInfo.TYPE_USB_HEADSET) {
