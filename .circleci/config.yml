@@ -68,7 +68,7 @@ commands:
       - run:
           name: Publish AudioSwitch release
           command: |
-            ./gradlew -q sonatypeAudioSwitchReleaseUpload --dry-run
+            ./gradlew -q sonatypeAudioSwitchReleaseUpload
 
 executors:
   build-executor:
