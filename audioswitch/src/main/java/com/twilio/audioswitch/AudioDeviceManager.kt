@@ -112,7 +112,8 @@ internal class AudioDeviceManager(
          * Some Samsung devices (reported Galaxy s9, s21) fail to route audio through USB headset
          * when in MODE_IN_COMMUNICATION & when running unit tests, Build.MODEL is null
          */
-        if (!speakerEnabled && null != Build.MODEL &&
+        if (!speakerEnabled &&
+            null != Build.MODEL &&
             "^SM-G(960|99)".toRegex().containsMatchIn(Build.MODEL)
         ) {
             val devices = audioManager.getDevices(AudioManager.GET_DEVICES_OUTPUTS)
