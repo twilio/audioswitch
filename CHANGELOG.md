@@ -6,7 +6,6 @@ Enhancements
 - Improved audio device routing reliability on some devices when switching between audio devices by making explicit the disabling of other audio devices.
   - This includes a fix that may have caused spurious bluetooth disconnection/reconnection when switching away from and back to a bluetooth device.
 
-
 ### 1.2.3 (Wed Aug 27, 2025)
 
 - Updated gradle to version 8.13
