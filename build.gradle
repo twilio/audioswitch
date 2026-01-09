@@ -199,12 +199,12 @@ tasks.register('sonatypeAudioSwitchReleaseUpload', RootGradleBuild) {
     buildFile = file('build.gradle')
     tasks = ['assembleRelease', 'publishAudioSwitchReleasePublicationToSonatypeRepository', 'closeAndReleaseSonatypeStagingRepository']
     startParameter.projectProperties += gradle.startParameter.projectProperties + [
-            'signing.keyId'            : "${getPropertyValue("SIGNING_KEY_ID")}",
-            'signing.password'         : "${getPropertyValue("SIGNING_PASSWORD")}",
-            'signing.secretKeyRingFile': "${getPropertyValue("SIGNING_SECRET_KEY_RING_FILE")}",
-            'mavenCentralUsername'     : "${getPropertyValue("MAVEN_CENTRAL_TOKEN_USERNAME")}",
-            'mavenCentralPassword'     : "${getPropertyValue("MAVEN_CENTRAL_TOKEN_PASSWORD")}",
-            'sonatypeStagingProfileId' : "${getPropertyValue("SONATYPE_STAGING_PROFILE_ID")}"
+            'signing.keyId'            : getPropertyValue("SIGNING_KEY_ID"),
+            'signing.password'         : getPropertyValue("SIGNING_PASSWORD"),
+            'signing.secretKeyRingFile': getPropertyValue("SIGNING_SECRET_KEY_RING_FILE"),
+            'mavenCentralUsername'     : getPropertyValue("MAVEN_CENTRAL_TOKEN_USERNAME"),
+            'mavenCentralPassword'     : getPropertyValue("MAVEN_CENTRAL_TOKEN_PASSWORD"),
+            'sonatypeStagingProfileId' : getPropertyValue("SONATYPE_STAGING_PROFILE_ID")
     ]
 }
 
