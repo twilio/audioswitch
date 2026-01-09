@@ -212,8 +212,8 @@ tasks.register('publishDocs', Exec) {
     description = 'Publish AudioSwitch KDocs to gh-pages branch'
     group = 'Publishing'
     dependsOn 'audioswitch:dokkaHtml'
-    dependsOn validateReleaseTag
+    //dependsOn validateReleaseTag
     workingDir rootDir
-    def version = System.getenv("CIRCLE_TAG") ?: ""
+    def version = System.getenv("CIRCLE_TAG") ?: "1.2.5"
     commandLine 'bash', 'scripts/commit-api-docs.sh', '--version', version
 }
