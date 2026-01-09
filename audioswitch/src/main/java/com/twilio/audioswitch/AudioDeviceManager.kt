@@ -8,6 +8,7 @@ import android.media.AudioFocusRequest
 import android.media.AudioManager
 import android.media.AudioManager.OnAudioFocusChangeListener
 import android.os.Build
+import androidx.annotation.RequiresApi
 import com.twilio.audioswitch.android.BuildWrapper
 import com.twilio.audioswitch.android.Logger
 
@@ -91,15 +92,7 @@ internal class AudioDeviceManager(
     @SuppressLint("NewApi")
     fun enableBluetoothSco(enable: Boolean) {
         if (build.getVersion() >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            if (enable) {
-                audioManager.availableCommunicationDevices
-                    .firstOrNull { it.type == AudioDeviceInfo.TYPE_BLUETOOTH_SCO }
-                    ?.let { device ->
-                        audioManager.setCommunicationDevice(device)
-                    }
-            } else {
-                audioManager.clearCommunicationDevice()
-            }
+            enableCommunicationForAudioDeviceType(AudioDeviceInfo.TYPE_BLUETOOTH_SCO, enable)
         } else {
             audioManager.run { if (enable) startBluetoothSco() else stopBluetoothSco() }
         }
@@ -108,28 +101,21 @@ internal class AudioDeviceManager(
     @SuppressLint("NewApi")
     fun enableSpeakerphone(enable: Boolean) {
         var speakerEnabled: Boolean
-
         if (build.getVersion() >= Build.VERSION_CODES.S) {
-            val currentDevice = audioManager.communicationDevice
-            speakerEnabled = currentDevice?.type == AudioDeviceInfo.TYPE_BUILTIN_SPEAKER
-
-            if (enable) {
-                audioManager.availableCommunicationDevices
-                    .firstOrNull { it.type == AudioDeviceInfo.TYPE_BUILTIN_SPEAKER }
-                    ?.let { device ->
-                        audioManager.setCommunicationDevice(device)
-                    }
-            }
+            speakerEnabled = audioManager.communicationDevice?.type == AudioDeviceInfo.TYPE_BUILTIN_SPEAKER
+            enableCommunicationForAudioDeviceType(AudioDeviceInfo.TYPE_BUILTIN_SPEAKER, enable)
         } else {
             audioManager.isSpeakerphoneOn = enable
             speakerEnabled = audioManager.isSpeakerphoneOn
         }
-
         /**
          * Some Samsung devices (reported Galaxy s9, s21) fail to route audio through USB headset
-         * when in MODE_IN_COMMUNICATION
+         * when in MODE_IN_COMMUNICATION & when running unit tests, Build.MODEL is null
          */
-        if (!speakerEnabled && "^SM-G(960|99)".toRegex().containsMatchIn(Build.MODEL)) {
+        if (!speakerEnabled &&
+            null != Build.MODEL &&
+            "^SM-G(960|99)".toRegex().containsMatchIn(Build.MODEL)
+        ) {
             val devices = audioManager.getDevices(AudioManager.GET_DEVICES_OUTPUTS)
             for (device in devices) {
                 if (device.type == AudioDeviceInfo.TYPE_USB_HEADSET) {
@@ -137,6 +123,13 @@ internal class AudioDeviceManager(
                     break
                 }
             }
+        }
+    }
+
+    @SuppressLint("NewApi")
+    fun enableEarpiece(enable: Boolean) {
+        if (build.getVersion() >= Build.VERSION_CODES.S) {
+            enableCommunicationForAudioDeviceType(AudioDeviceInfo.TYPE_BUILTIN_EARPIECE, enable)
         }
     }
 
@@ -167,6 +160,24 @@ internal class AudioDeviceManager(
             audioRequest?.let { audioManager.abandonAudioFocusRequest(it) }
         } else {
             audioManager.abandonAudioFocus(audioFocusChangeListener)
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.S)
+    fun enableCommunicationForAudioDeviceType(
+        deviceType: Int,
+        enable: Boolean,
+    ) {
+        if (enable) {
+            audioManager.availableCommunicationDevices
+                .firstOrNull { it.type == deviceType }
+                ?.let { device ->
+                    if (device != audioManager.communicationDevice) {
+                        audioManager.setCommunicationDevice(device)
+                    }
+                }
+        } else if (audioManager.communicationDevice?.type == deviceType) {
+            audioManager.clearCommunicationDevice()
         }
     }
 }

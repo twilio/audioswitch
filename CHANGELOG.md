@@ -1,8 +1,16 @@
 # Changelog
 
-### 1.2.5 (In Progress)
+### 1.2.5 (Fri Jan 9, 2025)
 
+Enhancements
+
+- Improved audio device routing reliability on some devices when switching between audio devices by making explicit the disabling of other audio devices.
+  - This includes a fix that may have caused spurious bluetooth disconnection/reconnection when switching away from and back to a bluetooth device.
 - Upgraded kotlin to 1.8.22
+
+### 1.2.4 (Wed Aug 27, 2025)
+
+TEST RELEASE/NO CHANGES
 
 ### 1.2.3 (Wed Aug 27, 2025)
 
