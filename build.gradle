@@ -215,5 +215,5 @@ tasks.register('publishDocs', Exec) {
     //dependsOn validateReleaseTag
     workingDir rootDir
     def version = System.getenv("CIRCLE_TAG") ?: "1.2.5"
-    commandLine 'bash', 'scripts/commit-api-docs.sh', '--version', version
+    commandLine 'bash', 'scripts/commit-api-docs.sh', '--version', version, '--git-user-name', System.getenv("GIT_USER_NAME"), '--github-token', System.getenv("GITHUB_TOKEN")
 }
