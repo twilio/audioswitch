@@ -50,7 +50,7 @@ fi
 
 # Fetch & check out the main branch
 GIT_BRANCH=$(git remote show origin | grep HEAD | cut -d: -f2-)
-git fetch "${REMOTE_NAME}"
+git fetch upstream
 git checkout "${GIT_BRANCH}"
 
 # Read current version from gradle.properties
