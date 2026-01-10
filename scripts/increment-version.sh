@@ -49,7 +49,7 @@ if ! git remote | grep -q "^upstream$"; then
 fi
 
 # Fetch & check out the main branch
-GIT_BRANCH=$(git remote show origin | grep HEAD | cut -d: -f2-)
+GIT_BRANCH="$(git remote show origin | grep HEAD | cut -d: -f2-)"
 git fetch upstream
 git checkout "${GIT_BRANCH}"
 
