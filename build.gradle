@@ -217,6 +217,6 @@ tasks.register('publishDocs', Exec) {
     dependsOn 'audioswitch:dokkaHtml'
     dependsOn validateReleaseTag
     workingDir rootDir
-    def version = System.getenv("CIRCLE_TAG") ?: "1.2.5"
+    def version = System.getenv("CIRCLE_TAG") ?: ""
     commandLine 'bash', 'scripts/commit-api-docs.sh', '--version', version, '--git-user-name', System.getenv("GIT_USER_NAME"), '--github-token', System.getenv("GITHUB_TOKEN")
 }
