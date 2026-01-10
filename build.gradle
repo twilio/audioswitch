@@ -147,49 +147,11 @@ tasks.register('validateReleaseTag', Exec) {
     workingDir "${rootDir}"
 }
 
-tasks.register('incrementVersion', RootGradleBuild) {
+tasks.register('incrementVersion', Exec) {
     description = 'Increment the SDK version after a release'
     group = 'Git'
-
-    doLast {
-        def gitBranch = grgit.repository.jgit.repository
-                .exactRef('refs/remotes/origin/HEAD')
-                ?.getTarget()
-                ?.getName()
-                ?.replace('refs/remotes/origin/', '')
-        def circleTag = System.getenv("CIRCLE_TAG")
-        def githubUser = System.getenv("GIT_USER_NAME")
-        def githubToken = System.getenv("GITHUB_TOKEN")
-        def repoSlug = "${System.env.CIRCLE_PROJECT_USERNAME}/${System.env.CIRCLE_PROJECT_REPONAME}"
-        def gitRef = "https://${githubUser}:${githubToken}@github.com/${repoSlug}.git"
-        def nextVersionPatch = versionPatch.toInteger() + 1
-        def remoteName = "upstream"
-
-        // Add remote if it doesn't exist
-        try {
-            grgit.remote.add(name: remoteName, url: gitRef)
-        } catch (Exception ignored) {
-            // Remote already exists
-        }
-
-        grgit.checkout(branch: gitBranch)
-
-        if (true || matchesVersion(circleTag)) {
-            println "Incrementing from versionPatch ${versionPatch} to ${nextVersionPatch}"
-
-            // Update gradle.properties
-            def gradlePropertiesFile = file('gradle.properties')
-            def properties = new Properties()
-            gradlePropertiesFile.withInputStream { properties.load(it) }
-            properties.setProperty("versionPatch", nextVersionPatch.toString())
-            gradlePropertiesFile.withOutputStream { properties.store(it, null) }
-
-            // commit the change
-            grgit.add(patterns: ['gradle.properties'])
-            grgit.commit(message: "Bump patch version [skip ci]")
-            grgit.push(remote: remoteName, refsOrSpecs: [gitBranch])
-        }
-    }
+    workingDir rootDir
+    commandLine 'bash', 'scripts/increment-version.sh', '--git-user-name', System.getenv("GIT_USER_NAME"), '--github-token', System.getenv("GITHUB_TOKEN")
 }
 
 tasks.register('sonatypeAudioSwitchReleaseUpload', RootGradleBuild) {
@@ -212,7 +174,7 @@ tasks.register('publishDocs', Exec) {
     description = 'Publish AudioSwitch KDocs to gh-pages branch'
     group = 'Publishing'
     dependsOn 'audioswitch:dokkaHtml'
-    //dependsOn validateReleaseTag
+    dependsOn validateReleaseTag
     workingDir rootDir
     def version = System.getenv("CIRCLE_TAG") ?: "1.2.5"
     commandLine 'bash', 'scripts/commit-api-docs.sh', '--version', version, '--git-user-name', System.getenv("GIT_USER_NAME"), '--github-token', System.getenv("GITHUB_TOKEN")
