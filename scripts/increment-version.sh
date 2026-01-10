@@ -40,11 +40,6 @@ if [ -z "$CIRCLE_PROJECT_REPONAME" ]; then
   CIRCLE_PROJECT_REPONAME=$(git remote get-url origin | sed -n 's#.*github.com[:/].*/\(.*\)\.git#\1#p')
 fi
 
-# Read current version from gradle.properties
-GRADLE_PROPERTIES="gradle.properties"
-CURRENT_PATCH=$(grep "^versionPatch=" "$GRADLE_PROPERTIES" | cut -d'=' -f2)
-NEXT_PATCH=$((CURRENT_PATCH + 1))
-
 # Create repo slug
 REMOTE_REPO="https://${GIT_USER_NAME}:${GITHUB_TOKEN}@github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}.git"
 
@@ -53,6 +48,16 @@ if ! git remote | grep -q "^upstream$"; then
   git remote add upstream "${REMOTE_REPO}"
 fi
 
+# Fetch & check out the main branch
+GIT_BRANCH=$(git remote show origin | grep HEAD | cut -d: -f2-)
+git fetch "${REMOTE_NAME}"
+git checkout "${GIT_BRANCH}"
+
+# Read current version from gradle.properties
+GRADLE_PROPERTIES="gradle.properties"
+CURRENT_PATCH=$(grep "^versionPatch=" "$GRADLE_PROPERTIES" | cut -d'=' -f2)
+NEXT_PATCH=$((CURRENT_PATCH + 1))
+
 # Update gradle.properties
 sed -i.bak "s/^versionPatch=.*/versionPatch=${NEXT_PATCH}/" "$GRADLE_PROPERTIES"
 rm -f "${GRADLE_PROPERTIES}.bak"
@@ -60,5 +65,5 @@ rm -f "${GRADLE_PROPERTIES}.bak"
 # Commit and push
 git add gradle.properties
 git commit -m "Bump patch version [skip ci]"
-git push upstream
+git push upstream "${GIT_BRANCH}"
 
