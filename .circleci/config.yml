@@ -7,10 +7,6 @@ parameters:
     type: boolean
     default: true
 
-  publish-docs-test:
-    type: boolean
-    default: false
-
 aliases:
   - &workspace
       ~/audioswitch
@@ -224,8 +220,3 @@ workflows:
           <<: *release-filter
           requires:
             - publish-docs
-
-  test-publish-docs:
-    when: << pipeline.parameters.publish-docs-test >>
-    jobs:
-      - publish-docs
