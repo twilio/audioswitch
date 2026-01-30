@@ -177,7 +177,7 @@ tasks.register('incrementVersion', RootGradleBuild) {
 
         grgit.checkout(branch: gitBranch)
 
-        if (true || matchesVersion(circleTag)) {
+        if (matchesVersion(circleTag)) {
             println "Incrementing from versionPatch ${versionPatch} to ${nextVersionPatch}"
 
             // Update gradle.properties
