@@ -133,7 +133,8 @@ class AudioSwitch {
             logger.loggingEnabled = value
         }
     val selectedAudioDevice: AudioDevice? get() = selectedDevice
-    val availableAudioDevices: List<AudioDevice> = mutableAudioDevices
+    val availableAudioDevices: List<AudioDevice>
+        get() = mutableAudioDevices.toList()
 
     /**
      * Constructs a new AudioSwitch instance.
@@ -406,9 +407,10 @@ class AudioSwitch {
             activate()
         }
         // trigger audio device change listener if there has been a change
-        val newAudioDeviceState = AudioDeviceState(mutableAudioDevices, selectedDevice)
+        val availableAudioDevicesSnapshot = mutableAudioDevices.toList()
+        val newAudioDeviceState = AudioDeviceState(availableAudioDevicesSnapshot, selectedDevice)
         if (newAudioDeviceState != oldAudioDeviceState) {
-            audioDeviceChangeListener?.invoke(mutableAudioDevices, selectedDevice)
+            audioDeviceChangeListener?.invoke(availableAudioDevicesSnapshot, selectedDevice)
         }
     }
 
