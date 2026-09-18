@@ -123,6 +123,38 @@ class AudioSwitchTest : BaseTest() {
     }
 
     @Test
+    fun `audio device change listener should receive a stable snapshot during reentrant enumeration`() {
+        val iteratedDevices = mutableListOf<AudioDevice>()
+        var enumerationTriggered = false
+
+        audioSwitch.start { audioDevices, _ ->
+            if (!enumerationTriggered) {
+                val iterator = audioDevices.iterator()
+                while (iterator.hasNext()) {
+                    iteratedDevices.add(iterator.next())
+                    if (!enumerationTriggered) {
+                        enumerationTriggered = true
+                        simulateNewWiredHeadsetConnection()
+                    }
+                }
+            }
+        }
+
+        assertThat(iteratedDevices, equalTo(listOf(Earpiece(), Speakerphone())))
+    }
+
+    @Test
+    fun `available audio devices should return a stable snapshot`() {
+        audioSwitch.start()
+        val initiallyAvailableDevices = audioSwitch.availableAudioDevices
+
+        simulateNewWiredHeadsetConnection()
+
+        assertThat(initiallyAvailableDevices, equalTo(listOf(Earpiece(), Speakerphone())))
+        assertThat(audioSwitch.availableAudioDevices, equalTo(listOf(WiredHeadset(), Speakerphone())))
+    }
+
+    @Test
     fun `start should not start the HeadsetManager if it is null`() {
         audioSwitch =
             AudioSwitch(
