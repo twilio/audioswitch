@@ -42,10 +42,24 @@ buildscript {
         return property
     }
 
+    /**
+     * CI accessors backed by GitHub Actions environment variables.
+     */
     ext.getShortCommitSha = {
-        def gitSha = System.getenv("CIRCLE_SHA1")
+        def gitSha = System.getenv("GITHUB_SHA")
 
         if(gitSha != null) return gitSha.substring(0, 7) else return ""
+    }
+
+    // The tag being built, or null when the build is not for a tag.
+    ext.getCiTag = {
+        if (System.getenv("GITHUB_REF_TYPE") == "tag") return System.getenv("GITHUB_REF_NAME")
+        return null
+    }
+
+    // "<owner>/<repo>" of the repository being built
+    ext.getRepoSlug = {
+        return System.getenv("GITHUB_REPOSITORY")
     }
 
     ext.isPreRelease = (project.hasProperty("preRelease") && project.property("preRelease").toBoolean() == true)
@@ -95,6 +109,25 @@ allprojects {
         google()
         mavenCentral()
     }
+
+    /*
+     * AGP's lint tooling (used by extractAnnotations and lint) resolves BouncyCastle 1.79 inside an
+     * internal detached configuration, which resolutionStrategy rules do not reach. Curated Artifactory
+     * blocks bcprov-jdk18on up to 1.84, so rewrite the dependencies of the BouncyCastle modules to a
+     * version it serves. Component metadata rules apply to detached configurations too.
+     * Build-time only: BouncyCastle is not part of the published artifact.
+     */
+    dependencies.components.all { ComponentMetadataDetails details ->
+        if (details.id.group == "org.bouncycastle") {
+            details.allVariants {
+                withDependencies { deps ->
+                    deps.findAll { it.group == "org.bouncycastle" }.each { dep ->
+                        dep.version { strictly "1.85" }
+                    }
+                }
+            }
+        }
+    }
 }
 
 nexusPublishing {
@@ -140,8 +173,8 @@ tasks.register('validateReleaseTag', Exec) {
     description = 'Validate the release tag matches the release version present on commit'
     group = 'Git'
     doFirst {
-        def circleTag = System.getenv("CIRCLE_TAG")
-        def tagsMatch = matchesVersion(circleTag) ? ("true") : ("false")
+        def ciTag = getCiTag()
+        def tagsMatch = matchesVersion(ciTag) ? ("true") : ("false")
         commandLine tagsMatch
     }
     workingDir "${rootDir}"
@@ -157,10 +190,10 @@ tasks.register('incrementVersion', RootGradleBuild) {
                 ?.getTarget()
                 ?.getName()
                 ?.replace('refs/remotes/origin/', '')
-        def circleTag = System.getenv("CIRCLE_TAG")
+        def ciTag = getCiTag()
         def githubUser = System.getenv("GIT_USER_NAME")
         def githubToken = System.getenv("GITHUB_TOKEN")
-        def repoSlug = "${System.env.CIRCLE_PROJECT_USERNAME}/${System.env.CIRCLE_PROJECT_REPONAME}"
+        def repoSlug = getRepoSlug()
         def gitRef = "https://${githubUser}:${githubToken}@github.com/${repoSlug}.git"
         def nextVersionPatch = versionPatch.toInteger() + 1
         def remoteName = "upstream"
@@ -177,7 +210,7 @@ tasks.register('incrementVersion', RootGradleBuild) {
 
         grgit.checkout(branch: gitBranch)
 
-        if (matchesVersion(circleTag)) {
+        if (matchesVersion(ciTag)) {
             println "Incrementing from versionPatch ${versionPatch} to ${nextVersionPatch}"
 
             // Update gradle.properties
@@ -217,6 +250,6 @@ tasks.register('publishDocs', Exec) {
     dependsOn 'audioswitch:dokkaHtml'
     dependsOn validateReleaseTag
     workingDir rootDir
-    def version = System.getenv("CIRCLE_TAG") ?: ""
+    def version = getCiTag() ?: ""
     commandLine 'bash', 'scripts/commit-api-docs.sh', '--version', version, '--git-user-name', System.getenv("GIT_USER_NAME"), '--github-token', System.getenv("GITHUB_TOKEN")
 }

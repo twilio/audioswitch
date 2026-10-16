@@ -35,18 +35,12 @@ if [ -z "$VERSION" ] || [ -z "$GIT_USER_NAME" ] || [ -z "$GITHUB_TOKEN" ]; then
   exit 1
 fi
 
-# Set CIRCLE_PROJECT_USERNAME if not provided by environment
-if [ -z "$CIRCLE_PROJECT_USERNAME" ]; then
-  CIRCLE_PROJECT_USERNAME=$(git remote get-url origin | sed -n 's#.*github.com[:/]\([^/]*\)/.*#\1#p')
+# Repo slug (<owner>/<repo>): GitHub Actions provides it, otherwise derive it from the origin remote
+if [ -z "$GITHUB_REPOSITORY" ]; then
+  GITHUB_REPOSITORY=$(git remote get-url origin | sed -E 's#.*github.com[:/](.*[^/])(\.git)?$#\1#; s#\.git$##')
 fi
 
-# Set CIRCLE_PROJECT_REPONAME if not provided by environment
-if [ -z "$CIRCLE_PROJECT_REPONAME" ]; then
-  CIRCLE_PROJECT_REPONAME=$(git remote get-url origin | sed -n 's#.*github.com[:/].*/\(.*\)\.git#\1#p')
-fi
-
-# Create repo slug
-REMOTE_REPO="https://${GIT_USER_NAME}:${GITHUB_TOKEN}@github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}.git"
+REMOTE_REPO="https://${GIT_USER_NAME}:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
 
 # Capture current branch
 ORIGINAL_BRANCH=$(git rev-parse --abbrev-ref HEAD)
