@@ -52,11 +52,16 @@ jobs:
               def cfg = buildscript.configurations.classpath
               def ac = cfg.incoming.artifactView { it.lenient(true) }.artifacts
               ac.artifactFiles.files
-              def blocked = ac.failures.collect { it.cause ? it.cause.message : it.message }.collect { m -> (m =~ /Could not (?:download|resolve) ([^\n]*)/).with { find() ? group(1) : m.readLines().first() } }.unique().sort()
+              def blocked = new TreeSet()
+              ac.failures.each { Throwable f ->
+                def msgs = []
+                for (Throwable t = f; t != null; t = t.cause) { msgs << (t.message ?: '').readLines().find { it.trim() } }
+                blocked << (msgs.find { it?.startsWith('Could not download') || it?.startsWith('Could not resolve') } ?: msgs.first())
+              }
               println "RESOLVED ARTIFACTS: ${ac.artifacts.size()}"
               println "BLOCKED/FAILED: ${blocked.size()}"
               blocked.each { println "  BLOCKED ${it}" }
             }
           }
           GRADLE
-          ./gradlew -q -p "$s" report 2>&1 | grep -E "RESOLVED|BLOCKED|FAILED|wrong|rror" | cut -c1-220 | head -40
+          ./gradlew -q -p "$s" report 2>&1 | cut -c1-220 | tail -60
