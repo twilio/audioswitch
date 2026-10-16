@@ -78,22 +78,6 @@ buildscript {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "org.jetbrains.dokka:dokka-gradle-plugin:$dokka_version"
     }
-
-    /*
-     * Curated Artifactory blocks these versions of AGP's transitive build dependencies. They are
-     * build-time only (never part of the published artifact), so use the oldest versions it serves.
-     */
-    configurations.classpath {
-        resolutionStrategy.eachDependency { details ->
-            if (details.requested.group == "org.bouncycastle") {
-                details.useVersion "1.85"
-            }
-            if (details.requested.group == "io.netty" &&
-                    (details.requested.name == "netty-codec-http" || details.requested.name == "netty-handler")) {
-                details.useVersion "4.1.137.Final"
-            }
-        }
-    }
 }
 
 plugins {
