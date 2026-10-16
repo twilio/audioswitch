@@ -1,0 +1,36 @@
+name: Build
+
+on:
+  push:
+    branches: ["supplychain_*"]
+  pull_request:
+
+jobs:
+  # Stage 1: verify every dependency (buildscript, plugins, project) resolves through Artifactory.
+  resolve-dependencies:
+    name: Resolve dependencies
+    runs-on: ${{ github.event.pull_request.head.repo.fork && 'ubuntu-latest' || 'ubuntu-x64' }}
+    environment: test_docker
+    permissions:
+      id-token: write
+      contents: read
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+
+      - name: Set up Java
+        uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3 # v4.9.1
+        with:
+          distribution: "temurin"
+          java-version: "17"
+
+      - name: Artifactory OIDC
+        if: ${{ !github.event.pull_request.head.repo.fork }}
+        uses: twilio/sdk-actions/artifactory-oidc@ee249453b64609cf2e92f9bba8c3337d3ca9f95a # java_gradle
+        with:
+          ecosystem: "gradle"
+          provider-name: "github-actions-twilio"
+
+      - name: Resolve dependencies
+        run: ./gradlew --refresh-dependencies buildEnvironment audioswitch:dependencies
