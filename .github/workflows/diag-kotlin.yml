@@ -1,0 +1,45 @@
+# TEMPORARY diagnostic: which kotlin-gradle-plugin versions does curated Artifactory serve? Delete after use.
+name: Diag Kotlin
+
+on:
+  push:
+    branches: ["supplychain_*"]
+    paths: [".github/workflows/diag-kotlin.yml"]
+
+permissions:
+  contents: read
+
+jobs:
+  diag:
+    runs-on: ubuntu-x64
+    permissions:
+      id-token: write
+      contents: read
+    timeout-minutes: 20
+    steps:
+      - uses: twilio/sdk-actions/artifactory-oidc@ee249453b64609cf2e92f9bba8c3337d3ca9f95a # java_gradle
+        with:
+          ecosystem: "gradle"
+      - name: Probe
+        run: |
+          props=~/.gradle/artifactoryoidc.properties
+          url=$(grep '^url=' $props | cut -d= -f2-)
+          user=$(grep '^username=' $props | cut -d= -f2-)
+          token=$(grep '^token=' $props | cut -d= -f2-)
+          echo "::add-mask::$token"
+          base="$url/artifactory/virtual-maven-thirdparty/org/jetbrains/kotlin"
+          code() { curl -s -o /dev/null -w '%{http_code}' -I -u "$user:$token" "$1"; }
+          echo "== other Kotlin artifacts at 1.8.22 (pom / jar)"
+          for a in kotlin-stdlib kotlin-gradle-plugin-api kotlin-gradle-plugin-model kotlin-compiler-embeddable kotlin-gradle-plugin-annotations; do
+            echo "$a pom=$(code $base/$a/1.8.22/$a-1.8.22.pom) jar=$(code $base/$a/1.8.22/$a-1.8.22.jar)"
+          done
+          echo "== kotlin-gradle-plugin: all stable versions  (pom module jar)"
+          a=kotlin-gradle-plugin
+          curl -sS -u "$user:$token" "$base/$a/maven-metadata.xml" | grep -o '<version>[^<]*' | sed 's/<version>//' > $RUNNER_TEMP/versions.txt
+          echo "listed: $(wc -l < $RUNNER_TEMP/versions.txt) versions, newest: $(tail -1 $RUNNER_TEMP/versions.txt)"
+          for v in $(grep -viE 'alpha|beta|rc|-m[0-9]|dev|eap|snapshot|release' $RUNNER_TEMP/versions.txt); do
+            echo "$v $(code $base/$a/$v/$a-$v.pom) $(code $base/$a/$v/$a-$v.module) $(code $base/$a/$v/$a-$v.jar)"
+          done > $RUNNER_TEMP/table.txt
+          echo "-- served (any 200):"; grep -E ' 200' $RUNNER_TEMP/table.txt || echo none
+          echo "-- distinct status patterns:"; awk '{print $2,$3,$4}' $RUNNER_TEMP/table.txt | sort | uniq -c
+          echo "-- first and last rows:"; head -2 $RUNNER_TEMP/table.txt; tail -3 $RUNNER_TEMP/table.txt
