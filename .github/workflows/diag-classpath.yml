@@ -32,31 +32,38 @@ jobs:
           s="$RUNNER_TEMP/scratch"; mkdir -p "$s"
           echo "rootProject.name = 'scratch'" > "$s/settings.gradle"
           cat > "$s/build.gradle" <<'GRADLE'
-          buildscript {
-            repositories { google(); mavenCentral() }
-            dependencies {
-              classpath 'com.android.tools.build:gradle:8.12.1'
-              classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.22'
-              classpath 'org.jetbrains.dokka:dokka-gradle-plugin:1.4.32'
-              classpath 'com.diffplug.spotless:spotless-plugin-gradle:7.2.1'
-              classpath 'io.github.gradle-nexus:publish-plugin:2.0.0'
-              classpath 'org.ajoberstar.grgit:grgit-gradle:5.3.2'
+          repositories { gradlePluginPortal(); google(); mavenCentral() }
+          configurations {
+            probe {
+              canBeConsumed = false
+              attributes {
+                attribute(Usage.USAGE_ATTRIBUTE, objects.named(Usage, Usage.JAVA_RUNTIME))
+                attribute(org.gradle.api.attributes.java.TargetJvmVersion.TARGET_JVM_VERSION_ATTRIBUTE, 17)
+                attribute(org.gradle.api.attributes.plugin.GradlePluginApiVersion.GRADLE_PLUGIN_API_VERSION_ATTRIBUTE, objects.named(org.gradle.api.attributes.plugin.GradlePluginApiVersion, '8.13'))
+              }
+              resolutionStrategy.eachDependency { d ->
+                if (d.requested.group == 'org.bouncycastle') d.useVersion('1.85')
+                if (d.requested.group == 'io.netty' && d.requested.version?.startsWith('4.1.')) d.useVersion('4.1.137.Final')
+              }
             }
-            configurations.classpath.resolutionStrategy.eachDependency { d ->
-              if (d.requested.group == 'org.bouncycastle') d.useVersion('1.85')
-              if (d.requested.group == 'io.netty' && d.requested.version?.startsWith('4.1.')) d.useVersion('4.1.137.Final')
-            }
+          }
+          dependencies {
+            probe 'com.android.tools.build:gradle:8.12.1'
+            probe 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.22'
+            probe 'org.jetbrains.dokka:dokka-gradle-plugin:1.4.32'
+            probe 'com.diffplug.spotless:spotless-plugin-gradle:7.2.1'
+            probe 'io.github.gradle-nexus:publish-plugin:2.0.0'
+            probe 'org.ajoberstar.grgit:grgit-gradle:5.3.2'
           }
           tasks.register('report') {
             doLast {
-              def cfg = buildscript.configurations.classpath
-              def ac = cfg.incoming.artifactView { it.lenient(true) }.artifacts
+              def ac = configurations.probe.incoming.artifactView { it.lenient(true) }.artifacts
               ac.artifactFiles.files
               def blocked = new TreeSet()
               ac.failures.each { Throwable f ->
                 def msgs = []
                 for (Throwable t = f; t != null; t = t.cause) { msgs << (t.message ?: '').readLines().find { it.trim() } }
-                blocked << (msgs.find { it?.startsWith('Could not download') || it?.startsWith('Could not resolve') } ?: msgs.first())
+                blocked << (msgs.find { it?.startsWith('Could not download') || it?.startsWith('Could not resolve') || it?.startsWith('Could not find') } ?: msgs.first())
               }
               println "RESOLVED ARTIFACTS: ${ac.artifacts.size()}"
               println "BLOCKED/FAILED: ${blocked.size()}"
@@ -64,4 +71,4 @@ jobs:
             }
           }
           GRADLE
-          ./gradlew -q -p "$s" report 2>&1 | cut -c1-220 | tail -60
+          ./gradlew -q -p "$s" report 2>&1 | grep -E "RESOLVED ARTIFACTS|BLOCKED|What went wrong|^> |^A problem|rror:" | grep -v "^\s*\^\[" | cut -c1-230 | head -40
