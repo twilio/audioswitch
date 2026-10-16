@@ -2,7 +2,7 @@ name: Build
 
 on:
   push:
-    branches: ["supplychain_*"]
+    branches: ["master", "supplychain_*"]
   pull_request:
 
 permissions:

@@ -1,0 +1,96 @@
+name: Release
+
+# Triggered by a version tag, e.g. 1.2.3. The tag must match the version in gradle.properties
+# (enforced by the validateReleaseTag Gradle task).
+on:
+  push:
+    tags: ["[0-9]+.[0-9]+.[0-9]+"]
+
+permissions:
+  contents: read
+
+env:
+  ARTIFACTORY_URL: ${{ vars.ARTIFACTORY_URL }}
+
+jobs:
+  # Publishes the signed release to Maven Central. Secrets live in the `production` environment.
+  publish-release:
+    name: Publish release
+    if: github.repository_owner == 'twilio'
+    runs-on: ubuntu-x64
+    environment: production
+    permissions:
+      id-token: write
+      contents: read
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+
+      - name: Set up Java
+        uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3 # v4.9.1
+        with:
+          distribution: "temurin"
+          java-version: "17"
+
+      - name: Artifactory OIDC
+        uses: twilio/sdk-actions/artifactory-oidc@ee249453b64609cf2e92f9bba8c3337d3ca9f95a # java_gradle
+        with:
+          ecosystem: "gradle"
+
+      - name: Install signing key
+        env:
+          SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
+        run: |
+          key_file="${RUNNER_TEMP}/signing-secret-key.gpg"
+          (umask 077; echo "$SIGNING_KEY" | base64 -d > "$key_file")
+          echo "SIGNING_SECRET_KEY_RING_FILE=${key_file}" >> "$GITHUB_ENV"
+
+      - name: Publish to Maven Central
+        env:
+          SIGNING_KEY_ID: ${{ secrets.SIGNING_KEY_ID }}
+          SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
+          MAVEN_CENTRAL_TOKEN_USERNAME: ${{ secrets.MAVEN_CENTRAL_TOKEN_USERNAME }}
+          MAVEN_CENTRAL_TOKEN_PASSWORD: ${{ secrets.MAVEN_CENTRAL_TOKEN_PASSWORD }}
+          SONATYPE_STAGING_PROFILE_ID: ${{ secrets.SONATYPE_STAGING_PROFILE_ID }}
+        run: ./gradlew -q sonatypeAudioSwitchReleaseUpload
+
+      - name: Remove signing key
+        if: always()
+        run: rm -f "${SIGNING_SECRET_KEY_RING_FILE}"
+
+  # Publishes the API docs (dokka) to the gh-pages branch with the built-in token.
+  publish-docs:
+    name: Publish docs
+    needs: publish-release
+    if: github.repository_owner == 'twilio'
+    runs-on: ubuntu-x64
+    permissions:
+      id-token: write
+      contents: write
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+
+      - name: Set up Java
+        uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3 # v4.9.1
+        with:
+          distribution: "temurin"
+          java-version: "17"
+
+      - name: Artifactory OIDC
+        uses: twilio/sdk-actions/artifactory-oidc@ee249453b64609cf2e92f9bba8c3337d3ca9f95a # java_gradle
+        with:
+          ecosystem: "gradle"
+
+      - name: Configure git user
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Publish docs
+        env:
+          GIT_USER_NAME: x-access-token
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./gradlew publishDocs

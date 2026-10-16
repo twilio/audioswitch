@@ -43,11 +43,10 @@ buildscript {
     }
 
     /**
-     * CI-provider agnostic accessors. GitHub Actions variables take precedence, CircleCI variables
-     * are kept as a fallback until the CircleCI pipeline is removed.
+     * CI accessors backed by GitHub Actions environment variables.
      */
     ext.getShortCommitSha = {
-        def gitSha = System.getenv("GITHUB_SHA") ?: System.getenv("CIRCLE_SHA1")
+        def gitSha = System.getenv("GITHUB_SHA")
 
         if(gitSha != null) return gitSha.substring(0, 7) else return ""
     }
@@ -55,14 +54,12 @@ buildscript {
     // The tag being built, or null when the build is not for a tag.
     ext.getCiTag = {
         if (System.getenv("GITHUB_REF_TYPE") == "tag") return System.getenv("GITHUB_REF_NAME")
-        return System.getenv("CIRCLE_TAG")
+        return null
     }
 
     // "<owner>/<repo>" of the repository being built
     ext.getRepoSlug = {
-        def slug = System.getenv("GITHUB_REPOSITORY")
-        if (slug != null) return slug
-        return "${System.getenv("CIRCLE_PROJECT_USERNAME")}/${System.getenv("CIRCLE_PROJECT_REPONAME")}"
+        return System.getenv("GITHUB_REPOSITORY")
     }
 
     ext.isPreRelease = (project.hasProperty("preRelease") && project.property("preRelease").toBoolean() == true)
