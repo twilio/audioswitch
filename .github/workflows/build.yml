@@ -73,3 +73,102 @@ jobs:
           name: audioswitch-build
           path: audioswitch/build/outputs
           if-no-files-found: error
+
+  # Stage 3: checks and tests. Independent of each other, all run after dependencies resolve.
+
+  lint:
+    name: Lint
+    needs: resolve-dependencies
+    runs-on: ${{ github.event.pull_request.head.repo.fork && 'ubuntu-latest' || 'ubuntu-x64' }}
+    permissions:
+      id-token: write
+      contents: read
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+
+      - name: Set up Java
+        uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3 # v4.9.1
+        with:
+          distribution: "temurin"
+          java-version: "17"
+
+      - name: Artifactory OIDC
+        if: ${{ !github.event.pull_request.head.repo.fork }}
+        uses: twilio/sdk-actions/artifactory-oidc@ee249453b64609cf2e92f9bba8c3337d3ca9f95a # java_gradle
+        with:
+          ecosystem: "gradle"
+
+      - name: Lint
+        run: ./gradlew -q lint
+
+      - name: Upload lint-results
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: lint-results
+          path: audioswitch/build/reports/lint-results*.html
+          if-no-files-found: warn
+
+  check-format:
+    name: Check format
+    needs: resolve-dependencies
+    runs-on: ${{ github.event.pull_request.head.repo.fork && 'ubuntu-latest' || 'ubuntu-x64' }}
+    permissions:
+      id-token: write
+      contents: read
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+
+      - name: Set up Java
+        uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3 # v4.9.1
+        with:
+          distribution: "temurin"
+          java-version: "17"
+
+      - name: Artifactory OIDC
+        if: ${{ !github.event.pull_request.head.repo.fork }}
+        uses: twilio/sdk-actions/artifactory-oidc@ee249453b64609cf2e92f9bba8c3337d3ca9f95a # java_gradle
+        with:
+          ecosystem: "gradle"
+
+      - name: Check format
+        run: ./gradlew -q spotlessCheck
+
+  unit-tests:
+    name: Unit tests
+    needs: build
+    runs-on: ${{ github.event.pull_request.head.repo.fork && 'ubuntu-latest' || 'ubuntu-x64' }}
+    permissions:
+      id-token: write
+      contents: read
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+
+      - name: Set up Java
+        uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3 # v4.9.1
+        with:
+          distribution: "temurin"
+          java-version: "17"
+
+      - name: Artifactory OIDC
+        if: ${{ !github.event.pull_request.head.repo.fork }}
+        uses: twilio/sdk-actions/artifactory-oidc@ee249453b64609cf2e92f9bba8c3337d3ca9f95a # java_gradle
+        with:
+          ecosystem: "gradle"
+
+      - name: Unit tests
+        run: ./gradlew audioswitch:testDebugUnitTest
+
+      - name: Upload unit-test-reports
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: unit-test-reports
+          path: audioswitch/build/reports/tests/testDebugUnitTest
+          if-no-files-found: warn
