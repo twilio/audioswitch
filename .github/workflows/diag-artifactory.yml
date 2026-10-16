@@ -1,0 +1,41 @@
+# TEMPORARY diagnostic: which bcprov versions does curated Artifactory serve? Delete after use.
+name: Diag Artifactory
+
+on:
+  push:
+    branches: ["supplychain_*"]
+    paths: [".github/workflows/diag-artifactory.yml"]
+
+permissions:
+  contents: read
+
+jobs:
+  diag:
+    runs-on: ubuntu-x64
+    permissions:
+      id-token: write
+      contents: read
+    timeout-minutes: 10
+    steps:
+      - name: Artifactory OIDC
+        uses: twilio/sdk-actions/artifactory-oidc@ee249453b64609cf2e92f9bba8c3337d3ca9f95a # java_gradle
+        with:
+          ecosystem: "gradle"
+
+      - name: Probe bcprov versions
+        run: |
+          set -u
+          props=~/.gradle/artifactoryoidc.properties
+          url=$(grep '^url=' $props | cut -d= -f2-)
+          user=$(grep '^username=' $props | cut -d= -f2-)
+          token=$(grep '^token=' $props | cut -d= -f2-)
+          echo "::add-mask::$token"
+          base="$url/artifactory/virtual-maven-thirdparty/org/bouncycastle"
+          for art in bcprov-jdk18on bcutil-jdk18on; do
+            echo "== $art: versions listed by maven-metadata.xml"
+            curl -sS -u "$user:$token" "$base/$art/maven-metadata.xml" | grep -o '<version>[^<]*' | sed 's/<version>//' | tr '\n' ' '; echo
+            for v in 1.70 1.72 1.77 1.78.1 1.79 1.80 1.81 1.82; do
+              code=$(curl -s -o /dev/null -w '%{http_code}' -I -u "$user:$token" "$base/$art/$v/$art-$v.jar")
+              echo "$art $v -> HTTP $code"
+            done
+          done
