@@ -61,9 +61,9 @@ jobs:
               ac.artifactFiles.files
               def blocked = new TreeSet()
               ac.failures.each { Throwable f ->
-                def msgs = []
-                for (Throwable t = f; t != null; t = t.cause) { msgs << (t.message ?: '').readLines().find { it.trim() } }
-                blocked << (msgs.find { it?.startsWith('Could not download') || it?.startsWith('Could not resolve') || it?.startsWith('Could not find') } ?: msgs.first())
+                def lines = []
+                for (Throwable t = f; t != null; t = t.cause) { (t.message ?: '').readLines().findAll { it.trim() }.take(6).each { lines << it.trim() } }
+                blocked << lines.unique().join(' | ')
               }
               println "RESOLVED ARTIFACTS: ${ac.artifacts.size()}"
               println "BLOCKED/FAILED: ${blocked.size()}"
@@ -71,4 +71,4 @@ jobs:
             }
           }
           GRADLE
-          ./gradlew -q -p "$s" report 2>&1 | grep -E "RESOLVED ARTIFACTS|BLOCKED|What went wrong|^> |^A problem|rror:" | grep -v "^\s*\^\[" | cut -c1-230 | head -40
+          ./gradlew -q -p "$s" report 2>&1 | grep -E "RESOLVED ARTIFACTS|BLOCKED" | grep -v "^\s*\^\[" | cut -c1-900 | head -40
