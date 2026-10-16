@@ -173,14 +173,13 @@ jobs:
           path: audioswitch/build/reports/tests/testDebugUnitTest
           if-no-files-found: warn
 
-  # Stage 4: instrumentation tests on Firebase Test Lab. Needs GCP credentials, so it never runs
-  # for fork PRs. The credentials live in the `firebase-test-lab` environment, not at repo level.
+  # Stage 4: instrumentation tests on Firebase Test Lab. Authenticates with GCP through workload
+  # identity federation (no stored key), so it never runs for fork PRs, which get no OIDC token.
   integration-tests:
     name: Integration tests
     needs: [build, lint, check-format]
     if: ${{ !github.event.pull_request.head.repo.fork }}
     runs-on: ubuntu-x64
-    environment: firebase-test-lab
     permissions:
       id-token: write
       contents: read
@@ -204,14 +203,10 @@ jobs:
           ls audioswitch/ftl/app-debug.apk audioswitch/build/outputs/apk/androidTest/debug/audioswitch-debug-androidTest.apk
 
       - name: Authenticate to Google Cloud
-        env:
-          GCP_KEY: ${{ secrets.GCP_KEY }}
-        run: |
-          if [ -z "$GCP_KEY" ]; then
-            echo "::error::Secret GCP_KEY is not set in the 'firebase-test-lab' environment"
-            exit 1
-          fi
-          echo "$GCP_KEY" | base64 -d | gcloud auth activate-service-account --key-file=-
+        uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3
+        with:
+          workload_identity_provider: projects/285008367772/locations/global/workloadIdentityPools/github/providers/github-actions
+          service_account: ahoy-video-app@video-app-79418.iam.gserviceaccount.com
 
       - name: Run integration tests
         run: >
