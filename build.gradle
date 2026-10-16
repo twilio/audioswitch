@@ -42,10 +42,27 @@ buildscript {
         return property
     }
 
+    /**
+     * CI-provider agnostic accessors. GitHub Actions variables take precedence, CircleCI variables
+     * are kept as a fallback until the CircleCI pipeline is removed.
+     */
     ext.getShortCommitSha = {
-        def gitSha = System.getenv("CIRCLE_SHA1")
+        def gitSha = System.getenv("GITHUB_SHA") ?: System.getenv("CIRCLE_SHA1")
 
         if(gitSha != null) return gitSha.substring(0, 7) else return ""
+    }
+
+    // The tag being built, or null when the build is not for a tag.
+    ext.getCiTag = {
+        if (System.getenv("GITHUB_REF_TYPE") == "tag") return System.getenv("GITHUB_REF_NAME")
+        return System.getenv("CIRCLE_TAG")
+    }
+
+    // "<owner>/<repo>" of the repository being built
+    ext.getRepoSlug = {
+        def slug = System.getenv("GITHUB_REPOSITORY")
+        if (slug != null) return slug
+        return "${System.getenv("CIRCLE_PROJECT_USERNAME")}/${System.getenv("CIRCLE_PROJECT_REPONAME")}"
     }
 
     ext.isPreRelease = (project.hasProperty("preRelease") && project.property("preRelease").toBoolean() == true)
@@ -140,8 +157,8 @@ tasks.register('validateReleaseTag', Exec) {
     description = 'Validate the release tag matches the release version present on commit'
     group = 'Git'
     doFirst {
-        def circleTag = System.getenv("CIRCLE_TAG")
-        def tagsMatch = matchesVersion(circleTag) ? ("true") : ("false")
+        def ciTag = getCiTag()
+        def tagsMatch = matchesVersion(ciTag) ? ("true") : ("false")
         commandLine tagsMatch
     }
     workingDir "${rootDir}"
@@ -157,10 +174,10 @@ tasks.register('incrementVersion', RootGradleBuild) {
                 ?.getTarget()
                 ?.getName()
                 ?.replace('refs/remotes/origin/', '')
-        def circleTag = System.getenv("CIRCLE_TAG")
+        def ciTag = getCiTag()
         def githubUser = System.getenv("GIT_USER_NAME")
         def githubToken = System.getenv("GITHUB_TOKEN")
-        def repoSlug = "${System.env.CIRCLE_PROJECT_USERNAME}/${System.env.CIRCLE_PROJECT_REPONAME}"
+        def repoSlug = getRepoSlug()
         def gitRef = "https://${githubUser}:${githubToken}@github.com/${repoSlug}.git"
         def nextVersionPatch = versionPatch.toInteger() + 1
         def remoteName = "upstream"
@@ -177,7 +194,7 @@ tasks.register('incrementVersion', RootGradleBuild) {
 
         grgit.checkout(branch: gitBranch)
 
-        if (matchesVersion(circleTag)) {
+        if (matchesVersion(ciTag)) {
             println "Incrementing from versionPatch ${versionPatch} to ${nextVersionPatch}"
 
             // Update gradle.properties
@@ -217,6 +234,6 @@ tasks.register('publishDocs', Exec) {
     dependsOn 'audioswitch:dokkaHtml'
     dependsOn validateReleaseTag
     workingDir rootDir
-    def version = System.getenv("CIRCLE_TAG") ?: ""
+    def version = getCiTag() ?: ""
     commandLine 'bash', 'scripts/commit-api-docs.sh', '--version', version, '--git-user-name', System.getenv("GIT_USER_NAME"), '--github-token', System.getenv("GITHUB_TOKEN")
 }
