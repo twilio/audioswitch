@@ -202,14 +202,37 @@ jobs:
           echo "testing.googleapis.com -> HTTP $(curl -s -o /dev/null -w '%{http_code}' https://testing.googleapis.com/)"
           ls audioswitch/ftl/app-debug.apk audioswitch/build/outputs/apk/androidTest/debug/audioswitch-debug-androidTest.apk
 
+      # Workload identity federation without a third-party action (the org allowlist does not include
+      # google-github-actions/auth): gcloud exchanges the job's GitHub OIDC token for short-lived
+      # credentials of the service account. No key is stored anywhere.
       - name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3
-        with:
-          workload_identity_provider: projects/285008367772/locations/global/workloadIdentityPools/github/providers/github-actions
-          service_account: ahoy-video-app@video-app-79418.iam.gserviceaccount.com
+        env:
+          WIF_PROVIDER: projects/285008367772/locations/global/workloadIdentityPools/github/providers/github-actions
+          SERVICE_ACCOUNT: ahoy-video-app@video-app-79418.iam.gserviceaccount.com
+        run: |
+          echo "::add-mask::${ACTIONS_ID_TOKEN_REQUEST_TOKEN}"
+          cred_file="${RUNNER_TEMP}/gcp-credentials.json"
+          (umask 077; jq -n \
+            --arg audience "//iam.googleapis.com/${WIF_PROVIDER}" \
+            --arg sa_url "https://iamcredentials.googleapis.com/v1/projects/-/serviceAccounts/${SERVICE_ACCOUNT}:generateAccessToken" \
+            --arg url "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=https://iam.googleapis.com/${WIF_PROVIDER}" \
+            --arg auth "Bearer ${ACTIONS_ID_TOKEN_REQUEST_TOKEN}" \
+            '{type: "external_account", audience: $audience,
+              subject_token_type: "urn:ietf:params:oauth:token-type:jwt",
+              token_url: "https://sts.googleapis.com/v1/token",
+              service_account_impersonation_url: $sa_url,
+              credential_source: {url: $url, headers: {Authorization: $auth},
+                                  format: {type: "json", subject_token_field_name: "value"}}}' \
+            > "$cred_file")
+          gcloud auth login --cred-file="$cred_file" --quiet
+          gcloud auth list
 
       - name: Run integration tests
         run: >
           gcloud firebase test android run --use-orchestrator
           --environment-variables clearPackageData=true --no-record-video
           --project "$GCP_PROJECT" ui-test-args.yaml:integration-tests
+
+      - name: Remove credentials file
+        if: always()
+        run: rm -f "${RUNNER_TEMP}/gcp-credentials.json"
