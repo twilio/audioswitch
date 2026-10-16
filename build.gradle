@@ -112,6 +112,25 @@ allprojects {
         google()
         mavenCentral()
     }
+
+    /*
+     * AGP's lint tooling (used by extractAnnotations and lint) resolves BouncyCastle 1.79 inside an
+     * internal detached configuration, which resolutionStrategy rules do not reach. Curated Artifactory
+     * blocks bcprov-jdk18on up to 1.84, so rewrite the dependencies of the BouncyCastle modules to a
+     * version it serves. Component metadata rules apply to detached configurations too.
+     * Build-time only: BouncyCastle is not part of the published artifact.
+     */
+    dependencies.components.all { ComponentMetadataDetails details ->
+        if (details.id.group == "org.bouncycastle") {
+            details.allVariants {
+                withDependencies { deps ->
+                    deps.findAll { it.group == "org.bouncycastle" }.each { dep ->
+                        dep.version { strictly "1.85" }
+                    }
+                }
+            }
+        }
+    }
 }
 
 nexusPublishing {
