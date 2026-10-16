@@ -10,7 +10,6 @@ jobs:
   resolve-dependencies:
     name: Resolve dependencies
     runs-on: ${{ github.event.pull_request.head.repo.fork && 'ubuntu-latest' || 'ubuntu-x64' }}
-    environment: test_docker
     permissions:
       id-token: write
       contents: read
@@ -30,7 +29,6 @@ jobs:
         uses: twilio/sdk-actions/artifactory-oidc@ee249453b64609cf2e92f9bba8c3337d3ca9f95a # java_gradle
         with:
           ecosystem: "gradle"
-          provider-name: "github-actions-twilio"
 
       - name: Resolve dependencies
         run: ./gradlew --refresh-dependencies buildEnvironment audioswitch:dependencies
