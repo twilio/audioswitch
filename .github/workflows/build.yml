@@ -36,6 +36,10 @@ jobs:
         with:
           ecosystem: "gradle"
 
+      - name: Route buildscript and plugin repositories through Artifactory
+        if: ${{ !github.event.pull_request.head.repo.fork }}
+        run: cp .github/gradle/zz-mirrors-extra.init.gradle ~/.gradle/init.d/zz-mirrors-extra.init.gradle
+
       - name: Resolve dependencies
         run: ./gradlew --refresh-dependencies buildEnvironment audioswitch:dependencies
 
@@ -64,8 +68,24 @@ jobs:
         with:
           ecosystem: "gradle"
 
+      - name: Route buildscript and plugin repositories through Artifactory
+        if: ${{ !github.event.pull_request.head.repo.fork }}
+        run: cp .github/gradle/zz-mirrors-extra.init.gradle ~/.gradle/init.d/zz-mirrors-extra.init.gradle
+
       - name: Build AudioSwitch and tests
-        run: ./gradlew -q audioswitch:assemble audioswitch:assembleAndroidTest
+        run: |
+          ./gradlew --info audioswitch:assemble audioswitch:assembleAndroidTest > "$RUNNER_TEMP/build.log" 2>&1 \
+            || { tail -n 80 "$RUNNER_TEMP/build.log"; exit 1; }
+
+      # Guard: on trusted builds every dependency must come through curated Artifactory.
+      - name: Verify no direct downloads from public repositories
+        if: ${{ !github.event.pull_request.head.repo.fork }}
+        run: |
+          if grep -E "(Downloading|HTTP GET).*https://(repo\.maven\.apache\.org|dl\.google\.com|plugins\.gradle\.org|repo1\.maven\.org|jcenter\.bintray\.com)" "$RUNNER_TEMP/build.log" | cut -c1-200 | head -10 | grep .; then
+            echo "::error::Gradle downloaded from a public repository instead of Artifactory"
+            exit 1
+          fi
+          echo "All dependency downloads went through Artifactory"
 
       - name: Upload build outputs
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
@@ -99,6 +119,10 @@ jobs:
         uses: twilio/sdk-actions/artifactory-oidc@ee249453b64609cf2e92f9bba8c3337d3ca9f95a # java_gradle
         with:
           ecosystem: "gradle"
+
+      - name: Route buildscript and plugin repositories through Artifactory
+        if: ${{ !github.event.pull_request.head.repo.fork }}
+        run: cp .github/gradle/zz-mirrors-extra.init.gradle ~/.gradle/init.d/zz-mirrors-extra.init.gradle
 
       - name: Lint
         run: ./gradlew -q lint
@@ -135,6 +159,10 @@ jobs:
         with:
           ecosystem: "gradle"
 
+      - name: Route buildscript and plugin repositories through Artifactory
+        if: ${{ !github.event.pull_request.head.repo.fork }}
+        run: cp .github/gradle/zz-mirrors-extra.init.gradle ~/.gradle/init.d/zz-mirrors-extra.init.gradle
+
       - name: Check format
         run: ./gradlew -q spotlessCheck
 
@@ -161,6 +189,10 @@ jobs:
         uses: twilio/sdk-actions/artifactory-oidc@ee249453b64609cf2e92f9bba8c3337d3ca9f95a # java_gradle
         with:
           ecosystem: "gradle"
+
+      - name: Route buildscript and plugin repositories through Artifactory
+        if: ${{ !github.event.pull_request.head.repo.fork }}
+        run: cp .github/gradle/zz-mirrors-extra.init.gradle ~/.gradle/init.d/zz-mirrors-extra.init.gradle
 
       - name: Unit tests
         run: ./gradlew audioswitch:testDebugUnitTest
