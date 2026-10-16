@@ -31,10 +31,10 @@ jobs:
           token=$(grep '^token=' $props | cut -d= -f2-)
           echo "::add-mask::$token"
           base="$url/artifactory/virtual-maven-thirdparty/org/bouncycastle"
-          for art in bcprov-jdk18on bcutil-jdk18on; do
+          for art in bcprov-jdk18on; do
             echo "== $art: versions listed by maven-metadata.xml"
             curl -sS -u "$user:$token" "$base/$art/maven-metadata.xml" | grep -o '<version>[^<]*' | sed 's/<version>//' | tr '\n' ' '; echo
-            for v in 1.70 1.72 1.77 1.78.1 1.79 1.80 1.81 1.82; do
+            for v in 1.71 1.73 1.76 1.78 1.80.2 1.81.1 1.83 1.84 1.85 1.85.2 1.86; do
               code=$(curl -s -o /dev/null -w '%{http_code}' -I -u "$user:$token" "$base/$art/$v/$art-$v.jar")
               echo "$art $v -> HTTP $code"
             done
