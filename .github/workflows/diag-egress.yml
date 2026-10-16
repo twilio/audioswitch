@@ -1,0 +1,28 @@
+# TEMPORARY diagnostic: what can the ubuntu-x64 runner reach? Delete after use.
+name: Diag Egress
+
+on:
+  push:
+    branches: ["supplychain_*"]
+    paths: [".github/workflows/diag-egress.yml"]
+
+permissions:
+  contents: read
+
+jobs:
+  diag:
+    runs-on: ubuntu-x64
+    timeout-minutes: 10
+    steps:
+      - name: Probe egress
+        run: |
+          echo "== runner"; echo "name=$RUNNER_NAME os=$RUNNER_OS arch=$RUNNER_ARCH env=$RUNNER_ENVIRONMENT"
+          echo "== proxy-related env var names"; env | cut -d= -f1 | grep -iE 'proxy|no_proxy' || echo none
+          echo "== reachability (HTTP code, 5s timeout)"
+          for u in https://repo.maven.apache.org/maven2/ https://dl.google.com/dl/android/maven2/ https://plugins.gradle.org/m2/ \
+                   https://services.gradle.org/distributions/ https://registry.npmjs.org/ https://pypi.org/simple/ \
+                   https://example.com/ https://api.github.com/ https://twilio.jfrog.io/; do
+            printf '%s -> ' "$u"; curl -s -o /dev/null -m 5 -w '%{http_code}\n' "$u" || echo "FAILED ($?)"
+          done
+          echo "== TLS issuer for Maven Central"
+          curl -svI -m 5 https://repo.maven.apache.org/maven2/ 2>&1 | grep -iE 'issuer|subject:' | head -3
