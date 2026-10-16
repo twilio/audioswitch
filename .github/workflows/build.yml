@@ -172,3 +172,49 @@ jobs:
           name: unit-test-reports
           path: audioswitch/build/reports/tests/testDebugUnitTest
           if-no-files-found: warn
+
+  # Stage 4: instrumentation tests on Firebase Test Lab. Needs GCP credentials, so it never runs
+  # for fork PRs. The credentials live in the `firebase-test-lab` environment, not at repo level.
+  integration-tests:
+    name: Integration tests
+    needs: [build, lint, check-format]
+    if: ${{ !github.event.pull_request.head.repo.fork }}
+    runs-on: ubuntu-x64
+    environment: firebase-test-lab
+    permissions:
+      id-token: write
+      contents: read
+    timeout-minutes: 45
+    env:
+      GCP_PROJECT: video-app-79418
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+
+      - name: Download build outputs
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: audioswitch-build
+          path: audioswitch/build/outputs
+
+      - name: Check runner prerequisites
+        run: |
+          gcloud --version | head -1
+          echo "testing.googleapis.com -> HTTP $(curl -s -o /dev/null -w '%{http_code}' https://testing.googleapis.com/)"
+          ls audioswitch/ftl/app-debug.apk audioswitch/build/outputs/apk/androidTest/debug/audioswitch-debug-androidTest.apk
+
+      - name: Authenticate to Google Cloud
+        env:
+          GCP_KEY: ${{ secrets.GCP_KEY }}
+        run: |
+          if [ -z "$GCP_KEY" ]; then
+            echo "::error::Secret GCP_KEY is not set in the 'firebase-test-lab' environment"
+            exit 1
+          fi
+          echo "$GCP_KEY" | base64 -d | gcloud auth activate-service-account --key-file=-
+
+      - name: Run integration tests
+        run: >
+          gcloud firebase test android run --use-orchestrator
+          --environment-variables clearPackageData=true --no-record-video
+          --project "$GCP_PROJECT" ui-test-args.yaml:integration-tests
