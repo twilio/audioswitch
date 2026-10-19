@@ -1,0 +1,36 @@
+name: Diag
+on:
+  push:
+    branches: ["supplychain_*"]
+    paths: [".github/workflows/zz-diag.yml"]
+permissions:
+  contents: read
+jobs:
+  diag:
+    runs-on: ubuntu-x64
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: twilio/sdk-actions/artifactory-oidc@ee249453b64609cf2e92f9bba8c3337d3ca9f95a # java_gradle
+        with:
+          ecosystem: "gradle"
+      - name: Probe
+        run: |
+          props="${HOME}/.gradle/artifactoryoidc.properties"
+          url="$(grep '^url=' "$props" | cut -d= -f2-)"; user="$(grep '^username=' "$props" | cut -d= -f2-)"; token="$(grep '^token=' "$props" | cut -d= -f2-)"
+          echo "::add-mask::${token}"
+          c(){ echo "$1 -> $(curl -s -o /dev/null -m 30 -w '%{http_code}' -u "${user}:${token}" -I "${url}/artifactory/$1")"; }
+          c web-services.gradle.org/distributions/gradle-8.13-bin.zip
+          c web-services.gradle.org/distributions/gradle-8.13-bin.zip.sha256
+          c remote-maven-gradle-plugins/com/diffplug/spotless/spotless-plugin-gradle/7.2.1/spotless-plugin-gradle-7.2.1.pom
+          echo "repos with gradle/generic/web in the name:"
+          curl -s -m 30 -u "${user}:${token}" "${url}/artifactory/api/repositories" | python3 -c "
+          import json,sys
+          try:
+              for r in json.load(sys.stdin):
+                  k=r['key']
+                  if any(x in k.lower() for x in ['gradle','generic','web-','google']): print(r['type'],r['packageType'],k)
+          except Exception as e: print('listing unavailable', e)"
+          echo "wrapper creds config:"; grep -c wrapper "${HOME}/.gradle/gradle.properties" 2>/dev/null || echo none
