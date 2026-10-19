@@ -38,6 +38,9 @@ jobs:
         with:
           ecosystem: "gradle"
 
+      - name: Enforce Artifactory
+        uses: ./.github/actions/enforce-artifactory
+
       - name: Install signing key
         env:
           SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
@@ -83,6 +86,9 @@ jobs:
         uses: twilio/sdk-actions/artifactory-oidc@ee249453b64609cf2e92f9bba8c3337d3ca9f95a # java_gradle
         with:
           ecosystem: "gradle"
+
+      - name: Enforce Artifactory
+        uses: ./.github/actions/enforce-artifactory
 
       - name: Configure git user
         run: |

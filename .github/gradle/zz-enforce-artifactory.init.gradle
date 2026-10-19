@@ -1,0 +1,89 @@
+/*
+ * CI-only. Installed into ~/.gradle/init.d by the enforce-artifactory action; never part of the build
+ * that consumers see, so published builds and local builds keep using the public repositories.
+ *
+ * twilio/sdk-actions/artifactory-oidc installs mirrors.init.gradle, which only rewrites the project
+ * repositories and the pluginManagement repositories. This script closes the rest, so that every
+ * Gradle dependency, plugin and plugin dependency resolves through curated Artifactory:
+ *   - buildscript { repositories {} } of every project (AGP, Kotlin Gradle plugin, Dokka, ...)
+ *   - buildscript repositories of settings.gradle
+ *   - dependencyResolutionManagement repositories of settings.gradle
+ *   - the default Gradle Plugin Portal used by the plugins {} block when pluginManagement declares none
+ * and then verifies the result: the build fails if any repository still points somewhere else.
+ *
+ * Must sort after mirrors.init.gradle (hence the zz- prefix): that script throws on repositories it
+ * does not recognise, including the Artifactory repositories this script adds.
+ * Keep MIRRORS in sync with the sdk-actions script.
+ */
+def MIRRORS = [
+    [name: 'MavenRepo',                        public_url: 'https://repo.maven.apache.org/maven2/',    artifactory_repo: 'virtual-maven-thirdparty'],
+    [name: 'Google',                           public_url: 'https://dl.google.com/dl/android/maven2/', artifactory_repo: 'remote-maven-google'],
+    [name: 'Gradle Central Plugin Repository', public_url: 'https://plugins.gradle.org/m2/',           artifactory_repo: 'remote-maven-gradle-plugins'],
+]
+def PORTAL = MIRRORS.find { it.name == 'Gradle Central Plugin Repository' }
+
+def propsFile = new File(gradle.gradleUserHomeDir, 'artifactoryoidc.properties')
+def props = new Properties()
+if (propsFile.exists()) {
+    propsFile.withInputStream { props.load(it) }
+}
+def artifactoryUrl = props.getProperty('url')?.trim()?.replaceAll('/+$', '')
+def artifactoryUsername = props.getProperty('username')
+def artifactoryToken = props.getProperty('token')
+
+if (!artifactoryUrl || !artifactoryUsername || !artifactoryToken) {
+    throw new GradleException("artifactory-enforce: url, username, and token must be set in ${propsFile}")
+}
+
+def mirrorUrl = { mirror -> "${artifactoryUrl}/artifactory/${mirror.artifactory_repo}/" }
+def repoUrl = { repo -> repo.hasProperty('url') ? repo.url.toString() : null }
+def isLocal = { url -> url == null || url.startsWith('file:') }
+def isMirror = { url -> isLocal(url) || url.startsWith(artifactoryUrl) }
+
+// Point a repository at its mirror in place. Unknown repositories fail the build, like the main script.
+def redirect = { repo, label ->
+    def url = repoUrl(repo)
+    if (isMirror(url)) return
+    def match = MIRRORS.find { m -> repo.name == m.name || url.startsWith(m.public_url) }
+    if (!match) {
+        throw new GradleException("artifactory-enforce: Unknown ${label} repository not mapped to a mirror: name=${repo.name} url=${url}")
+    }
+    logger.lifecycle("artifactory-enforce: ${label}: replacing ${repo.name}[${url}] with ${mirrorUrl(match)}")
+    repo.url = mirrorUrl(match)
+    repo.credentials { username = artifactoryUsername; password = artifactoryToken }
+}
+
+// Repositories declared by the build scripts are added after init scripts run, so redirect them as they appear.
+gradle.beforeSettings { settings ->
+    settings.buildscript.repositories.whenObjectAdded { repo -> redirect(repo, 'settings buildscript') }
+}
+gradle.allprojects { p ->
+    p.buildscript.repositories.whenObjectAdded { repo -> redirect(repo, "buildscript of '${p.name}'") }
+}
+
+settingsEvaluated { settings ->
+    // plugins {} resolves from the Gradle Plugin Portal when pluginManagement declares no repository.
+    if (settings.pluginManagement.repositories.isEmpty()) {
+        logger.lifecycle("artifactory-enforce: no pluginManagement repositories, adding ${mirrorUrl(PORTAL)}")
+        settings.pluginManagement.repositories.maven {
+            name = "Artifactory-Mirror-${PORTAL.name}"
+            url mirrorUrl(PORTAL)
+            credentials { username = artifactoryUsername; password = artifactoryToken }
+        }
+    }
+    settings.dependencyResolutionManagement.repositories.all { repo -> redirect(repo, 'settings dependency') }
+}
+
+// Verification: nothing may resolve from anywhere else.
+gradle.projectsEvaluated {
+    def offenders = []
+    gradle.settings.pluginManagement.repositories.each { if (!isMirror(repoUrl(it))) offenders << "pluginManagement: ${it.name} ${repoUrl(it)}" }
+    gradle.allprojects { p ->
+        p.buildscript.repositories.each { if (!isMirror(repoUrl(it))) offenders << "${p.name} buildscript: ${it.name} ${repoUrl(it)}" }
+        p.repositories.each { if (!isMirror(repoUrl(it))) offenders << "${p.name}: ${it.name} ${repoUrl(it)}" }
+    }
+    if (offenders) {
+        throw new GradleException("artifactory-enforce: repositories bypass Artifactory:\n  " + offenders.join('\n  '))
+    }
+    logger.lifecycle("artifactory-enforce: all repositories resolve through ${artifactoryUrl}")
+}

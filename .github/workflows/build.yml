@@ -36,6 +36,10 @@ jobs:
         with:
           ecosystem: "gradle"
 
+      - name: Enforce Artifactory
+        if: ${{ !github.event.pull_request.head.repo.fork }}
+        uses: ./.github/actions/enforce-artifactory
+
       - name: Resolve dependencies
         run: ./gradlew --refresh-dependencies buildEnvironment audioswitch:dependencies
 
@@ -63,6 +67,10 @@ jobs:
         uses: twilio/sdk-actions/artifactory-oidc@ee249453b64609cf2e92f9bba8c3337d3ca9f95a # java_gradle
         with:
           ecosystem: "gradle"
+
+      - name: Enforce Artifactory
+        if: ${{ !github.event.pull_request.head.repo.fork }}
+        uses: ./.github/actions/enforce-artifactory
 
       - name: Build AudioSwitch and tests
         run: ./gradlew -q audioswitch:assemble audioswitch:assembleAndroidTest
@@ -100,6 +108,10 @@ jobs:
         with:
           ecosystem: "gradle"
 
+      - name: Enforce Artifactory
+        if: ${{ !github.event.pull_request.head.repo.fork }}
+        uses: ./.github/actions/enforce-artifactory
+
       - name: Lint
         run: ./gradlew -q lint
 
@@ -135,6 +147,10 @@ jobs:
         with:
           ecosystem: "gradle"
 
+      - name: Enforce Artifactory
+        if: ${{ !github.event.pull_request.head.repo.fork }}
+        uses: ./.github/actions/enforce-artifactory
+
       - name: Check format
         run: ./gradlew -q spotlessCheck
 
@@ -161,6 +177,10 @@ jobs:
         uses: twilio/sdk-actions/artifactory-oidc@ee249453b64609cf2e92f9bba8c3337d3ca9f95a # java_gradle
         with:
           ecosystem: "gradle"
+
+      - name: Enforce Artifactory
+        if: ${{ !github.event.pull_request.head.repo.fork }}
+        uses: ./.github/actions/enforce-artifactory
 
       - name: Unit tests
         run: ./gradlew audioswitch:testDebugUnitTest

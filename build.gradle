@@ -1,6 +1,6 @@
 buildscript {
-    ext.kotlin_version = '1.8.22'
-    ext.dokka_version = '1.4.32'
+    ext.kotlin_version = '2.4.21'
+    ext.dokka_version = '2.2.0'
 
     /**
      * Properties and environment variables needed to publish.
@@ -74,6 +74,20 @@ buildscript {
         classpath 'com.android.tools.build:gradle:8.12.1'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "org.jetbrains.dokka:dokka-gradle-plugin:$dokka_version"
+    }
+
+    // Build-tool dependencies pulled in by AGP that the curated Artifactory only serves in newer
+    // versions (older ones are blocked). Build-time only, nothing here is published.
+    configurations.classpath {
+        resolutionStrategy.eachDependency { details ->
+            if (details.requested.group == "org.bouncycastle") {
+                details.useVersion "1.85"
+            }
+            if (details.requested.group == "io.netty" &&
+                    (details.requested.name == "netty-codec-http" || details.requested.name == "netty-handler")) {
+                details.useVersion "4.1.137.Final"
+            }
+        }
     }
 }
 

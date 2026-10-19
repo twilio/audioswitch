@@ -414,7 +414,7 @@ class AudioSwitch {
 
     private fun addAvailableAudioDevices(bluetoothHeadsetName: String?) {
         mutableAudioDevices.clear()
-        preferredDeviceList.forEach { audioDevice ->
+        for (audioDevice in preferredDeviceList) {
             when (audioDevice) {
                 BluetoothHeadset::class.java -> {
                 /*
