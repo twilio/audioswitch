@@ -1,0 +1,56 @@
+name: Nix experiment
+
+# Throwaway experiment: does building inside a devbox/nixpkgs toolchain change what curation lets through?
+on:
+  push:
+    branches: ["supplychain_nix"]
+
+permissions:
+  contents: read
+
+env:
+  ARTIFACTORY_URL: ${{ vars.ARTIFACTORY_URL }}
+
+jobs:
+  build-in-devbox:
+    name: Build in devbox
+    runs-on: ubuntu-x64
+    permissions:
+      id-token: write
+      contents: read
+    timeout-minutes: 60
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+
+      - name: Artifactory OIDC
+        uses: twilio/sdk-actions/artifactory-oidc@ee249453b64609cf2e92f9bba8c3337d3ca9f95a # java_gradle
+        with:
+          ecosystem: "gradle"
+
+      - name: Enforce Artifactory
+        uses: ./.github/actions/enforce-artifactory
+
+      - name: Probe Artifactory for a Nix cache
+        run: |
+          props="${HOME}/.gradle/artifactoryoidc.properties"
+          url="$(grep '^url=' "$props" | cut -d= -f2-)"; user="$(grep '^username=' "$props" | cut -d= -f2-)"; token="$(grep '^token=' "$props" | cut -d= -f2-)"
+          echo "::add-mask::${token}"
+          for p in remote-nix-cache-nixos/nix-cache-info remote-nix-cache-nixos/ ; do
+            echo "$p -> $(curl -s -o /dev/null -m 30 -w '%{http_code}' -u "${user}:${token}" "${url}/artifactory/${p}")"
+          done
+
+      - name: Install Nix
+        run: |
+          sh <(curl -sSfL https://nixos.org/nix/install) --daemon --yes
+          echo "/nix/var/nix/profiles/default/bin" >> "$GITHUB_PATH"
+
+      - name: Install devbox
+        run: curl -fsSL https://get.jetify.com/devbox | bash -s -- -f
+
+      - name: Toolchain from nixpkgs
+        run: |
+          devbox run -- bash -c 'java -version 2>&1 | head -1; gradle --version | grep -E "^Gradle"; echo "JAVA_HOME=$JAVA_HOME"'
+
+      - name: Build with the nixpkgs Gradle and JDK
+        run: devbox run -- gradle --console=plain audioswitch:assemble audioswitch:assembleAndroidTest lint spotlessCheck audioswitch:testDebugUnitTest

@@ -102,7 +102,7 @@ internal class BluetoothHeadsetManager
             bluetoothProfile: BluetoothProfile,
         ) {
             headsetProxy = bluetoothProfile as BluetoothHeadset
-            for (device in bluetoothProfile.connectedDevices) {
+            bluetoothProfile.connectedDevices.forEach { device ->
                 logger.d(TAG, "Bluetooth " + device.name + " connected")
             }
             if (hasConnectedDevice()) {

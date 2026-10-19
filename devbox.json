@@ -1,0 +1,4 @@
+{
+  "$schema": "https://raw.githubusercontent.com/jetify-com/devbox/main/.schema/devbox.schema.json",
+  "packages": ["jdk17@latest", "gradle@8"]
+}
