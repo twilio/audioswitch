@@ -1,8 +1,9 @@
 name: Enforce Artifactory
 description: >
   Completes twilio/sdk-actions/artifactory-oidc (run it first): routes buildscript, plugin portal and
-  settings repositories through the Artifactory mirrors with an init script, and downloads the Gradle
-  wrapper distribution from Artifactory. CI only; the repository build itself keeps public repositories.
+  settings repositories through the Artifactory mirrors with an init script. CI only; the repository
+  build itself keeps public repositories. The Gradle wrapper distribution is not mirrored (curated
+  Artifactory has no services.gradle.org remote); it is verified by distributionSha256Sum instead.
 
 runs:
   using: composite
@@ -12,25 +13,3 @@ runs:
       run: |
         mkdir -p "${HOME}/.gradle/init.d"
         cp "${GITHUB_WORKSPACE}/.github/gradle/zz-enforce-artifactory.init.gradle" "${HOME}/.gradle/init.d/"
-
-    - name: Download the Gradle wrapper from Artifactory
-      shell: bash
-      run: |
-        props="${HOME}/.gradle/artifactoryoidc.properties"
-        url="$(grep '^url=' "$props" | cut -d= -f2- | sed 's#/*$##')"
-        user="$(grep '^username=' "$props" | cut -d= -f2-)"
-        token="$(grep '^token=' "$props" | cut -d= -f2-)"
-        echo "::add-mask::${token}"
-        wrapper_props="gradle/wrapper/gradle-wrapper.properties"
-        # Keep the distribution path, swap the host for the services.gradle.org mirror
-        current="$(grep '^distributionUrl=' "$wrapper_props" | cut -d= -f2-)"
-        dist_path="${current#*services.gradle.org/}"
-        grep -v '^distributionUrl=' "$wrapper_props" > "${wrapper_props}.tmp"
-        echo "distributionUrl=${url//:/\\:}/artifactory/web-services.gradle.org/${dist_path}" >> "${wrapper_props}.tmp"
-        mv "${wrapper_props}.tmp" "$wrapper_props"
-        # The wrapper reads credentials from systemProp.* in the Gradle user home
-        (umask 077; {
-          echo "systemProp.gradle.wrapper.user=${user}"
-          echo "systemProp.gradle.wrapper.password=${token}"
-        } >> "${HOME}/.gradle/gradle.properties")
-        grep '^distributionUrl' "$wrapper_props"
