@@ -118,7 +118,7 @@ Multiple connected bluetooth headsets are supported.
 
 ## Java Compatibility
 
-Audioswitch is compatible with apps written in Java that [target Java 8](https://developer.android.com/studio/write/java8-support), and follows the recommendations provided in the [Kotlin for Java consumption guide](https://developer.android.com/kotlin/interop#kotlin_for_java_consumption). The project includes [Java specific unit tests](https://github.com/twilio/audioswitch/tree/master/audioswitch/src/test/java/com/twilio/audioswitch) that demonstrate how to use Audioswitch from a Java based application. If you have any Java compatibility questions please [open an issue](https://github.com/twilio/audioswitch/issues).
+Audioswitch is compatible with apps written in Java that [target Java 8](https://developer.android.com/studio/write/java8-support), and follows the recommendations provided in the [Kotlin for Java consumption guide](https://developer.android.com/kotlin/interop#kotlin_for_java_consumption). The project includes [Java specific unit tests](https://github.com/twilio/audioswitch/tree/master/audioswitch/src/test/java/com/twilio/audioswitch) that demonstrate how to use Audioswitch from a Java based application. For reproducible Java compatibility bugs, please [open an issue](https://github.com/twilio/audioswitch/issues). For general usage questions, contact [Twilio Support](https://help.twilio.com/).
 
 ## Logging
 
@@ -134,16 +134,23 @@ audioSwitch.start { _, _ -> }
 On Android 12 and greater, the application using this library is expected to request the BLUETOOTH_CONNECT permission. Not doing so will disable the use of bluetooth in the audioswitch library.
 Pre-Android 12, no user permission requests are needed. All other permissions needed are listed in the library's manifest and are automatically merged from the [manifest file](audioswitch/src/main/AndroidManifest.xml) in this library.
 
-## Contributing
+<a id="contributing"></a>
 
-We welcome and encourage contributions to AudioSwitch! However, pull request (PR) validation requires access to credentials that we cannot provide to external contributors. As a result, the contribution process is as follows:
+## Community Contributions and Support
 
-1. Submit a PR from a fork with your changes
-1. Our team will review
-1. If the changes are small enough and do not require validation (eg. documentation typo) we will merge your PR directly.
-1. If the changes require integration testing, then, once approved, our team will close your PR and create a new PR from a branch on the main repository and reference your original work.
-1. Our team will handle merging the final PR and releasing a new version with your changes.
-1. (Optional) Submit a PR that adds you to our [CONTRIBUTORS](CONTRIBUTORS.md) file so you show up on the [contributors page](https://github.com/twilio/audioswitch/graphs/contributors).
+This repository is publicly available and maintained by Twilio under a limited external contribution model.
+
+Due to limited maintenance capacity, external pull requests are not currently accepted.
+
+GitHub Issues may be used to report reproducible bugs or provide feature feedback about this library. Issues are reviewed on a best-effort basis, with no SLA or guaranteed response.
+
+GitHub Issues are not an official Twilio support channel. For production issues, general usage questions, or account-specific assistance, please contact [Twilio Support](https://help.twilio.com/). If you have a Twilio account manager, you may also escalate through them.
+
+Do not share [Personally Identifiable Information (PII)](https://www.twilio.com/docs/glossary/what-is-personally-identifiable-information-pii) or sensitive account information, including access tokens, API keys, and credentials, in issues, logs, or screenshots.
+
+Report security vulnerabilities privately through [Twilio's Vulnerability Disclosure Program](https://www.twilio.com/en-us/security/vulnerability-disclosure-program), rather than public GitHub Issues.
+
+See [CONTRIBUTING.md](https://github.com/twilio/audioswitch/blob/master/CONTRIBUTING.md) for reporting guidance.
 
 ## Usage Examples
 
