@@ -1,6 +1,6 @@
 # AudioSwitch
 
-[![CircleCI](https://circleci.com/gh/twilio/audioswitch.svg?style=svg)](https://circleci.com/gh/twilio/audioswitch)
+[![Build](https://github.com/twilio/audioswitch/actions/workflows/build.yml/badge.svg)](https://github.com/twilio/audioswitch/actions/workflows/build.yml)
 
 An Android audio management library for real-time communication apps.
 
